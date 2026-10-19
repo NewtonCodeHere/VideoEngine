@@ -45,8 +45,8 @@ from app.services.transcription_adapter import get_transcription_adapter
 
 router = APIRouter(tags=["jobs"])
 
-# Shared thread pool for background jobs
-_executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix="job-worker")
+# Shared thread pool for background jobs (max 1 worker for 512MB RAM stability)
+_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="job-worker")
 
 
 def _job_to_response(job: dict) -> JobResponse:

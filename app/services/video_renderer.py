@@ -20,11 +20,11 @@ from PIL import Image, ImageDraw
 
 from app.models.schemas import AspectRatio, SceneResult
 
-# Standard 1080p-class dimensions
+# Cloud-optimized 720p HD dimensions (memory-efficient for 512MB RAM free tier)
 RESOLUTION = {
-    AspectRatio.r16x9: (1920, 1080),
-    AspectRatio.r9x16: (1080, 1920),
-    AspectRatio.r1x1:  (1080, 1080),
+    AspectRatio.r16x9: (1280, 720),
+    AspectRatio.r9x16: (720, 1280),
+    AspectRatio.r1x1:  (720, 720),
 }
 
 # Rich background palette for scene cards when no B-roll video is available
@@ -221,13 +221,14 @@ def render_video(
                 )
                 cmd = [
                     bin_path, "-y",
+                    "-threads", "1",
                     "-stream_loop", "-1",
                     "-t", str(duration),
                     "-i", str(broll_file),
                     "-i", str(overlay_png),
                     "-filter_complex", filter_graph,
                     "-c:v", "libx264",
-                    "-preset", preset,
+                    "-preset", "ultrafast",
                     "-crf", str(crf),
                     "-pix_fmt", "yuv420p",
                     "-r", str(fps),
@@ -240,11 +241,12 @@ def render_video(
                 _generate_fallback_card(scene, i, total_scenes, width, height, card_png)
                 cmd = [
                     bin_path, "-y",
+                    "-threads", "1",
                     "-loop", "1",
                     "-t", str(duration),
                     "-i", str(card_png),
                     "-c:v", "libx264",
-                    "-preset", preset,
+                    "-preset", "ultrafast",
                     "-crf", str(crf),
                     "-pix_fmt", "yuv420p",
                     "-r", str(fps),
@@ -259,11 +261,12 @@ def render_video(
                 _generate_fallback_card(scene, i, total_scenes, width, height, fallback_card)
                 fb_cmd = [
                     bin_path, "-y",
+                    "-threads", "1",
                     "-loop", "1",
                     "-t", str(duration),
                     "-i", str(fallback_card),
                     "-c:v", "libx264",
-                    "-preset", preset,
+                    "-preset", "ultrafast",
                     "-crf", str(crf),
                     "-pix_fmt", "yuv420p",
                     "-r", str(fps),

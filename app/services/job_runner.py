@@ -119,10 +119,13 @@ def run_job(
                             if not clip_save.exists() or clip_save.stat().st_size == 0:
                                 headers = {"User-Agent": "Mozilla/5.0"}
                                 with httpx.Client(timeout=30.0, follow_redirects=True) as dl_client:
-                                    r_dl = dl_client.get(chosen.download_url, headers=headers)
-                                    if r_dl.status_code == 200 and len(r_dl.content) > 1000:
-                                        clip_save.write_bytes(r_dl.content)
-                                        chosen.local_path = str(clip_save)
+                                    with dl_client.stream("GET", chosen.download_url, headers=headers) as r_dl:
+                                        if r_dl.status_code == 200:
+                                            with open(clip_save, "wb") as f_out:
+                                                for chunk in r_dl.iter_bytes(chunk_size=65536):
+                                                    f_out.write(chunk)
+                                            if clip_save.stat().st_size > 1000:
+                                                chosen.local_path = str(clip_save)
                             else:
                                 chosen.local_path = str(clip_save)
                         except Exception as dl_exc:

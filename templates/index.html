@@ -2517,18 +2517,25 @@ async function submitVideoJob() {
   }
 }
 
+let pollRetries = 0;
 function pollJobProgress(jobId) {
   if (pollInterval) clearInterval(pollInterval);
+  pollRetries = 0;
 
   pollInterval = setInterval(async () => {
     try {
       const resp = await fetch(`/api/v1/jobs/${jobId}`);
+      if (resp.status === 404) {
+        pollRetries++;
+        if (pollRetries <= 3) return; // Allow brief server delay while registering
+      }
       const data = await resp.json();
       if (!resp.ok) {
         clearInterval(pollInterval);
-        showJobError(data.detail);
+        showJobError(data.detail || 'Job not found. The server may have restarted due to memory limits.');
         return;
       }
+      pollRetries = 0;
 
       setProgress(data.progress, formatProgressLabel(data.status, data.progress));
       updateLivePipelineStages(data.progress, data.status);
