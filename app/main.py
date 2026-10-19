@@ -111,6 +111,10 @@ _output_dir = BASE_DIR / "outputs"
 _output_dir.mkdir(exist_ok=True)
 app.mount("/outputs", StaticFiles(directory=str(_output_dir)), name="outputs")
 
+_fixtures_dir = BASE_DIR / "fixtures"
+if _fixtures_dir.exists():
+    app.mount("/fixtures", StaticFiles(directory=str(_fixtures_dir)), name="fixtures")
+
 # ── API Routers ───────────────────────────────────────────────────────────────
 app.include_router(health.router)
 app.include_router(jobs.router)

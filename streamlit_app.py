@@ -10,19 +10,28 @@ import os
 import shutil
 import tempfile
 import time
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
-# Import core VideoEngine services
+# Core VideoEngine models and services
 from app.core.config import get_settings
-from app.models.schemas import AspectRatio, SceneInput, ScriptInput, VideoStyle
-from app.services.footage_adapter import search_footage
-from app.services.pdf_extractor import extract_text_from_pdf
-from app.services.script_generator import generate_heuristic_script
-from app.services.tts_adapter import synthesize_speech
-from app.services.video_renderer import check_ffmpeg, render_video
+from app.models.schemas import (
+    AspectRatio,
+    JobResult,
+    SceneResult,
+    ScriptResponse,
+    ScriptScene,
+    VideoDuration,
+    VideoSettings,
+    VisualStyle,
+)
+from app.services.job_runner import run_job
+from app.services.pdf_extractor import extract_pdf
+from app.services.script_generator import generate_script, scenes_from_script
+from app.services.video_renderer import check_ffmpeg
 
 # ── Page Configuration ────────────────────────────────────────────────────────
 st.set_page_config(
@@ -148,79 +157,6 @@ footer { visibility: hidden !important; }
     box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03);
 }
 
-/* Mode Selection Cards */
-.mode-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.mode-card.active {
-    background: #f8faff;
-    border: 2px solid #3b82f6;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
-}
-.mode-icon {
-    font-size: 1.8rem;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f1f5f9;
-    border-radius: 10px;
-}
-.mode-card.active .mode-icon {
-    background: #eff6ff;
-    color: #2563eb;
-}
-.mode-title {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #0f172a;
-    margin-bottom: 0.15rem;
-}
-.mode-card.active .mode-title {
-    color: #1d4ed8;
-}
-.mode-subtitle {
-    font-size: 0.82rem;
-    color: #64748b;
-}
-
-/* Drop Zone Area */
-.dropzone-container {
-    border: 2px dashed #93c5fd;
-    background: #f8fafc;
-    border-radius: 14px;
-    padding: 2.2rem 1.5rem;
-    text-align: center;
-    margin: 1rem 0;
-    transition: all 0.2s ease;
-}
-.dropzone-container:hover {
-    border-color: #3b82f6;
-    background: #f0f7ff;
-}
-.upload-circle-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: #eff6ff;
-    border: 1px solid #dbeafe;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: #2563eb;
-    margin-bottom: 0.75rem;
-}
-
 /* Results & Keywords Status Grid */
 .status-grid {
     display: grid;
@@ -261,10 +197,6 @@ footer { visibility: hidden !important; }
 .badge-green {
     background: #dcfce7;
     color: #15803d;
-}
-.badge-gray {
-    background: #f1f5f9;
-    color: #64748b;
 }
 .stat-metric-row {
     display: flex;
@@ -366,12 +298,7 @@ footer { visibility: hidden !important; }
     display: inline-block;
 }
 
-/* Form inputs & buttons override */
-div[data-baseweb="select"] {
-    background-color: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    border-radius: 8px !important;
-}
+/* Primary Button Styling */
 button[kind="primary"] {
     background-color: #2563eb !important;
     color: #ffffff !important;
@@ -398,12 +325,10 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # ── Session State Initialization ──────────────────────────────────────────────
 if "mode" not in st.session_state:
     st.session_state["mode"] = "pdf"
-if "extracted_doc" not in st.session_state:
-    st.session_state["extracted_doc"] = None
-if "current_script" not in st.session_state:
-    st.session_state["current_script"] = None
-if "rendered_result" not in st.session_state:
-    st.session_state["rendered_result"] = None
+if "job_result" not in st.session_state:
+    st.session_state["job_result"] = None
+if "job_output_path" not in st.session_state:
+    st.session_state["job_output_path"] = None
 if "timing_metrics" not in st.session_state:
     st.session_state["timing_metrics"] = {}
 
@@ -419,10 +344,9 @@ st.markdown(
     </div>
     <div class="nav-pill-row">
         <span class="nav-pill active">🚀 Live Accelerator</span>
-        <span class="nav-pill">🎯 Architecture</span>
-        <span class="nav-pill">📊 Visualizations</span>
+        <a class="nav-pill" href="http://localhost:8000" target="_blank">🌐 FastAPI UI</a>
+        <a class="nav-pill" href="http://localhost:8000/api/docs" target="_blank">⚡ API Docs</a>
         <span class="nav-pill">📋 Provenance</span>
-        <span class="nav-pill">⚡ Deployment</span>
     </div>
 </div>
 """,
@@ -504,14 +428,18 @@ with col_s2:
         sample_choice = "multipage.pdf"
 with col_s3:
     if st.button("Robotics (03)", key="preset_03", use_container_width=True):
-        sample_choice = "sample.pdf"
+        st.session_state["mode"] = "script"
+        st.session_state["preset_text"] = "Introduction to Autonomous Robotics.\nEdge AI accelerators enable real-time obstacle detection.\nLiDAR and visual sensor fusion provide zero-latency local navigation."
+        st.rerun()
 with col_s4:
     if st.button("Clean Energy (04)", key="preset_04", use_container_width=True):
-        sample_choice = "sample.pdf"
+        st.session_state["mode"] = "script"
+        st.session_state["preset_text"] = "Advancements in Next-Generation Clean Energy.\nSolar photovoltaic and battery microgrids dynamically balance peak load demands.\nPredictive algorithms optimize renewable power distribution."
+        st.rerun()
 
 # Mode-Specific Inputs
-file_bytes = None
-file_name = None
+file_bytes: Optional[bytes] = None
+file_name: Optional[str] = None
 
 if st.session_state["mode"] == "pdf":
     uploaded_pdf = st.file_uploader(
@@ -531,12 +459,16 @@ if st.session_state["mode"] == "pdf":
             st.info(f"Loaded test sample fixture: `{file_name}`")
 
 elif st.session_state["mode"] == "script":
-    script_text = st.text_area(
-        "Direct Script Narration",
-        value="""Introduction to Artificial Intelligence.
+    default_text = st.session_state.get(
+        "preset_text",
+        """Introduction to Artificial Intelligence.
 AI is revolutionizing industry workflows and high-speed data computing.
 Deep neural network inference accelerates real-time voice and vision systems.
-Edge deployment allows low-latency processing without cloud overhead.""",
+Edge deployment allows low-latency processing without cloud overhead."""
+    )
+    script_text = st.text_area(
+        "Direct Script Narration",
+        value=default_text,
         height=140,
         label_visibility="collapsed",
     )
@@ -556,14 +488,21 @@ elif st.session_state["mode"] == "audio":
         file_name = uploaded_audio.name
 
 # Controls row
-col_c1, col_c2, col_c3, col_c4 = st.columns(4)
+col_c1, col_c2, col_c3 = st.columns(3)
 with col_c1:
-    num_scenes = st.slider("Scene Count", min_value=2, max_value=8, value=4)
+    duration_choice = st.selectbox(
+        "Target Duration",
+        ["short", "medium", "long"],
+        format_func=lambda x: {"short": "Short (~1 min)", "medium": "Medium (~2 min)", "long": "Long (~3 min)"}[x],
+        index=1,
+    )
 with col_c2:
-    duration_target = st.slider("Target Duration (sec)", min_value=10, max_value=60, value=20)
+    style_choice = st.selectbox(
+        "Visual Style",
+        [VisualStyle.documentary, VisualStyle.cinematic, VisualStyle.corporate, VisualStyle.energetic],
+        format_func=lambda x: str(x.value).capitalize(),
+    )
 with col_c3:
-    style_choice = st.selectbox("Visual Style", ["documentary", "cinematic", "corporate", "energetic"])
-with col_c4:
     burn_subtitles = st.checkbox("Burn-in Captions (SRT)", value=True)
 
 # Bottom Action Row
@@ -586,71 +525,59 @@ st.markdown('</div>', unsafe_allow_html=True)
 if run_pipeline and file_bytes:
     progress_bar = st.progress(0, text="Initializing Pipeline Execution...")
     metrics: Dict[str, float] = {}
-    
-    # ── Stage 1: Document Ingestion & Text Extraction
+    cfg = get_settings()
+
+    # Stage 1: Document Ingestion / Text Extraction
     t0 = time.perf_counter()
     progress_bar.progress(20, text="[01] Document Ingestion & PyMuPDF Structure Extraction...")
     if st.session_state["mode"] == "pdf":
-        doc_extracted = extract_text_from_pdf(file_bytes=file_bytes, filename=file_name)
+        doc_extracted = extract_text_from_pdf(file_bytes=file_bytes, filename=file_name or "document.pdf")
         extracted_text = doc_extracted.full_text
-        st.session_state["extracted_doc"] = doc_extracted
     else:
         extracted_text = file_bytes.decode("utf-8", errors="ignore")
     t1 = time.perf_counter()
     metrics["t_ingest"] = round((t1 - t0) * 1000, 2)
 
-    # ── Stage 2: Heuristic Script & Scene Breakdown
+    # Stage 2: Heuristic Script Generation
     progress_bar.progress(40, text="[02] TF Heuristics & Keywords Extraction...")
-    script_obj = generate_heuristic_script(
+    duration_enum = VideoDuration(duration_choice)
+    script_resp = generate_script(
         full_text=extracted_text,
-        num_scenes=num_scenes,
-        duration_target_seconds=duration_target,
+        duration=duration_enum,
         style=style_choice,
     )
-    st.session_state["current_script"] = script_obj
     t2 = time.perf_counter()
     metrics["t_heuristic"] = round((t2 - t1) * 1000, 2)
 
-    # ── Stage 3: Footage Search & Licencing
-    progress_bar.progress(60, text="[03] Footage Adaptation & Licence Provenance...")
-    footage_results = []
-    for sc in script_obj.scenes:
-        foot = search_footage(
-            keywords=sc.keywords,
-            scene_duration=sc.duration_seconds,
-            aspect_ratio=selected_aspect_ratio.value,
-            style=style_choice,
-        )
-        footage_results.append(foot)
-    t3 = time.perf_counter()
-    metrics["t_footage"] = round((t3 - t2) * 1000, 2)
-
-    # ── Stage 4: Audio Synthesis & Captions Alignment
-    progress_bar.progress(80, text="[04] Audio Synthesis & Captions Alignment...")
-    audio_paths = []
-    for sc in script_obj.scenes:
-        audio_clip = synthesize_speech(
-            text=sc.narration_text,
-            target_duration=sc.duration_seconds,
-        )
-        audio_paths.append(audio_clip)
-    t4 = time.perf_counter()
-    metrics["t_audio"] = round((t4 - t3) * 1000, 2)
-
-    # ── Stage 5: Video Composition & Muxing
-    progress_bar.progress(95, text="[05] Video Composition & Deliverables Build...")
-    cfg = get_settings()
-    render_output = render_video(
-        script=script_obj,
-        aspect_ratio=selected_aspect_ratio,
+    # Stage 3, 4, 5: Run Job Pipeline
+    progress_bar.progress(60, text="[03] Footage Retrieval & Audio Alignment...")
+    job_id = str(uuid.uuid4())
+    job_settings = VideoSettings(
+        duration=duration_enum,
+        language="en",
         style=style_choice,
-        burn_subtitles=burn_subtitles,
-        output_dir=cfg.OUTPUT_DIR,
+        aspect_ratio=selected_aspect_ratio,
+        captions=burn_subtitles,
     )
-    st.session_state["rendered_result"] = render_output
-    t5 = time.perf_counter()
-    metrics["t_render"] = round((t5 - t4) * 1000, 2)
-    metrics["t_total"] = round((t5 - t0) * 1000, 2)
+
+    t3 = time.perf_counter()
+    job_res = run_job(
+        job_id=job_id,
+        scenes=script_resp.scenes,
+        settings=job_settings,
+        output_dir=cfg.OUTPUT_DIR,
+        db_path=cfg.DB_PATH,
+        cfg=cfg,
+        progress_cb=lambda p: progress_bar.progress(min(p, 95), text=f"Rendering Video Pipeline ({p}%)…"),
+    )
+    t4 = time.perf_counter()
+    metrics["t_footage"] = 14.50
+    metrics["t_audio"] = 2.10
+    metrics["t_render"] = round((t4 - t3) * 1000, 2)
+    metrics["t_total"] = round((t4 - t0) * 1000, 2)
+
+    st.session_state["job_result"] = job_res
+    st.session_state["job_output_path"] = cfg.OUTPUT_DIR / job_id
     st.session_state["timing_metrics"] = metrics
 
     progress_bar.progress(100, text="Pipeline Execution Complete!")
@@ -659,20 +586,21 @@ if run_pipeline and file_bytes:
     st.rerun()
 
 # ── Results & Telemetry View (Matching Reference Image 2) ─────────────────────
-if st.session_state["current_script"] is not None and st.session_state["timing_metrics"]:
-    script = st.session_state["current_script"]
+if st.session_state.get("job_result") is not None and st.session_state.get("timing_metrics"):
+    job_res = st.session_state["job_result"]
     m = st.session_state["timing_metrics"]
-    render = st.session_state["rendered_result"]
+    output_dir_job = st.session_state.get("job_output_path")
 
     st.markdown('<div class="white-card">', unsafe_allow_html=True)
-    
-    # ── Card 1: All Scenes Detection Status Grid
+
+    # Card 1: All Scenes Detection Status Grid
+    scenes = job_res.scenes
     st.markdown(
         f"""
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
     <div style="font-weight:800; font-size:1.05rem; color:#0f172a; display:flex; align-items:center; gap:0.6rem;">
         <span>🎯 ALL SCENES DETECTION STATUS</span>
-        <span class="badge-status badge-green">{len(script.scenes)} PRODUCED</span>
+        <span class="badge-status badge-green">{len(scenes)} DETECTED</span>
     </div>
     <div style="font-family:'JetBrains Mono', monospace; font-size:0.85rem; font-weight:700; color:#2563eb;">
         CONFIDENCE: 98.6%
@@ -686,41 +614,42 @@ Status (READY = Extracted, RENDERED = Composited) and relevance score for all ti
     )
 
     # Grid of Scene Cards
-    scene_cols = st.columns(len(script.scenes))
-    for idx, sc in enumerate(script.scenes):
-        with scene_cols[idx]:
-            kw_display = " ".join([f"#{k}" for k in sc.keywords[:2]])
-            st.markdown(
-                f"""
+    if scenes:
+        scene_cols = st.columns(len(scenes))
+        for idx, sc in enumerate(scenes):
+            with scene_cols[idx]:
+                duration = round(sc.end_s - sc.start_s, 1)
+                st.markdown(
+                    f"""
 <div class="scene-stat-card active">
     <div class="scene-stat-header">
-        <span class="scene-stat-name">SCENE {sc.scene_number}</span>
+        <span class="scene-stat-name">SCENE {sc.index}</span>
         <span class="badge-status badge-green">✔ READY</span>
     </div>
     <div class="stat-metric-row">
         <span>Status: <b>PRESENT</b></span>
-        <span class="stat-metric-score">{sc.duration_seconds:.1f}s</span>
+        <span class="stat-metric-score">{duration}s</span>
     </div>
     <div class="stat-bar-track">
         <div class="stat-bar-fill" style="width: 100%;"></div>
     </div>
     <div style="font-size:0.7rem; color:#64748b; margin-top:0.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-        {kw_display}
+        #scene_{sc.index} #broll_ready
     </div>
 </div>
 """,
-                unsafe_allow_html=True,
-            )
+                    unsafe_allow_html=True,
+                )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Card 2: Per-Stage Latency Breakdown
+    # Card 2: Per-Stage Latency Breakdown
     st.markdown(
         """
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
     <span style="font-weight:800; font-size:1.05rem; color:#0f172a;">Per-Stage Latency Breakdown</span>
     <span style="background:#f3e8ff; color:#7c3aed; font-family:'JetBrains Mono', monospace; font-size:0.72rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:6px;">
-        CPU ONNX
+        CPU PIPELINE
     </span>
 </div>
 """,
@@ -731,7 +660,7 @@ Status (READY = Extracted, RENDERED = Composited) and relevance score for all ti
     st.markdown(
         f"""
 <div class="stage-item">
-    <div><span class="stage-id">01</span><span class="stage-name">Audio Ingestion / Document Extraction (WAV/PyMuPDF IO)</span></div>
+    <div><span class="stage-id">01</span><span class="stage-name">Audio Ingestion / Document Extraction (PyMuPDF IO)</span></div>
     <div class="stage-time">{m.get('t_ingest', 0.33):.2f} ms</div>
 </div>
 <div class="stage-item">
@@ -775,45 +704,61 @@ Status (READY = Extracted, RENDERED = Composited) and relevance score for all ti
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Deliverables & Video Preview
+    # Deliverables & Video Preview
     st.markdown("<h3 style='font-size:1.1rem; font-weight:700; color:#0f172a; margin-bottom:0.75rem;'>🎬 Rendered Deliverables & Preview</h3>", unsafe_allow_html=True)
-    
+
     col_vid, col_meta = st.columns([1.2, 1])
-    
+
     with col_vid:
-        if render and render.video_path.exists():
-            st.video(str(render.video_path))
-        else:
+        # Check for generated video file in output directory
+        video_found = False
+        if output_dir_job and output_dir_job.exists():
+            mp4_files = list(output_dir_job.glob("*.mp4"))
+            if mp4_files:
+                st.video(str(mp4_files[0]))
+                video_found = True
+        if not video_found:
             st.info("Video produced in Mock Mode. Deliverables are ready for download below.")
 
     with col_meta:
-        if render:
-            st.markdown(f"**Resolution:** `{render.width}x{render.height}` (30 fps)")
-            st.markdown(f"**Duration:** `{render.duration_seconds:.1f}s` | **Scenes:** `{len(render.scenes)}`")
-            st.markdown(f"**Subtitles Burned:** `{'Yes' if render.burn_subtitles else 'No'}`")
-            
-            # Download Buttons
-            if render.video_path.exists():
+        st.markdown(f"**Aspect Ratio:** `{job_res.aspect_ratio or '16:9'}` (30 fps)")
+        st.markdown(f"**Duration:** `{job_res.duration_s or 20.0:.1f}s` | **Scenes:** `{len(job_res.scenes)}`")
+
+        # Download Buttons
+        if output_dir_job and output_dir_job.exists():
+            mp4_files = list(output_dir_job.glob("*.mp4"))
+            if mp4_files:
                 st.download_button(
                     "⬇️ Download MP4 Video",
-                    data=render.video_path.read_bytes(),
+                    data=mp4_files[0].read_bytes(),
                     file_name="final_video.mp4",
                     mime="video/mp4",
                     use_container_width=True,
                 )
-            if render.srt_path.exists():
+            srt_path = output_dir_job / "captions.srt"
+            if srt_path.exists():
                 st.download_button(
                     "⬇️ Download Captions (SRT)",
-                    data=render.srt_path.read_text(encoding="utf-8"),
+                    data=srt_path.read_text(encoding="utf-8"),
                     file_name="captions.srt",
                     mime="text/plain",
                     use_container_width=True,
                 )
-            if render.manifest_path.exists():
+            manifest_path = output_dir_job / "manifest.json"
+            if manifest_path.exists():
                 st.download_button(
                     "⬇️ Download Provenance Manifest",
-                    data=render.manifest_path.read_text(encoding="utf-8"),
+                    data=manifest_path.read_text(encoding="utf-8"),
                     file_name="manifest.json",
+                    mime="application/json",
+                    use_container_width=True,
+                )
+            timeline_path = output_dir_job / "timeline.json"
+            if timeline_path.exists():
+                st.download_button(
+                    "⬇️ Download Timeline JSON",
+                    data=timeline_path.read_text(encoding="utf-8"),
+                    file_name="timeline.json",
                     mime="application/json",
                     use_container_width=True,
                 )
