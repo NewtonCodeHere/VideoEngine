@@ -167,9 +167,9 @@ def run_job(
 
     ffmpeg_ok, ffmpeg_msg = check_ffmpeg(cfg.FFMPEG_BIN, cfg.FFPROBE_BIN)
     if not ffmpeg_ok:
-        raise RuntimeError(
-            "FFmpeg is not available. Install FFmpeg to generate video output.\n"
-            f"Details: {ffmpeg_msg}"
+        warnings.append(
+            "FFmpeg is not installed on this machine. Video rendered using mock MP4 template. "
+            "Install FFmpeg (https://ffmpeg.org) or run via Docker for full H.264/AAC video encoding."
         )
 
     def _render_progress(p: int):

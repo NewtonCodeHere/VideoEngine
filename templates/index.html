@@ -772,15 +772,14 @@ document.getElementById('script-editor').addEventListener('input', updateGenerat
       const banner = document.createElement('div');
       banner.className = 'alert alert-warn';
       banner.style.margin = '0 0 1rem';
-      banner.innerHTML = '⚠️ <strong>FFmpeg not found.</strong> Video rendering will fail. ' +
-        '<a href="https://ffmpeg.org/download.html" target="_blank" style="color:inherit">Install FFmpeg</a>.';
+      banner.innerHTML = 'ℹ️ <strong>Running in Mock Video Mode:</strong> FFmpeg is not detected on system PATH. The engine generates valid mock MP4 deliverables so you can test the entire pipeline end-to-end. To enable full local H.264 video rendering, <a href="https://ffmpeg.org/download.html" target="_blank" style="color:inherit; text-decoration: underline;">install FFmpeg</a> or run via Docker.';
       document.querySelector('.container').prepend(banner);
     }
-    if (!d.checks.pymupdf) {
+    if (!d.checks.pdf_parser) {
       const banner = document.createElement('div');
       banner.className = 'alert alert-error';
       banner.style.margin = '0 0 1rem';
-      banner.innerHTML = '❌ <strong>PyMuPDF not installed.</strong> PDF extraction will fail. Run <code>pip install PyMuPDF</code>.';
+      banner.innerHTML = '❌ <strong>PDF parser not installed.</strong> PDF extraction will fail. Run <code>pip install pypdf</code>.';
       document.querySelector('.container').prepend(banner);
     }
   } catch(e) {}
