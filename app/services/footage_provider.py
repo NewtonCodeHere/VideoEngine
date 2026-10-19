@@ -2,19 +2,16 @@
 Footage retrieval adapters.
 
 Providers:
-  - PexelsProvider  : Real stock footage via Pexels API (requires PEXELS_API_KEY)
-  - MockProvider    : Deterministic mock for offline testing
+  - PexelsProvider    : Real stock footage via Pexels API (requires PEXELS_API_KEY)
+  - WikimediaProvider : Open stock footage via Wikimedia Commons (no API key required)
+  - MockProvider      : Deterministic mock for offline unit testing
 
-The interface is a simple function:
-    search(query, aspect_ratio, n) -> List[ClipCandidate]
-
-All providers must populate licence metadata accurately.
-Mock footage is clearly tagged with is_mock=True so the UI and manifest
-can distinguish it from real footage.
+All providers populate licence metadata accurately.
 """
 from __future__ import annotations
 
 import hashlib
+import re
 import time
 import urllib.parse
 from typing import List, Optional, Protocol
@@ -70,7 +67,7 @@ class PexelsProvider:
         orientation = _ORIENTATION_MAP.get(aspect_ratio, "landscape")
         params = {
             "query": query,
-            "per_page": min(n * 3, 40),  # fetch more, filter duplicates
+            "per_page": min(n * 3, 40),
             "orientation": orientation,
         }
         headers = {"Authorization": self._key}
@@ -105,9 +102,15 @@ class PexelsProvider:
             if len(clips) >= n:
                 break
 
-            # Build attribution from Pexels photographer info
             photographer = video.get("user", {}).get("name", "Unknown")
             source_url = video.get("url", f"https://www.pexels.com/video/{vid_id}/")
+
+            # Extract highest quality direct MP4 download link
+            video_files = video.get("video_files", [])
+            download_url = None
+            if video_files:
+                hd_files = [f for f in video_files if f.get("quality") == "hd" and f.get("link")]
+                download_url = (hd_files[0] if hd_files else video_files[0]).get("link")
 
             clip = ClipInfo(
                 asset_id=vid_id,
@@ -119,6 +122,7 @@ class PexelsProvider:
                 relevance_score=_estimate_relevance(query, video),
                 selection_reason=f"Top Pexels result for query: '{query}'",
                 is_mock=False,
+                download_url=download_url,
             )
             clips.append(clip)
 
@@ -126,10 +130,6 @@ class PexelsProvider:
 
 
 def _estimate_relevance(query: str, video: dict) -> float:
-    """
-    Estimate relevance by checking query terms against video tags/description.
-    Returns a float in [0, 1].
-    """
     text = " ".join([
         video.get("url", ""),
         video.get("alt", ""),
@@ -140,6 +140,88 @@ def _estimate_relevance(query: str, video: dict) -> float:
         return 0.5
     matches = sum(1 for t in terms if t in text)
     return round(matches / len(terms), 3)
+
+
+# ── Wikimedia Commons Open Video Provider ─────────────────────────────────────
+
+class WikimediaProvider:
+    """
+    Searches and retrieves open stock video footage from Wikimedia Commons.
+    Fully free, requires no API keys, and provides real video media.
+    """
+    name = "wikimedia"
+
+    def search(
+        self,
+        query: str,
+        aspect_ratio: AspectRatio = AspectRatio.r16x9,
+        n: int = 5,
+        avoid_ids: Optional[set] = None,
+    ) -> List[ClipInfo]:
+        avoid_ids = avoid_ids or set()
+        # Clean query: remove special chars and keep top meaningful keywords
+        clean_words = [w for w in re.findall(r"\w+", query) if len(w) > 2 and w.lower() not in ("video", "footage", "broll", "shot", "documentary", "cinematic")]
+        clean_query = " ".join(clean_words[:3]) or "technology"
+
+        url = "https://commons.wikimedia.org/w/api.php"
+        params = {
+            "action": "query",
+            "format": "json",
+            "generator": "search",
+            "gsrnamespace": "6",
+            "gsrsearch": f"filetype:video {clean_query}",
+            "gsrlimit": min(n * 3, 15),
+            "prop": "imageinfo",
+            "iiprop": "url|mime|extmetadata",
+        }
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        try:
+            resp = httpx.get(url, params=params, headers=headers, timeout=12.0)
+            if resp.status_code != 200:
+                return []
+            data = resp.json()
+        except Exception:
+            return []
+
+        pages = data.get("query", {}).get("pages", {})
+        clips: List[ClipInfo] = []
+
+        for pid, page in pages.items():
+            vid_id = f"wiki_{pid}"
+            if vid_id in avoid_ids:
+                continue
+            imageinfo = page.get("imageinfo", [])
+            if not imageinfo:
+                continue
+            info = imageinfo[0]
+            dl_url = info.get("url")
+            if not dl_url:
+                continue
+
+            metadata = info.get("extmetadata", {})
+            title = page.get("title", f"Video {pid}").replace("File:", "").replace(".webm", "").replace(".mp4", "")
+            artist = metadata.get("Artist", {}).get("value", "Wikimedia Contributor")
+            artist_clean = re.sub(r"<[^>]+>", "", artist).strip() or "Wikimedia Contributor"
+            licence = metadata.get("LicenseShortName", {}).get("value", "Creative Commons / Public Domain")
+            licence_url = metadata.get("LicenseUrl", {}).get("value", "https://creativecommons.org/licenses/")
+
+            clip = ClipInfo(
+                asset_id=vid_id,
+                provider="wikimedia",
+                source_url=info.get("descriptionurl", dl_url),
+                licence_name=licence,
+                licence_url=licence_url,
+                attribution=f"Video '{title}' by {artist_clean} via Wikimedia Commons",
+                relevance_score=0.85,
+                selection_reason=f"Open stock video match for query: '{clean_query}'",
+                is_mock=False,
+                download_url=dl_url,
+            )
+            clips.append(clip)
+            if len(clips) >= n:
+                break
+
+        return clips
 
 
 # ── Mock Provider ─────────────────────────────────────────────────────────────
@@ -157,11 +239,6 @@ _MOCK_VIDEO_URLS = [
 
 
 class MockProvider:
-    """
-    Deterministic mock footage provider for offline testing.
-    NEVER used in production jobs unless FOOTAGE_PROVIDER=mock is explicitly set.
-    All clips are tagged is_mock=True.
-    """
     name = "mock"
 
     def search(
@@ -173,7 +250,6 @@ class MockProvider:
     ) -> List[ClipInfo]:
         avoid_ids = avoid_ids or set()
         clips: List[ClipInfo] = []
-        # Use a hash of the query to deterministically pick clips
         seed = int(hashlib.md5(query.encode()).hexdigest(), 16)
         indices = [(seed + i) % len(_MOCK_VIDEO_URLS) for i in range(n * 2)]
 
@@ -208,7 +284,13 @@ def get_footage_provider(provider_name: str, pexels_api_key: Optional[str] = Non
                 "Set it in your .env file or use FOOTAGE_PROVIDER=mock for testing."
             )
         return PexelsProvider(pexels_api_key)
+    elif provider_name == "wikimedia":
+        return WikimediaProvider()
     elif provider_name == "mock":
         return MockProvider()
+    elif provider_name in ("auto", "default", ""):
+        if pexels_api_key:
+            return PexelsProvider(pexels_api_key)
+        return WikimediaProvider()
     else:
         raise ValueError(f"Unknown footage provider: '{provider_name}'")

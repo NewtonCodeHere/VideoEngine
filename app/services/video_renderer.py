@@ -1,8 +1,8 @@
 """
 Video rendering service using FFmpeg and Pillow.
 Produces H.264 / AAC MP4 at 30 fps, normalized to requested aspect ratios.
-Generates dynamic visual title cards for each scene matching the user's input,
-timed to the narration audio.
+Generates genuine B-roll video footage for each scene matched to the narration timing,
+with modern translucent caption overlays.
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ RESOLUTION = {
     AspectRatio.r1x1:  (1080, 1080),
 }
 
-# Rich background palette for scene cards
+# Rich background palette for scene cards when no B-roll video is available
 SCENE_COLORS = [
     (26, 26, 46),   # Dark Navy
     (22, 33, 62),   # Deep Blue
@@ -74,7 +74,59 @@ def check_ffmpeg(ffmpeg_bin: str = "ffmpeg", ffprobe_bin: str = "ffprobe") -> Tu
         return False, str(e)
 
 
-def _generate_scene_card(
+def _generate_caption_overlay(
+    scene: SceneResult,
+    width: int,
+    height: int,
+    output_png: Path,
+) -> Path:
+    """
+    Render a clean, transparent overlay image containing a modern subtitle pill bar
+    at the bottom of the video, allowing the B-roll footage to show through.
+    """
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    # Wrap caption text cleanly for bottom display
+    wrap_width = 54 if width >= 1920 else (30 if width <= 1080 and height > 1080 else 40)
+    clean_text = " ".join(scene.text.strip().split())
+    wrapped_lines = textwrap.wrap(clean_text, width=wrap_width)
+    display_lines = wrapped_lines[:3]  # keep to 1-3 lines max for subtitles
+
+    if display_lines:
+        line_height = 36
+        padding_y = 20
+        box_height = len(display_lines) * line_height + padding_y * 2
+        box_bottom = height - 70
+        box_top = box_bottom - box_height
+
+        # Calculate horizontal bounds
+        box_left = int(width * 0.1)
+        box_right = int(width * 0.9)
+
+        # Translucent dark rounded pill box
+        draw.rounded_rectangle(
+            [(box_left, box_top), (box_right, box_bottom)],
+            radius=18,
+            fill=(10, 15, 25, 210),
+            outline=(255, 255, 255, 40),
+            width=2,
+        )
+
+        # Draw centered caption lines
+        curr_y = box_top + padding_y
+        for line in display_lines:
+            # Draw line with slight drop shadow for readability
+            text_x = box_left + 40
+            draw.text((text_x + 1, curr_y + 1), line, fill=(0, 0, 0, 220))
+            draw.text((text_x, curr_y), line, fill=(255, 255, 255, 255))
+            curr_y += line_height
+
+    overlay.save(str(output_png), format="PNG")
+    return output_png
+
+
+def _generate_fallback_card(
     scene: SceneResult,
     index: int,
     total: int,
@@ -82,33 +134,24 @@ def _generate_scene_card(
     height: int,
     output_png: Path,
 ) -> Path:
-    """Render a clean, high-resolution graphic card displaying the scene text."""
+    """Render a visual card when no video clip is available."""
     bg_color = SCENE_COLORS[index % len(SCENE_COLORS)]
     img = Image.new("RGB", (width, height), color=bg_color)
     draw = ImageDraw.Draw(img)
 
-    # 1. Top badge: Scene number & source page
+    # Header badge
     badge_text = f"SCENE {index + 1} OF {total}"
     if scene.source_page:
-        badge_text += f"   ·   SOURCE PAGE {scene.source_page}"
+        badge_text += f"   ·   PAGE {scene.source_page}"
     draw.text((80, 80), badge_text, fill=(0, 214, 160))
 
-    # 2. Main Narration Text (word-wrapped)
+    # Narration text
     wrap_width = 46 if width >= 1920 else (28 if width <= 1080 and height > 1080 else 36)
     wrapped_lines = textwrap.wrap(scene.text.strip(), width=wrap_width)
-    display_text = "\n".join(wrapped_lines[:10])
+    display_text = "\n".join(wrapped_lines[:8])
 
-    y_pos = int(height * 0.28)
+    y_pos = int(height * 0.3)
     draw.text((80, y_pos), display_text, fill=(255, 255, 255), spacing=18)
-
-    # 3. Visual Search / Scene metadata at the bottom
-    query_hint = ""
-    if scene.clip and scene.clip.selection_reason:
-        query_hint = f"Visual Query: {scene.clip.selection_reason[:75]}"
-    elif scene.clip and scene.clip.source_url:
-        query_hint = f"Source: {scene.clip.source_url}"
-    if query_hint:
-        draw.text((80, height - 100), query_hint, fill=(160, 180, 205))
 
     img.save(str(output_png), format="PNG")
     return output_png
@@ -131,14 +174,13 @@ def render_video(
     progress_callback=None,
 ) -> Path:
     """
-    Render a dynamic, timed video from scenes + audio using FFmpeg.
-    Each scene generates a customized visual card featuring the exact text,
-    matched to the narration timing.
+    Render a finished B-roll video.
+    Each scene uses actual stock B-roll video footage trimmed and scaled
+    to the narration timing with subtitles overlaid at the bottom.
     """
     bin_path = _find_bin("ffmpeg", ffmpeg_bin)
     ffmpeg_available, ffmpeg_version = check_ffmpeg(bin_path, ffprobe_bin)
     if not ffmpeg_available:
-        # Fallback if ffmpeg is somehow missing
         template = Path(__file__).resolve().parent.parent.parent / "fixtures" / "mock_template.mp4"
         if template.exists():
             shutil.copyfile(template, output_path)
@@ -154,42 +196,87 @@ def render_video(
         segment_paths: List[Path] = []
         total_scenes = len(scenes)
 
-        # 1. Generate video segments for each scene
         for i, scene in enumerate(scenes):
-            card_png = tmp / f"card_{i:04d}.png"
             seg_path = tmp / f"seg_{i:04d}.mp4"
-
-            # Render custom scene image
-            _generate_scene_card(scene, i, total_scenes, width, height, card_png)
-
-            # Determine duration
             duration = round(scene.end_s - scene.start_s, 3)
             if duration <= 0:
                 duration = 3.0
 
-            # Encode PNG to MP4 segment of exact duration
-            cmd = [
-                bin_path, "-y",
-                "-loop", "1",
-                "-t", str(duration),
-                "-i", str(card_png),
-                "-c:v", "libx264",
-                "-preset", preset,
-                "-crf", str(crf),
-                "-pix_fmt", "yuv420p",
-                "-r", str(fps),
-                "-an",
-                str(seg_path),
-            ]
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            # 1. Check if real B-roll video was downloaded
+            broll_file = None
+            if scene.clip and scene.clip.local_path:
+                p = Path(scene.clip.local_path)
+                if p.exists() and p.stat().st_size > 1024:
+                    broll_file = p
+
+            # 2. Subtitle overlay
+            overlay_png = tmp / f"caption_{i:04d}.png"
+            _generate_caption_overlay(scene, width, height, overlay_png)
+
+            if broll_file is not None:
+                # Encode real B-roll video segment with subtitle overlay
+                filter_graph = (
+                    f"[0:v]scale={width}:{height}:force_original_aspect_ratio=increase,"
+                    f"crop={width}:{height}[bg];[bg][1:v]overlay=0:0"
+                )
+                cmd = [
+                    bin_path, "-y",
+                    "-stream_loop", "-1",
+                    "-t", str(duration),
+                    "-i", str(broll_file),
+                    "-i", str(overlay_png),
+                    "-filter_complex", filter_graph,
+                    "-c:v", "libx264",
+                    "-preset", preset,
+                    "-crf", str(crf),
+                    "-pix_fmt", "yuv420p",
+                    "-r", str(fps),
+                    "-an",
+                    str(seg_path),
+                ]
+            else:
+                # Fallback: render dynamic card
+                card_png = tmp / f"card_{i:04d}.png"
+                _generate_fallback_card(scene, i, total_scenes, width, height, card_png)
+                cmd = [
+                    bin_path, "-y",
+                    "-loop", "1",
+                    "-t", str(duration),
+                    "-i", str(card_png),
+                    "-c:v", "libx264",
+                    "-preset", preset,
+                    "-crf", str(crf),
+                    "-pix_fmt", "yuv420p",
+                    "-r", str(fps),
+                    "-an",
+                    str(seg_path),
+                ]
+
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             if res.returncode != 0:
-                raise RuntimeError(f"FFmpeg failed to encode scene {i}: {res.stderr[-400:]}")
+                # If complex B-roll fails (e.g. exotic codec), fallback to card
+                fallback_card = tmp / f"fallback_{i:04d}.png"
+                _generate_fallback_card(scene, i, total_scenes, width, height, fallback_card)
+                fb_cmd = [
+                    bin_path, "-y",
+                    "-loop", "1",
+                    "-t", str(duration),
+                    "-i", str(fallback_card),
+                    "-c:v", "libx264",
+                    "-preset", preset,
+                    "-crf", str(crf),
+                    "-pix_fmt", "yuv420p",
+                    "-r", str(fps),
+                    "-an",
+                    str(seg_path),
+                ]
+                subprocess.run(fb_cmd, capture_output=True, text=True, timeout=120)
 
             segment_paths.append(seg_path)
             if progress_callback:
-                progress_callback(30 + int(30 * (i + 1) / max(total_scenes, 1)))
+                progress_callback(30 + int(35 * (i + 1) / max(total_scenes, 1)))
 
-        # 2. Concatenate scene segments
+        # 3. Concatenate scene segments
         concat_list = tmp / "concat.txt"
         file_lines = ["file " + repr(str(p)) for p in segment_paths]
         concat_list.write_text("\n".join(file_lines), encoding="utf-8")
@@ -203,14 +290,14 @@ def render_video(
             "-c", "copy",
             str(concat_video),
         ]
-        res = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=120)
+        res = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=180)
         if res.returncode != 0:
             raise RuntimeError(f"FFmpeg concat failed: {res.stderr[-400:]}")
 
         if progress_callback:
             progress_callback(75)
 
-        # 3. Audio Muxing
+        # 4. Audio Muxing
         if audio_path and audio_path.exists() and audio_path.stat().st_size > 0:
             mux_cmd = [
                 bin_path, "-y",
@@ -225,7 +312,6 @@ def render_video(
             ]
             res = subprocess.run(mux_cmd, capture_output=True, text=True, timeout=180)
             if res.returncode != 0:
-                # If audio mux fails, fallback to video only
                 shutil.copyfile(concat_video, output_path)
         else:
             shutil.copyfile(concat_video, output_path)

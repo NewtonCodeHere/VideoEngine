@@ -86,12 +86,12 @@ footer { visibility: hidden !important; }
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .status-indicator {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
-    background-color: #10b981;
+    background-color: #dc2626;
     display: inline-block;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
 }
 
 /* Navigation Tabs */
@@ -105,30 +105,31 @@ footer { visibility: hidden !important; }
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 .nav-pill {
-    padding: 0.35rem 0.9rem;
+    padding: 0.38rem 1rem;
     border-radius: 9999px;
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #64748b;
     text-decoration: none;
     transition: all 0.15s ease;
 }
 .nav-pill.active {
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
+    background: #dc2626;
+    color: #ffffff !important;
+    border: 1px solid #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
 }
 
 /* Hero Title Section */
 .hero-tag {
     display: inline-block;
-    background: #eff6ff;
-    border: 1px solid #dbeafe;
-    color: #2563eb;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.08em;
-    padding: 0.2rem 0.75rem;
+    padding: 0.2rem 0.8rem;
     border-radius: 9999px;
     margin-bottom: 0.5rem;
     font-family: 'JetBrains Mono', monospace;

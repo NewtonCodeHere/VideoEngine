@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     JOB_TIMEOUT_SECONDS: int = 600
 
     # ── Footage Provider ──────────────────────────────────────────────────────
-    FOOTAGE_PROVIDER: str = "pexels"          # pexels | mock
+    FOOTAGE_PROVIDER: str = "auto"            # auto | pexels | wikimedia | mock
     PEXELS_API_KEY: Optional[str] = None
     FOOTAGE_MAX_CLIPS_PER_JOB: int = 20
     FOOTAGE_MIN_RELEVANCE: float = 0.25

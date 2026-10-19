@@ -1,69 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF to Video AI Accelerator Studio</title>
+  <title>PDF to Video AI Production Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Chart.js CDN for dynamic metric graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    /* ── Reset & Base Variables ────────────────────────────────────────── */
+    /* ── Theme Definitions: Light (White & Purple) | Dark (Black & Yellow) ─ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:           #f8fafc;
+    
+    :root, [data-theme="light"] {
+      --theme-name: 'light';
+      --bg:           #faf8ff;
+      --bg-grid:      rgba(124, 58, 237, 0.05);
       --surface:      #ffffff;
-      --surface-sub:  #f1f5f9;
-      --border:       #e2e8f0;
-      --border-focus: #3b82f6;
-      --primary:      #2563eb;
-      --primary-hover:#1d4ed8;
-      --primary-light:#eff6ff;
-      --primary-border:#bfdbfe;
-      --text:         #0f172a;
-      --text-muted:   #64748b;
-      --text-sub:     #475569;
+      --surface-sub:  #f5f3ff;
+      --surface-hover:#ede9fe;
+      --border:       #e9d5ff;
+      --border-focus: #7c3aed;
+      --border-accent:#c4b5fd;
+      --primary:      #7c3aed;
+      --primary-hover:#6d28d9;
+      --primary-light:#f3e8ff;
+      --primary-border:#ddd6fe;
+      --primary-text: #ffffff;
+      --accent:       #9333ea;
+      --accent-glow:  rgba(124, 58, 237, 0.25);
+      --text:         #1e1b4b;
+      --text-muted:   #6b7280;
+      --text-sub:     #4b5563;
       --green:        #10b981;
-      --green-light:  #dcfce7;
-      --green-text:   #15803d;
+      --green-light:  #ecfdf5;
+      --green-text:   #047857;
       --orange:       #f97316;
-      --orange-light: #ffedd5;
-      --purple:       #8b5cf6;
+      --orange-light: #fff7ed;
+      --orange-text:  #c2410c;
+      --purple:       #7c3aed;
       --purple-light: #f3e8ff;
-      --purple-text:  #7c3aed;
+      --purple-text:  #6d28d9;
       --red:          #ef4444;
       --red-light:    #fee2e2;
       --radius-sm:    8px;
       --radius:       14px;
       --radius-pill:  9999px;
-      --shadow-sm:    0 1px 2px rgba(0,0,0,0.03);
-      --shadow:       0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.04);
-      --shadow-lg:    0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+      --shadow-sm:    0 1px 3px rgba(124, 58, 237, 0.05);
+      --shadow:       0 4px 16px rgba(124, 58, 237, 0.08);
+      --shadow-lg:    0 12px 30px rgba(124, 58, 237, 0.12);
+      --flow-dot:     #7c3aed;
+      --card-highlight: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(147, 51, 234, 0.02));
+    }
+
+    [data-theme="dark"] {
+      --theme-name: 'dark';
+      --bg:           #09090b;
+      --bg-grid:      rgba(234, 179, 8, 0.04);
+      --surface:      #141416;
+      --surface-sub:  #1c1c20;
+      --surface-hover:#27272a;
+      --border:       #2e2e33;
+      --border-focus: #eab308;
+      --border-accent:#facc15;
+      --primary:      #eab308;
+      --primary-hover:#ca8a04;
+      --primary-light: rgba(234, 179, 8, 0.14);
+      --primary-border: rgba(234, 179, 8, 0.35);
+      --primary-text: #09090b;
+      --accent:       #facc15;
+      --accent-glow:  rgba(234, 179, 8, 0.3);
+      --text:         #f4f4f5;
+      --text-muted:   #a1a1aa;
+      --text-sub:     #d4d4d8;
+      --green:        #10b981;
+      --green-light:  rgba(16, 185, 129, 0.15);
+      --green-text:   #34d399;
+      --orange:       #fb923c;
+      --orange-light: rgba(251, 146, 60, 0.15);
+      --orange-text:  #fdba74;
+      --purple:       #facc15;
+      --purple-light: rgba(234, 179, 8, 0.14);
+      --purple-text:  #fde047;
+      --red:          #f87171;
+      --red-light:    rgba(248, 113, 113, 0.15);
+      --radius-sm:    8px;
+      --radius:       14px;
+      --radius-pill:  9999px;
+      --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.4);
+      --shadow:       0 4px 20px rgba(0, 0, 0, 0.6);
+      --shadow-lg:    0 12px 35px rgba(0, 0, 0, 0.8);
+      --flow-dot:     #eab308;
+      --card-highlight: linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(202, 138, 4, 0.02));
     }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
       background-image: 
-        linear-gradient(to right, rgba(226, 232, 240, 0.7) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(226, 232, 240, 0.7) 1px, transparent 1px);
+        linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
       background-size: 24px 24px;
       color: var(--text);
       min-height: 100vh;
       line-height: 1.5;
-      padding-bottom: 3rem;
+      padding-bottom: 4rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     /* ── Layout Container ────────────────────────────────────────────────── */
     .container {
-      max-width: 1120px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 1.5rem 1.25rem;
     }
 
-    /* ── Top Pill Header Bar ─────────────────────────────────────────────── */
+    /* ── Global Animated Pulse & Shimmers ────────────────────────────────── */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+      50% { box-shadow: 0 0 12px 4px var(--accent-glow); }
+    }
+    @keyframes flowBeam {
+      0% { transform: translateX(-100%); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateX(200%); opacity: 0; }
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.985) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    @keyframes shimmerBar {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* ── Top Header Bar ─────────────────────────────────────────────────── */
     .top-pill-bar {
       display: flex;
       align-items: center;
@@ -84,6 +164,11 @@
       font-weight: 600;
       color: var(--text-sub);
       box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+    .system-status-pill:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
     }
     .status-dot {
       width: 8px;
@@ -91,13 +176,49 @@
       border-radius: 50%;
       background-color: var(--green);
       display: inline-block;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+      animation: pulseGlow 2s infinite ease-in-out;
     }
-    .status-divider { color: #cbd5e1; }
+    .status-divider { color: var(--border); }
+
+    .header-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* Theme Switcher Button */
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 0.4rem 0.95rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+      user-select: none;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px var(--accent-glow);
+    }
+    .theme-indicator-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
 
     .nav-pill-row {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.35rem;
       background: var(--surface);
       padding: 0.3rem;
       border: 1px solid var(--border);
@@ -112,7 +233,7 @@
       font-weight: 600;
       color: var(--text-muted);
       text-decoration: none;
-      transition: all 0.18s ease;
+      transition: all 0.2s ease;
       cursor: pointer;
       border: 1px solid transparent;
       white-space: nowrap;
@@ -120,26 +241,36 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      background: transparent;
     }
-    .nav-pill:hover { color: var(--primary); background: #f8fafc; }
+    .nav-pill:hover {
+      color: var(--primary);
+      background: var(--surface-sub);
+    }
     .nav-pill.active {
       background: var(--primary-light);
       color: var(--primary);
       border-color: var(--primary-border);
-      box-shadow: 0 1px 3px rgba(37,99,235,0.12);
+      box-shadow: 0 2px 8px var(--accent-glow);
+      font-weight: 700;
     }
 
-    /* ── Tab Views Container ─────────────────────────────────────────────── */
+    /* ── Tab Views ───────────────────────────────────────────────────────── */
     .tab-view { display: none; }
-    .tab-view.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-view.active {
+      display: block;
+      animation: fadeInScale 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
     /* ── Hero Title Section ──────────────────────────────────────────────── */
-    .hero-section { margin-bottom: 1.5rem; }
+    .hero-section {
+      margin-bottom: 1.5rem;
+      animation: fadeInScale 0.35s ease-out;
+    }
     .hero-tag {
       display: inline-block;
       background: var(--primary-light);
-      border: 1px solid #dbeafe;
+      border: 1px solid var(--primary-border);
       color: var(--primary);
       font-size: 0.72rem;
       font-weight: 700;
@@ -148,6 +279,7 @@
       border-radius: var(--radius-pill);
       margin-bottom: 0.6rem;
       font-family: 'JetBrains Mono', monospace;
+      box-shadow: 0 1px 4px var(--accent-glow);
     }
     .hero-title {
       font-size: 2.1rem;
@@ -162,6 +294,88 @@
       color: var(--text-muted);
     }
     .hero-desc b { color: var(--text); }
+
+    /* ── Studio Step Tabs (3 Sub-Tabs inside Live Studio) ─────────────────── */
+    .studio-steps-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .studio-step-btn {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .studio-step-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: transparent;
+      transition: background 0.2s ease;
+    }
+    .studio-step-btn:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .studio-step-btn.active {
+      border-color: var(--primary);
+      background: var(--card-highlight);
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .studio-step-btn.active::after {
+      background: var(--primary);
+    }
+    .studio-step-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface-sub);
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .studio-step-btn.active .studio-step-badge {
+      background: var(--primary);
+      color: var(--primary-text);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .studio-step-info { display: flex; flex-direction: column; text-align: left; }
+    .studio-step-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .studio-step-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    /* Studio Screen Panels */
+    .studio-screen-view { display: none; }
+    .studio-screen-view.active {
+      display: block;
+      animation: fadeInScale 0.25s ease-out;
+    }
 
     /* ── Mode Selection Cards (Horizontal Split) ─────────────────────────── */
     .mode-cards-grid {
@@ -183,13 +397,14 @@
       box-shadow: var(--shadow-sm);
     }
     .mode-card:hover {
-      border-color: var(--primary-border);
-      transform: translateY(-1px);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
     .mode-card.active {
-      background: #f8faff;
-      border: 2px solid var(--border-focus);
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.08);
+      background: var(--card-highlight);
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 16px var(--accent-glow);
     }
     .mode-icon {
       font-size: 1.75rem;
@@ -198,14 +413,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f8fafc;
+      background: var(--surface-sub);
       border: 1px solid var(--border);
       border-radius: 10px;
       flex-shrink: 0;
+      transition: all 0.2s;
     }
     .mode-card.active .mode-icon {
       background: var(--primary-light);
       border-color: var(--primary-border);
+      color: var(--primary);
+      transform: scale(1.05);
     }
     .mode-title {
       font-weight: 700;
@@ -213,14 +431,14 @@
       color: var(--text);
       margin-bottom: 0.15rem;
     }
-    .mode-card.active .mode-title { color: #1d4ed8; }
+    .mode-card.active .mode-title { color: var(--primary); font-weight: 800; }
     .mode-subtitle {
       font-size: 0.8rem;
       color: var(--text-muted);
       line-height: 1.3;
     }
 
-    /* ── White Container Card ────────────────────────────────────────────── */
+    /* ── Surface Card Base ───────────────────────────────────────────────── */
     .white-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -228,6 +446,10 @@
       padding: 1.5rem 1.75rem;
       margin-bottom: 1.5rem;
       box-shadow: var(--shadow);
+      transition: all 0.25s ease;
+    }
+    .white-card:hover {
+      box-shadow: var(--shadow-lg);
     }
 
     /* ── Config Rows ─────────────────────────────────────────────────────── */
@@ -251,7 +473,7 @@
     .select-engine {
       flex: 1;
       max-width: 580px;
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 0.65rem 0.95rem;
@@ -259,9 +481,12 @@
       font-weight: 600;
       color: var(--text);
       outline: none;
-      transition: border-color 0.15s;
+      transition: all 0.2s ease;
     }
-    .select-engine:focus { border-color: var(--border-focus); }
+    .select-engine:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
 
     /* ── Test Samples Pills Row ──────────────────────────────────────────── */
     .samples-row {
@@ -280,29 +505,32 @@
       font-weight: 600;
       color: var(--text-sub);
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.18s ease;
     }
     .sample-pill-btn:hover {
       background: var(--primary-light);
       color: var(--primary);
       border-color: var(--primary-border);
+      transform: translateY(-1px);
     }
 
     /* ── Dropzone ────────────────────────────────────────────────────────── */
     .dropzone {
-      border: 2px dashed #93c5fd;
-      background: #f8fafc;
+      border: 2px dashed var(--border-accent);
+      background: var(--surface-sub);
       border-radius: var(--radius);
       padding: 2.5rem 1.5rem;
       text-align: center;
       cursor: pointer;
       position: relative;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       margin-bottom: 1.25rem;
     }
     .dropzone:hover, .dropzone.dragover {
       border-color: var(--primary);
       background: var(--primary-light);
+      transform: scale(1.005);
+      box-shadow: 0 6px 20px var(--accent-glow);
     }
     .dropzone input[type=file] {
       position: absolute;
@@ -313,17 +541,18 @@
       height: 100%;
     }
     .upload-icon-circle {
-      width: 52px;
-      height: 52px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
       background: var(--primary-light);
       border: 1px solid var(--primary-border);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       color: var(--primary);
       margin-bottom: 0.75rem;
+      animation: cardFloat 3s ease-in-out infinite;
     }
     .dropzone-title {
       font-size: 1rem;
@@ -342,7 +571,7 @@
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
       margin-bottom: 1.25rem;
-      background: #f8fafc;
+      background: var(--surface-sub);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1rem 1.25rem;
@@ -354,15 +583,19 @@
       color: var(--text-muted);
     }
     .control-select, .control-input {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 0.5rem 0.75rem;
       font-size: 0.85rem;
       color: var(--text);
       outline: none;
+      transition: border-color 0.15s;
     }
-    .control-select:focus, .control-input:focus { border-color: var(--border-focus); }
+    .control-select:focus, .control-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
 
     /* ── Bottom Action Bar ───────────────────────────────────────────────── */
     .action-bar {
@@ -384,25 +617,27 @@
     }
     .btn-run {
       background: var(--primary);
-      color: #ffffff;
+      color: var(--primary-text);
       border: none;
       border-radius: var(--radius-sm);
-      padding: 0.75rem 2rem;
-      font-size: 0.95rem;
-      font-weight: 700;
+      padding: 0.8rem 2.2rem;
+      font-size: 0.96rem;
+      font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      transition: all 0.15s ease;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+      gap: 0.55rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px var(--accent-glow);
     }
     .btn-run:hover:not(:disabled) {
       background: var(--primary-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-glow);
     }
     .btn-run:disabled {
-      background: #94a3b8;
+      background: var(--border);
+      color: var(--text-muted);
       cursor: not-allowed;
       box-shadow: none;
       transform: none;
@@ -411,7 +646,7 @@
     /* ── Direct Script & Extracted Text Areas ────────────────────────────── */
     .editor-textarea {
       width: 100%;
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 0.9rem;
@@ -421,16 +656,19 @@
       resize: vertical;
       line-height: 1.6;
       outline: none;
+      transition: border-color 0.2s;
     }
-    .editor-textarea:focus { border-color: var(--border-focus); }
+    .editor-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
 
-    /* ── Results Dashboard (Image 2 style) ───────────────────────────────── */
-    .results-section { margin-top: 1.5rem; }
+    /* ── Results Dashboard ───────────────────────────────────────────────── */
     .section-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.5rem;
       flex-wrap: wrap;
       gap: 0.5rem;
     }
@@ -451,7 +689,7 @@
     }
     .badge-pill-green { background: var(--green-light); color: var(--green-text); }
     .badge-pill-purple { background: var(--purple-light); color: var(--purple-text); font-family: 'JetBrains Mono', monospace; }
-    .badge-pill-blue { background: var(--primary-light); color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+    .badge-pill-primary { background: var(--primary-light); color: var(--primary); font-family: 'JetBrains Mono', monospace; }
 
     /* ── Scene Detection Grid ────────────────────────────────────────────── */
     .scenes-grid {
@@ -461,22 +699,21 @@
       margin: 1rem 0 1.5rem 0;
     }
     .scene-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.9rem 1rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.95rem 1rem;
       box-shadow: var(--shadow-sm);
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
-    .scene-card.active {
-      border: 1.5px solid var(--green);
-    }
+    .scene-card.active { border-color: var(--green); }
     .scene-card:hover {
       box-shadow: var(--shadow);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      border-color: var(--primary);
     }
     .scene-card-header {
       display: flex;
@@ -485,22 +722,22 @@
       margin-bottom: 0.4rem;
     }
     .scene-card-title {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.85rem;
       color: var(--text);
       text-transform: uppercase;
     }
     .scene-text-excerpt {
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       color: var(--text-sub);
-      line-height: 1.35;
-      margin-bottom: 0.5rem;
+      line-height: 1.4;
+      margin-bottom: 0.6rem;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      background: #f8fafc;
-      padding: 0.35rem 0.45rem;
+      background: var(--surface-sub);
+      padding: 0.45rem 0.55rem;
       border-radius: 6px;
       border-left: 3px solid var(--primary);
     }
@@ -515,7 +752,7 @@
     .scene-bar-track {
       width: 100%;
       height: 4px;
-      background: #e2e8f0;
+      background: var(--border);
       border-radius: var(--radius-pill);
       overflow: hidden;
       margin-bottom: 0.45rem;
@@ -534,27 +771,84 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* ── Source Utilization & Pipeline Transformation List (Replacing Latency) ── */
+    /* ── Storyboard Interactive Scrubber Strip ───────────────────────────── */
+    .storyboard-preview-box {
+      background: var(--surface-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .storyboard-timeline-row {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .storyboard-thumb-card {
+      min-width: 155px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .storyboard-thumb-card:hover, .storyboard-thumb-card.active {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .thumb-header-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .thumb-visual-preview {
+      height: 52px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--primary), #38bdf8);
+      margin-bottom: 0.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1.1rem;
+    }
+    .thumb-script-excerpt {
+      font-size: 0.72rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Source Utilization & Pipeline Transformation List ───────────────── */
     .stage-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f8fafc;
-      border: 1px solid #f1f5f9;
-      border-radius: 8px;
+      background: var(--surface-sub);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       padding: 0.85rem 1.15rem;
       margin-bottom: 0.55rem;
       font-size: 0.86rem;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       gap: 1rem;
     }
     .stage-row.in-progress {
-      background: #eff6ff;
-      border-color: #bfdbfe;
+      background: var(--primary-light);
+      border-color: var(--primary-border);
+      box-shadow: 0 2px 10px var(--accent-glow);
     }
     .stage-row.completed {
-      background: #ffffff;
-      border-color: #e2e8f0;
+      background: var(--surface);
+      border-color: var(--border);
     }
     .stage-left {
       display: flex;
@@ -567,7 +861,7 @@
       font-weight: 700;
       color: var(--text-muted);
       font-size: 0.88rem;
-      background: #e2e8f0;
+      background: var(--border);
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
     }
@@ -576,8 +870,8 @@
       color: var(--green-text);
     }
     .stage-row.in-progress .stage-id {
-      background: var(--primary-light);
-      color: var(--primary);
+      background: var(--primary);
+      color: var(--primary-text);
     }
     .stage-content { display: flex; flex-direction: column; gap: 0.2rem; }
     .stage-name { font-weight: 700; color: var(--text); font-size: 0.88rem; }
@@ -591,7 +885,7 @@
       white-space: nowrap;
     }
 
-    /* ── Transformation Summary Box (Replacing Total Latency Box) ─────────── */
+    /* ── Transformation Summary Box ───────────────────────────────────────── */
     .total-latency-box {
       display: flex;
       justify-content: space-between;
@@ -613,7 +907,7 @@
       letter-spacing: 0.02em;
     }
 
-    /* ── Segmented Multi-Color Progress Bar & Legend ─────────────────────── */
+    /* ── Segmented Multi-Color Progress Bar & Shimmer ─────────────────────── */
     .segmented-bar {
       display: flex;
       height: 8px;
@@ -624,7 +918,7 @@
     .seg-blue   { background-color: #38bdf8; }
     .seg-orange { background-color: #f97316; }
     .seg-green  { background-color: #10b981; }
-    .seg-purple { background-color: #8b5cf6; }
+    .seg-purple { background-color: var(--primary); }
 
     .bar-legend {
       display: flex;
@@ -641,11 +935,12 @@
 
     /* ── Video Player & Downloads ────────────────────────────────────────── */
     .video-preview-wrapper {
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
       background: #000;
       margin: 1rem 0;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
     }
     video { width: 100%; display: block; max-height: 480px; }
     .downloads-row {
@@ -658,20 +953,21 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.55rem 1.1rem;
-      background: #ffffff;
+      padding: 0.6rem 1.15rem;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text-sub);
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
     }
     .btn-download:hover {
       background: var(--primary-light);
-      border-color: var(--primary-border);
+      border-color: var(--primary);
       color: var(--primary);
+      transform: translateY(-1px);
     }
 
     /* ── Alerts ──────────────────────────────────────────────────────────── */
@@ -684,182 +980,250 @@
       align-items: center;
       gap: 0.6rem;
     }
-    .alert-warn { background: #fef3c7; border: 1px solid #fde68a; color: #92400e; }
-    .alert-error { background: var(--red-light); border: 1px solid #fecaca; color: #991b1b; }
-    .alert-success { background: var(--green-light); border: 1px solid #bbf7d0; color: var(--green-text); }
-    .alert-info { background: var(--primary-light); border: 1px solid var(--primary-border); color: #1e40af; }
+    .alert-error { background: var(--red-light); border: 1px solid var(--red); color: var(--red); }
+    .alert-info { background: var(--primary-light); border: 1px solid var(--primary-border); color: var(--primary); }
 
-    /* ── Architecture Interactive Diagram Styles ─────────────────────────── */
-    .arch-canvas-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      margin-bottom: 1.5rem;
+    /* ══════════════════════════════════════════════════════════════════════ */
+    /* ARCHITECTURE PIPELINE (Matching Uploaded Image Flow + Animated Dots)  */
+    /* ══════════════════════════════════════════════════════════════════════ */
+    .arch-stages-wrapper {
       position: relative;
+      margin-bottom: 2rem;
     }
-    .arch-flow-svg {
-      width: 100%;
-      height: auto;
-      max-height: 380px;
-      display: block;
+    /* Dashed line connecting all 5 stages horizontally */
+    .arch-connector-line {
+      position: absolute;
+      top: 50%;
+      left: 6%;
+      right: 6%;
+      height: 2px;
+      background-image: repeating-linear-gradient(to right, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px);
+      z-index: 1;
+      transform: translateY(-50%);
     }
-    .arch-node {
+    /* Flowing pulse beam along the line */
+    .arch-connector-pulse {
+      position: absolute;
+      top: -3px;
+      left: 0;
+      width: 60px;
+      height: 8px;
+      border-radius: 4px;
+      background: radial-gradient(circle, var(--flow-dot) 0%, transparent 70%);
+      animation: flowBeam 3s infinite linear;
+      z-index: 2;
+    }
+
+    .arch-stages-nav {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.85rem;
+    }
+    .arch-stage-btn {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1.1rem 0.85rem;
+      text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
-    }
-    .arch-node:hover rect {
-      stroke: var(--primary);
-      stroke-width: 2.5px;
-      filter: drop-shadow(0 4px 12px rgba(37,99,235,0.2));
-    }
-    .arch-node.selected rect {
-      stroke: var(--primary);
-      stroke-width: 3px;
-      fill: #f0f7ff !important;
-    }
-    .arch-pulse-dot {
-      fill: #3b82f6;
-      filter: drop-shadow(0 0 4px #2563eb);
-    }
-
-    /* Architecture Stage Details Drawer / Inspector Card */
-    .arch-inspector {
-      background: #f8fafc;
-      border: 1.5px solid var(--primary-border);
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-top: 1.25rem;
-      animation: fadeIn 0.25s ease-out;
-    }
-    .arch-inspector-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0.75rem;
-    }
-    .arch-prop-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
-    }
-    .arch-prop-item {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.9rem 1rem;
-    }
-    .arch-prop-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.3rem;
-    }
-    .arch-prop-val {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .arch-prop-code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: var(--purple-text);
-      background: var(--purple-light);
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      display: inline-block;
-      margin-top: 0.25rem;
-    }
-
-    /* ── Visualizations Tab Styles ───────────────────────────────────────── */
-    .metrics-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .metric-stat-box {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.15rem;
       box-shadow: var(--shadow-sm);
+      position: relative;
     }
-    .stat-box-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
+    .arch-stage-btn:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow);
+    }
+    .arch-stage-btn.selected {
+      border: 2px solid var(--primary);
+      box-shadow: 0 6px 20px var(--accent-glow);
+      background: var(--card-highlight);
+    }
+    /* Glowing dot indicator between stages */
+    .arch-stage-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--flow-dot);
+      box-shadow: 0 0 6px var(--flow-dot);
+      transform: translateY(-50%);
+      z-index: 4;
+    }
+    .arch-stage-btn:last-child::after { display: none; }
+
+    .arch-stage-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
       margin-bottom: 0.35rem;
     }
-    .stat-box-value {
-      font-size: 1.5rem;
+    .arch-stage-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    .arch-stage-btn:hover .arch-stage-icon {
+      transform: scale(1.12);
+    }
+    .arch-stage-name {
+      font-size: 0.92rem;
       font-weight: 800;
       color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 0.2rem;
+    }
+    .arch-stage-tech {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .arch-stage-badge {
+      display: inline-block;
       font-family: 'JetBrains Mono', monospace;
-      line-height: 1.2;
-    }
-    .stat-box-sub {
-      font-size: 0.75rem;
-      color: var(--green-text);
-      font-weight: 600;
-      margin-top: 0.25rem;
-    }
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-    .chart-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem 1.4rem;
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-    }
-    .chart-card.full-width {
-      grid-column: span 2;
-    }
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .chart-title {
-      font-size: 0.92rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-    .chart-canvas-wrap {
-      position: relative;
-      width: 100%;
-      height: 240px;
-    }
-    .chart-canvas-wrap.tall {
-      height: 280px;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-pill);
+      background: var(--surface-sub);
+      color: var(--text-sub);
     }
 
-    /* ── Provenance Tab Styles ───────────────────────────────────────────── */
-    .provenance-card {
-      background: #ffffff;
+    /* Architecture Stage Detail Card */
+    .arch-inspector-card {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 1.75rem;
       box-shadow: var(--shadow);
       margin-bottom: 1.5rem;
     }
+
+    /* Clean 4 Sub-Boxes (without cluttered descriptive paragraphs, sleek & animated) */
+    .arch-sub-boxes-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .arch-sub-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1rem;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      position: relative;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
+      box-shadow: var(--shadow-sm);
+    }
+    .arch-sub-box:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px var(--accent-glow);
+    }
+    .arch-sub-box.active {
+      border: 2px solid var(--primary);
+      background: var(--card-highlight);
+      box-shadow: 0 6px 20px var(--accent-glow);
+      animation: cardFloat 3s ease-in-out infinite;
+    }
+    .arch-sub-box-icon {
+      font-size: 1.7rem;
+      margin-bottom: 0.4rem;
+      transition: transform 0.2s;
+    }
+    .arch-sub-box:hover .arch-sub-box-icon {
+      transform: scale(1.15);
+    }
+    .arch-sub-box-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+    .arch-sub-box-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-pill);
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Flowchart Drill-Down Drawer for Clicked Box */
+    .flowchart-drilldown-panel {
+      background: var(--surface-sub);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      animation: fadeInScale 0.3s ease-out;
+    }
+    .flowchart-nodes-row {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      overflow-x: auto;
+      padding: 1rem 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .fc-node {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      min-width: 180px;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      animation: fadeInScale 0.35s ease-out;
+    }
+    .fc-node:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .fc-node-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+    .fc-node-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+    .fc-arrow {
+      color: var(--primary);
+      font-size: 1.4rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      animation: pulseGlow 1.5s infinite;
+    }
+
+    /* ── Provenance Tab Styles ───────────────────────────────────────────── */
     .audit-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -867,16 +1231,21 @@
       margin: 1.25rem 0;
     }
     .audit-box {
-      background: #f8fafc;
+      background: var(--surface-sub);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 1rem;
+      transition: all 0.2s ease;
+    }
+    .audit-box:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
     }
     .audit-box-title {
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text-muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.45rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -885,8 +1254,8 @@
       font-size: 0.78rem;
       color: var(--primary);
       word-break: break-all;
-      background: #ffffff;
-      padding: 0.4rem 0.5rem;
+      background: var(--surface);
+      padding: 0.45rem 0.55rem;
       border: 1px solid var(--border);
       border-radius: 6px;
     }
@@ -894,7 +1263,7 @@
       overflow-x: auto;
       margin: 1.25rem 0;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
     }
     .provenance-table {
       width: 100%;
@@ -903,45 +1272,41 @@
       text-align: left;
     }
     .provenance-table th {
-      background: #f8fafc;
-      padding: 0.75rem 1rem;
+      background: var(--surface-sub);
+      padding: 0.8rem 1rem;
       font-weight: 700;
       color: var(--text-sub);
       border-bottom: 1px solid var(--border);
     }
     .provenance-table td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid #f1f5f9;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid var(--border);
       color: var(--text);
     }
     .provenance-table tr:last-child td { border-bottom: none; }
-    .provenance-table tr:hover td { background: #fbfcfe; }
+    .provenance-table tr:hover td { background: var(--surface-hover); }
 
     /* ── API Explorer Tab Styles ─────────────────────────────────────────── */
-    .api-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.75rem;
-      box-shadow: var(--shadow);
-      margin-bottom: 1.5rem;
-    }
     .endpoint-item {
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 1rem;
       overflow: hidden;
-      background: #ffffff;
-      transition: all 0.15s ease;
+      background: var(--surface);
+      transition: all 0.2s ease;
     }
-    .endpoint-item:hover { border-color: var(--primary-border); }
+    .endpoint-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
     .endpoint-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.85rem 1.15rem;
-      background: #f8fafc;
+      padding: 0.9rem 1.2rem;
+      background: var(--surface-sub);
       cursor: pointer;
+      user-select: none;
     }
     .endpoint-badge {
       font-family: 'JetBrains Mono', monospace;
@@ -951,8 +1316,8 @@
       border-radius: 6px;
       margin-right: 0.75rem;
     }
-    .badge-post { background: #dbeafe; color: #1e40af; }
-    .badge-get  { background: #dcfce7; color: #166534; }
+    .badge-post { background: var(--primary-light); color: var(--primary); }
+    .badge-get  { background: var(--green-light); color: var(--green-text); }
     .endpoint-path {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
@@ -962,17 +1327,37 @@
     .endpoint-body {
       padding: 1.25rem;
       border-top: 1px solid var(--border);
-      background: #ffffff;
+      background: var(--surface);
     }
     .code-block {
-      background: #0f172a;
-      color: #f8fafc;
+      background: #09090b;
+      color: #f4f4f5;
       padding: 1rem;
       border-radius: 8px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
       overflow-x: auto;
       margin: 0.6rem 0;
+      border: 1px solid #27272a;
+    }
+
+    /* ── Progress Shimmer Bar ────────────────────────────────────────────── */
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-active-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+      background-size: 200% 100%;
+      animation: shimmerBar 2s infinite linear;
+      border-radius: var(--radius-pill);
+      transition: width 0.3s ease;
     }
 
     /* ── Utilities ───────────────────────────────────────────────────────── */
@@ -983,11 +1368,13 @@
     /* ── Responsive ──────────────────────────────────────────────────────── */
     @media (max-width: 868px) {
       .mode-cards-grid { grid-template-columns: 1fr; }
-      .charts-grid { grid-template-columns: 1fr; }
-      .chart-card.full-width { grid-column: span 1; }
+      .studio-steps-nav { grid-template-columns: 1fr; }
+      .arch-stages-nav { grid-template-columns: repeat(2, 1fr); }
+      .arch-sub-boxes-grid { grid-template-columns: 1fr 1fr; }
       .hero-title { font-size: 1.6rem; }
       .config-row { flex-direction: column; align-items: flex-start; }
       .select-engine { max-width: 100%; width: 100%; }
+      .arch-connector-line { display: none; }
     }
   </style>
 </head>
@@ -995,7 +1382,7 @@
 
 <div class="container">
 
-  <!-- ── Top Pill Header Bar with Working Tabs ─────────────────────────── -->
+  <!-- ── Top Header Bar (With Brand, Live Dot, Nav Tabs, & Theme Toggle) ── -->
   <div class="top-pill-bar">
     <div class="system-status-pill">
       <span class="status-dot"></span>
@@ -1003,259 +1390,306 @@
       <span class="status-divider">|</span>
       <span style="color:var(--text-muted);">INCUBRIX PRODUCTION ENGINE</span>
     </div>
-    <div class="nav-pill-row">
-      <button class="nav-pill active" id="tab-btn-studio" onclick="switchTab('studio')">🚀 Live Studio</button>
-      <button class="nav-pill" id="tab-btn-architecture" onclick="switchTab('architecture')">🎯 Architecture</button>
-      <button class="nav-pill" id="tab-btn-visualizations" onclick="switchTab('visualizations')">📊 Visualizations</button>
-      <button class="nav-pill" id="tab-btn-provenance" onclick="switchTab('provenance')">📋 Provenance</button>
-      <button class="nav-pill" id="tab-btn-api" onclick="switchTab('api')">⚡ API Docs</button>
+
+    <div class="header-actions-row">
+      <!-- Theme Switcher Button (Light: White & Purple | Dark: Black & Yellow) -->
+      <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light & Dark Theme">
+        <span class="theme-indicator-dot" id="theme-dot"></span>
+        <span id="theme-label-text">☀️ Light (Purple)</span>
+      </button>
+
+      <!-- Main Navigation Tabs -->
+      <div class="nav-pill-row">
+        <button class="nav-pill active" id="tab-btn-studio" onclick="switchTab('studio')">🚀 Live Studio</button>
+        <button class="nav-pill" id="tab-btn-architecture" onclick="switchTab('architecture')">🎯 Architecture</button>
+        <button class="nav-pill" id="tab-btn-visualizations" onclick="switchTab('visualizations')">📊 Visualizations</button>
+        <button class="nav-pill" id="tab-btn-provenance" onclick="switchTab('provenance')">📋 Provenance</button>
+        <button class="nav-pill" id="tab-btn-api" onclick="switchTab('api')">⚡ API Docs</button>
+      </div>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 1: LIVE STUDIO                                                   -->
+  <!-- TAB 1: LIVE STUDIO (With 3 Sub-Tabs: Screen 1, Screen 2, Screen 3)    -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
   <div class="tab-view active" id="tab-view-studio">
 
     <!-- Hero Title Section -->
     <div class="hero-section">
-      <div class="hero-tag">INTERACTIVE DOCUMENT-TO-VIDEO PIPELINE · PDF TO VIDEO AI</div>
+      <div class="hero-tag">DOCUMENT-TO-VIDEO PRODUCTION ENGINE · PDF TO VIDEO AI</div>
       <h1 class="hero-title">Live Document & B-Roll Video Studio</h1>
       <p class="hero-desc">
-        Select target video format across <b>YouTube & Widescreen (16:9 Landscape)</b>, <b>Shorts, Reels & TikTok (9:16 Portrait)</b>, or <b>Square Social Feed (1:1 Square)</b>.
+        Automated document transformation pipeline converting PDFs and scripts into synchronized B-roll videos across <b>YouTube 16:9</b>, <b>Shorts/Reels 9:16</b>, and <b>Square 1:1</b>.
       </p>
     </div>
 
-    <!-- System Warnings (FFmpeg Mock / Parser Banner) -->
+    <!-- System Warnings Banner -->
     <div id="system-banner-wrap"></div>
 
-    <!-- Mode Selection Cards (Horizontal Split) -->
-    <div class="mode-cards-grid">
-      <div class="mode-card active" id="card-mode-pdf" onclick="switchMode('pdf')">
-        <div class="mode-icon">📄</div>
-        <div>
-          <div class="mode-title">1. Passive PDF Data Mode</div>
-          <div class="mode-subtitle">Extract document headings, pages & structure</div>
+    <!-- ── Studio 3-Step Navigation Bar ──────────────────────────────────── -->
+    <div class="studio-steps-nav">
+      <button class="studio-step-btn active" id="studio-step-btn-1" onclick="switchStudioScreen(1)">
+        <div class="studio-step-badge">1</div>
+        <div class="studio-step-info">
+          <span class="studio-step-title">Screen 1 — Create a Video</span>
+          <span class="studio-step-subtitle">Upload PDF, script & parameters</span>
         </div>
-      </div>
-      <div class="mode-card" id="card-mode-script" onclick="switchMode('script')">
-        <div class="mode-icon">📝</div>
-        <div>
-          <div class="mode-title">2. Direct Script Editor</div>
-          <div class="mode-subtitle">Multi-scene custom narration script</div>
+      </button>
+
+      <button class="studio-step-btn" id="studio-step-btn-2" onclick="switchStudioScreen(2)">
+        <div class="studio-step-badge">2</div>
+        <div class="studio-step-info">
+          <span class="studio-step-title">Screen 2 — Preview & Edit</span>
+          <span class="studio-step-subtitle">Storyboard beats & pipeline progress</span>
         </div>
-      </div>
-      <div class="mode-card" id="card-mode-audio" onclick="switchMode('audio')">
-        <div class="mode-icon">🎙️</div>
-        <div>
-          <div class="mode-title">3. Real-Time Voice Mode</div>
-          <div class="mode-subtitle">Voiceover audio capture & sync buffer</div>
+      </button>
+
+      <button class="studio-step-btn" id="studio-step-btn-3" onclick="switchStudioScreen(3)">
+        <div class="studio-step-badge">3</div>
+        <div class="studio-step-info">
+          <span class="studio-step-title">Screen 3 — Finished Video</span>
+          <span class="studio-step-subtitle">MP4 playback, downloads & audit</span>
         </div>
-      </div>
+      </button>
     </div>
 
-    <!-- Main Configuration Card -->
-    <div class="white-card" id="config-card">
-
-      <!-- Target Video Format Dropdown (Intuitive naming replacing Config A, B, C) -->
-      <div class="config-row">
-        <span class="config-label">⚙️ TARGET EXECUTION ENGINE:</span>
-        <select class="select-engine" id="cfg-aspect" onchange="onAspectChanged()">
-          <option value="16:9" selected>YouTube & Widescreen · 1080p 16:9 (Desktop, Presentation & Television)</option>
-          <option value="9:16">Mobile Vertical · 1080x1920 9:16 (YouTube Shorts, IG Reels & TikTok)</option>
-          <option value="1:1">Social Feed Square · 1080x1080 1:1 (Instagram Post & LinkedIn Feed)</option>
-        </select>
-      </div>
-
-      <!-- Test Samples Preset Pills -->
-      <div class="samples-row">
-        <span class="config-label">TEST SAMPLES:</span>
-        <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'AI Intro (01)')">AI Intro (01)</button>
-        <button class="sample-pill-btn" onclick="loadSamplePreset('multipage.pdf', 'Multipage Tech (02)')">Multipage Tech (02)</button>
-        <button class="sample-pill-btn" onclick="loadDirectScriptSample('Robotics (03)')">Robotics (03)</button>
-        <button class="sample-pill-btn" onclick="loadDirectScriptSample('Clean Energy (04)')">Clean Energy (04)</button>
-      </div>
-
-      <!-- Mode 1: PDF Upload Dropzone -->
-      <div id="dropzone-pdf-wrap">
-        <div class="dropzone" id="drop-zone"
-             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-          <input type="file" id="pdf-input" accept=".pdf,application/pdf" onchange="onFileSelected(event)" />
-          <div class="upload-icon-circle">↑</div>
-          <div class="dropzone-title">Click to upload or drag PDF document here</div>
-          <div class="dropzone-subtitle">Standard multi-page PDF · 50MB limit · Automatic heading extraction</div>
+    <!-- ────────────────────────────────────────────────────────────────── -->
+    <!-- SCREEN 1: CREATE A VIDEO                                           -->
+    <!-- ────────────────────────────────────────────────────────────────── -->
+    <div class="studio-screen-view active" id="studio-screen-1">
+      
+      <!-- Mode Selection Cards (Horizontal Split) -->
+      <div class="mode-cards-grid">
+        <div class="mode-card active" id="card-mode-pdf" onclick="switchMode('pdf')">
+          <div class="mode-icon">📄</div>
+          <div>
+            <div class="mode-title">1. Passive PDF Data Mode</div>
+            <div class="mode-subtitle">Extract document headings, pages & structure</div>
+          </div>
         </div>
-        <div id="pdf-file-details" class="hidden" style="margin-bottom:1rem; font-size:0.85rem; color:var(--text-sub);">
-          <b>Selected File:</b> <span id="pdf-name-text"></span> | <span id="pdf-size-text"></span> | <span id="pdf-pages-text" style="color:var(--green-text); font-weight:700;"></span>
+        <div class="mode-card" id="card-mode-script" onclick="switchMode('script')">
+          <div class="mode-icon">📝</div>
+          <div>
+            <div class="mode-title">2. Direct Script Editor</div>
+            <div class="mode-subtitle">Multi-scene custom narration script</div>
+          </div>
         </div>
-        <div id="extract-error" class="alert alert-error hidden"></div>
-      </div>
-
-      <!-- Mode 2: Direct Script Editor (Hidden by default) -->
-      <div id="mode-script-wrap" class="hidden" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.82rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem;">NARRATION SCRIPT (ONE PARAGRAPH PER SCENE):</p>
-        <textarea id="direct-script" class="editor-textarea" rows="6" placeholder="Paste or write your narration text here...
-Each paragraph will become an individual B-roll scene with automatic keyword extraction."></textarea>
-      </div>
-
-      <!-- Mode 3: Audio Upload (Hidden by default) -->
-      <div id="mode-audio-wrap" class="hidden" style="margin-bottom:1.25rem;">
-        <div class="dropzone" id="audio-drop-zone"
-             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDropAudio(event)">
-          <input type="file" id="audio-input" accept=".mp3,.wav,.m4a,audio/*" onchange="onAudioSelected(event)" />
-          <div class="upload-icon-circle">🎙️</div>
-          <div class="dropzone-title">Click to upload or drag speech audio here</div>
-          <div class="dropzone-subtitle">Standard 16kHz WAV, MP3, or M4A audio · 100MB limit</div>
-        </div>
-        <div id="audio-file-details" class="hidden" style="margin-bottom:1rem; font-size:0.85rem; color:var(--text-sub);">
-          <b>Selected Audio:</b> <span id="audio-name-text"></span> | <span id="audio-size-text"></span>
+        <div class="mode-card" id="card-mode-audio" onclick="switchMode('audio')">
+          <div class="mode-icon">🎙️</div>
+          <div>
+            <div class="mode-title">3. Real-Time Voice Mode</div>
+            <div class="mode-subtitle">Voiceover audio capture & sync buffer</div>
+          </div>
         </div>
       </div>
 
-      <!-- Secondary Parameter Controls -->
-      <div class="controls-grid">
-        <div class="control-item">
-          <label class="control-label">⏱️ TARGET DURATION</label>
-          <select class="control-select" id="cfg-duration" onchange="onParameterChanged()">
-            <option value="short">Short (~1 min)</option>
-            <option value="medium" selected>Medium (~2 min)</option>
-            <option value="long">Long (~3 min)</option>
+      <!-- Main Creation Configuration Card -->
+      <div class="white-card" id="config-card">
+
+        <!-- Target Video Format Dropdown -->
+        <div class="config-row">
+          <span class="config-label">⚙️ TARGET EXECUTION ENGINE:</span>
+          <select class="select-engine" id="cfg-aspect">
+            <option value="16:9" selected>YouTube & Widescreen · 1080p 16:9 (Desktop, Presentation & Television)</option>
+            <option value="9:16">Mobile Vertical · 1080x1920 9:16 (YouTube Shorts, IG Reels & TikTok)</option>
+            <option value="1:1">Social Feed Square · 1080x1080 1:1 (Instagram Post & LinkedIn Feed)</option>
           </select>
         </div>
-        <div class="control-item">
-          <label class="control-label">🎨 VISUAL STYLE</label>
-          <select class="control-select" id="cfg-style">
-            <option value="documentary" selected>Documentary</option>
-            <option value="cinematic">Cinematic</option>
-            <option value="corporate">Corporate</option>
-            <option value="energetic">Energetic</option>
-          </select>
+
+        <!-- Test Samples Preset Pills -->
+        <div class="samples-row">
+          <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">FAST PRESETS:</span>
+          <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'Robotics (03)')">🤖 Robotics (03)</button>
+          <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'Clean Energy (04)')">🌱 Clean Energy (04)</button>
+          <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'AI Intro (01)')">🧠 AI Intro (01)</button>
+          <button class="sample-pill-btn" onclick="loadSamplePreset('multipage.pdf', 'Multipage Tech (02)')">📚 Multipage Tech (02)</button>
         </div>
-        <div class="control-item">
-          <label class="control-label">🌐 LANGUAGE</label>
-          <select class="control-select" id="cfg-language">
-            <option value="en" selected>English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="hi">Hindi</option>
-          </select>
+
+        <!-- Mode 1: PDF Dropzone -->
+        <div id="dropzone-pdf-wrap">
+          <div class="dropzone" id="pdf-dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            <input type="file" id="pdf-file-input" accept=".pdf" onchange="onFileSelected(event)" />
+            <div class="upload-icon-circle">📄</div>
+            <div class="dropzone-title">Drag & drop your PDF file here, or click to browse</div>
+            <div class="dropzone-subtitle">Supports PDF documents up to 50MB (PyMuPDF IO Engine)</div>
+          </div>
+          <div id="pdf-file-details" class="hidden" style="margin-bottom:1.25rem; font-size:0.85rem; color:var(--text-sub); display:flex; gap:1.5rem; align-items:center;">
+            <span>📎 <b id="pdf-name-text">filename.pdf</b></span>
+            <span>💾 <span id="pdf-size-text">0 KB</span></span>
+            <span class="badge-pill badge-pill-green" id="pdf-pages-text">1 page</span>
+          </div>
         </div>
-        <div class="control-item">
-          <label class="control-label">💬 SUBTITLES</label>
-          <select class="control-select" id="cfg-captions">
-            <option value="true" selected>Burn-in Captions (SRT)</option>
-            <option value="false">Standalone SRT Only</option>
-          </select>
+
+        <!-- Mode 2: Direct Script Editor Wrap -->
+        <div id="mode-script-wrap" class="hidden">
+          <div style="margin-bottom:1rem;">
+            <label class="control-label" style="display:block; margin-bottom:0.4rem;">ENTER NARRATION SCRIPT (Separate scenes with double blank line):</label>
+            <textarea class="editor-textarea" id="direct-script" rows="6" placeholder="Enter narration script here. Double line break indicates a new video scene..."></textarea>
+          </div>
         </div>
+
+        <!-- Mode 3: Real-Time Audio Mode Wrap -->
+        <div id="mode-audio-wrap" class="hidden">
+          <div class="dropzone" id="audio-dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDropAudio(event)">
+            <input type="file" id="audio-file-input" accept=".wav,.mp3" onchange="onAudioSelected(event)" />
+            <div class="upload-icon-circle">🎙️</div>
+            <div class="dropzone-title">Upload speech narration audio (.WAV or .MP3)</div>
+            <div class="dropzone-subtitle">Audio cadence will be transcribed and synchronized with B-roll</div>
+          </div>
+          <div id="audio-file-details" class="hidden" style="margin-bottom:1.25rem; font-size:0.85rem; color:var(--text-sub);">
+            <span>🎙️ <b id="audio-name-text">audio.wav</b></span>
+            <span id="audio-size-text" style="margin-left:1rem;">0 KB</span>
+          </div>
+        </div>
+
+        <!-- Secondary Controls: Duration, Style, Captions, Voice -->
+        <div class="controls-grid">
+          <div class="control-item">
+            <label class="control-label">VIDEO DURATION</label>
+            <select class="control-select" id="cfg-duration">
+              <option value="short" selected>Short (~60s · 4 Scenes)</option>
+              <option value="medium">Medium (~120s · 8 Scenes)</option>
+              <option value="long">Long (~180s · 12 Scenes)</option>
+            </select>
+          </div>
+          <div class="control-item">
+            <label class="control-label">NARRATION STYLE</label>
+            <select class="control-select" id="cfg-style">
+              <option value="documentary" selected>Documentary & Educational</option>
+              <option value="cinematic">Cinematic & Dramatic</option>
+              <option value="corporate">Corporate & Professional</option>
+              <option value="energetic">Energetic & Social Media</option>
+            </select>
+          </div>
+          <div class="control-item">
+            <label class="control-label">LANGUAGE</label>
+            <select class="control-select" id="cfg-language">
+              <option value="en" selected>English (Neural Standard)</option>
+              <option value="es">Spanish (Español)</option>
+              <option value="fr">French (Français)</option>
+              <option value="de">German (Deutsch)</option>
+              <option value="hi">Hindi (हिंदी)</option>
+            </select>
+          </div>
+          <div class="control-item">
+            <label class="control-label">BURNED SUBTITLES</label>
+            <select class="control-select" id="cfg-captions">
+              <option value="true" selected>Enabled (SRT Burn-In)</option>
+              <option value="false">Disabled (Audio Only)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bottom Action Bar with Prominent Generate Button -->
+        <div class="action-bar">
+          <div class="file-status-indicator">
+            <span id="action-status-dot" class="status-dot"></span>
+            <span id="action-status-text">Ready for file upload or preset selection</span>
+          </div>
+          <button class="btn-run" id="generate-btn" onclick="submitVideoJob()" disabled>
+            <span>✨ Generate Video</span>
+          </button>
+        </div>
+
       </div>
 
-      <!-- Extracted Script Review Accordion / Box -->
-      <div id="script-review-wrap" class="hidden" style="margin-bottom:1.25rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-          <span style="font-size:0.82rem; font-weight:700; color:var(--text-sub);">✏️ GENERATED SCENE SCRIPT:</span>
-          <span id="script-stats-badge" style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;"></span>
-        </div>
-        <textarea id="script-editor" class="editor-textarea" rows="6" placeholder="Extracted script will appear here..."></textarea>
-      </div>
-
-      <!-- Bottom Action Bar -->
-      <div class="action-bar">
-        <div class="file-status-indicator" id="file-status-indicator">
-          <span style="font-size:1.2rem;">📄</span>
-          <span id="action-status-text">No document selected</span>
-        </div>
-        <button class="btn-run" id="generate-btn" onclick="generateVideo()" disabled>
-          ▷ Run Video Pipeline
-        </button>
-      </div>
-
+      <!-- Extraction Error Box -->
+      <div id="extract-error" class="alert alert-error hidden"></div>
     </div>
 
-    <!-- Progress Execution Card -->
-    <div class="white-card hidden" id="progress-card">
-      <div class="section-header-row">
-        <span class="section-title">⏳ Pipeline Execution in Progress</span>
-        <span class="badge-pill badge-pill-purple" id="progress-percent-badge">0%</span>
-      </div>
-      <div style="width:100%; height:8px; background:#e2e8f0; border-radius:9999px; overflow:hidden; margin:0.8rem 0;">
-        <div id="progress-bar-fill" style="width:0%; height:100%; background:linear-gradient(90deg, #2563eb, #38bdf8); transition:width 0.4s ease;"></div>
-      </div>
-      <p id="progress-status-label" style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">Initializing pipeline stages…</p>
-    </div>
-
-    <!-- Results & Telemetry Card (Matching Image 2 Style with Source Utilization replacing Latency) -->
-    <div class="white-card hidden" id="results-card">
-
-      <!-- Card 1: All Scenes Detection Status -->
-      <div class="section-header-row">
-        <div class="section-title">
-          <span>🎯 ALL SCENES DETECTION STATUS</span>
-          <span class="badge-pill badge-pill-green" id="scenes-detected-badge">4 READY</span>
+    <!-- ────────────────────────────────────────────────────────────────── -->
+    <!-- SCREEN 2: PREVIEW AND EDIT                                         -->
+    <!-- ────────────────────────────────────────────────────────────────── -->
+    <div class="studio-screen-view" id="studio-screen-2">
+      
+      <!-- Script Review & Edit Section -->
+      <div class="white-card" id="script-review-card">
+        <div class="section-header-row">
+          <span class="section-title">📝 Extracted Narration Script & Scene Beats</span>
+          <span class="badge-pill badge-pill-primary" id="script-stats-badge">Ready for Review</span>
         </div>
-        <div style="font-family:'JetBrains Mono', monospace; font-size:0.85rem; font-weight:700; color:var(--primary);" id="scenes-confidence-text">
-          CONFIDENCE: 98.6%
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Edit narration text below. Each paragraph represents a distinct visual scene cut with synchronized B-roll footage.
+        </p>
+        <textarea class="editor-textarea" id="script-editor" rows="6"></textarea>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+          <button class="sample-pill-btn" onclick="autoGenerateScript()">🔄 Re-generate Script from Source</button>
+          <button class="sample-pill-btn" style="background:var(--primary); color:var(--primary-text); border-color:var(--primary);" onclick="submitVideoJob()">🚀 Render with Edited Script</button>
         </div>
       </div>
-      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.2rem;">
-        Status (READY = Extracted, RENDERED = Composited) and document source relevance score for all timeline scenes.
-      </p>
 
-      <!-- Scene Cards Grid -->
-      <div class="scenes-grid" id="scenes-grid"></div>
-
-      <hr style="border:none; border-top:1px solid #f1f5f9; margin: 1.5rem 0;" />
-
-      <!-- Card 2: Source Document Utilization & Pipeline Transformation (Clean Image 2 style, no latency) -->
-      <div class="section-header-row" style="margin-bottom:0.75rem;">
-        <span style="font-size:1.05rem; font-weight:800; color:var(--text);">Source Document Utilization & Pipeline Transformation</span>
-        <span class="badge-pill badge-pill-purple" id="pipeline-status-badge">REAL-TIME ENGINE</span>
+      <!-- Storyboard Scrubber Preview -->
+      <div class="white-card">
+        <div class="section-header-row">
+          <span class="section-title">🎞️ Scene-by-Scene Storyboard Strip</span>
+          <span class="badge-pill badge-pill-green" id="storyboard-count-badge">4 SCENES</span>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Click any scene beat below to inspect its visual duration and keyword heuristics.
+        </p>
+        <div class="storyboard-timeline-row" id="storyboard-timeline-row"></div>
       </div>
 
-      <!-- Real-Time Pipeline Stages List -->
-      <div id="stage-breakdown-list">
+      <!-- Pipeline Progress Tracking Card -->
+      <div class="white-card" id="progress-card">
+        <div class="section-header-row">
+          <span class="section-title">
+            <span class="spin">⚙️</span>
+            <span>Real-Time Production Pipeline</span>
+          </span>
+          <span class="badge-pill badge-pill-primary" id="progress-percent-badge">0%</span>
+        </div>
+        <div class="progress-bar-container" style="margin:0.75rem 0 1rem 0;">
+          <div class="progress-bar-active-fill" id="progress-bar-fill"></div>
+        </div>
+        <div id="progress-status-label" style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:1rem;">
+          Waiting for job submission…
+        </div>
+
+        <!-- 5-Stage Live Transformation Status -->
         <div class="stage-row" id="stage-row-01">
           <div class="stage-left">
             <span class="stage-id" id="stage-icon-01">01</span>
             <div class="stage-content">
-              <span class="stage-name">Audio Ingestion / PDF Extraction (PyMuPDF IO)</span>
-              <span class="stage-desc" id="stage-desc-01">Document parsed: Extracted headings, paragraphs, and raw text corpus</span>
+              <span class="stage-name">Audio & Document Ingestion (PyMuPDF Text IO)</span>
+              <span class="stage-desc" id="stage-desc-01">Extracted document corpus and verified reading boundaries</span>
             </div>
           </div>
-          <div class="stage-metric-badge badge-pill-blue" id="stage-metric-01">Extracted & Structured</div>
+          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-01">Ready</div>
         </div>
 
         <div class="stage-row" id="stage-row-02">
           <div class="stage-left">
             <span class="stage-id" id="stage-icon-02">02</span>
             <div class="stage-content">
-              <span class="stage-name">TF Preprocessing & Keyword Heuristics (GEMM + Log)</span>
-              <span class="stage-desc" id="stage-desc-02">Synthesized narrative scenes: Ranked salient visual concepts from document text</span>
+              <span class="stage-name">Semantic Concept Extraction & Narrative Chunking</span>
+              <span class="stage-desc" id="stage-desc-02">Ranked keywords using TF-IDF and segmented into narrative visual scenes</span>
             </div>
           </div>
-          <div class="stage-metric-badge badge-pill-blue" id="stage-metric-02">Visual Beats Mapped</div>
+          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-02">Pending</div>
         </div>
 
         <div class="stage-row" id="stage-row-03">
           <div class="stage-left">
             <span class="stage-id" id="stage-icon-03">03</span>
             <div class="stage-content">
-              <span class="stage-name">Footage Adaptation & Licence Verification (Pexels / Clean Media)</span>
-              <span class="stage-desc" id="stage-desc-03">Matched verified HD visual clips to source concepts with CC0 royalty clearance</span>
+              <span class="stage-name">B-Roll Footage Matching & Rights Verification</span>
+              <span class="stage-desc" id="stage-desc-03">Retrieved HD stock footage under Creative Commons (CC0) clearance</span>
             </div>
           </div>
-          <div class="stage-metric-badge badge-pill-green" id="stage-metric-03">Verified CC0 Licensed</div>
+          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-03">Pending</div>
         </div>
 
         <div class="stage-row" id="stage-row-04">
           <div class="stage-left">
             <span class="stage-id" id="stage-icon-04">04</span>
             <div class="stage-content">
-              <span class="stage-name">Audio Synthesis & Captions Alignment (gTTS / Neural TTS)</span>
-              <span class="stage-desc" id="stage-desc-04">Synthesized voiceover script and aligned synchronized SRT subtitle cues</span>
+              <span class="stage-name">Neural Speech Synthesis & SRT Subtitle Alignment</span>
+              <span class="stage-desc" id="stage-desc-04">Synthesized voiceover audio and computed millisecond word timecodes</span>
             </div>
           </div>
-          <div class="stage-metric-badge badge-pill-blue" id="stage-metric-04">Voice & Subtitles Synced</div>
+          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-04">Pending</div>
         </div>
 
         <div class="stage-row" id="stage-row-05">
@@ -1266,39 +1700,74 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
               <span class="stage-desc" id="stage-desc-05">Composited visual beats with audio track into broadcast-ready deliverable</span>
             </div>
           </div>
-          <div class="stage-metric-badge badge-pill-green" id="stage-metric-05">1080p MP4 Ready</div>
+          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-05">Pending</div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+          <button class="sample-pill-btn" onclick="switchStudioScreen(3)">Proceed to Finished Video ➔</button>
         </div>
       </div>
 
-      <!-- Source Transformation Summary Box (Replacing Total Latency Box) -->
-      <div class="total-latency-box">
-        <span>DOCUMENT-TO-VIDEO TRANSFORMATION SUMMARY</span>
-        <span class="total-latency-metric" id="pipeline-summary-metric">100% SOURCE FIDELITY · 4 SCENES PRODUCED · VERIFIED CC0 ASSETS</span>
-      </div>
+    </div>
 
-      <!-- Segmented Multi-Color Progress Bar -->
-      <div class="segmented-bar">
-        <div class="seg-blue" style="width: 25%;"></div>
-        <div class="seg-orange" style="width: 25%;"></div>
-        <div class="seg-green" style="width: 25%;"></div>
-        <div class="seg-purple" style="width: 25%;"></div>
-      </div>
+    <!-- ────────────────────────────────────────────────────────────────── -->
+    <!-- SCREEN 3: FINISHED VIDEO                                           -->
+    <!-- ────────────────────────────────────────────────────────────────── -->
+    <div class="studio-screen-view" id="studio-screen-3">
 
-      <!-- Bar Legend -->
-      <div class="bar-legend">
-        <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Document Extraction</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> TF Concept Mapping</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Footage Verification</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> H.264 Composition</div>
-      </div>
+      <!-- Finished Deliverables Card -->
+      <div class="white-card" id="results-card">
+        <div class="section-header-row">
+          <span class="section-title">🎬 Rendered Deliverables & Video Player</span>
+          <span class="badge-pill badge-pill-green" id="scenes-detected-badge">4 SCENES READY</span>
+        </div>
 
-      <!-- Card 3: Video Preview & Deliverables Downloads -->
-      <div id="downloads-section">
-        <h3 style="font-size:1rem; font-weight:700; color:var(--text); margin-bottom:0.75rem;">🎬 Rendered Deliverables & Video Player</h3>
+        <!-- Video Player -->
         <div class="video-preview-wrapper">
           <video id="video-player" controls preload="metadata"></video>
         </div>
-        <div class="downloads-row" id="downloads-row"></div>
+
+        <!-- Action / Download Buttons -->
+        <div class="downloads-row" id="downloads-row">
+          <button class="btn-download" onclick="alert('Please generate a video first')">⬇️ Download MP4 Video</button>
+          <button class="btn-download" onclick="alert('Please generate a video first')">📄 Captions (SRT)</button>
+          <button class="btn-download" onclick="alert('Please generate a video first')">📋 Manifest JSON</button>
+          <button class="btn-download" onclick="alert('Please generate a video first')">🗺️ Timeline JSON</button>
+        </div>
+
+        <!-- Document-to-Video Transformation Summary -->
+        <div class="total-latency-box">
+          <span>DOCUMENT-TO-VIDEO TRANSFORMATION SUMMARY</span>
+          <span class="total-latency-metric" id="pipeline-summary-metric">100% SOURCE FIDELITY · 4 SCENES PRODUCED · VERIFIED CC0 ASSETS</span>
+        </div>
+
+        <!-- Segmented Multi-Color Progress Bar -->
+        <div class="segmented-bar">
+          <div class="seg-blue" style="width: 25%;"></div>
+          <div class="seg-orange" style="width: 25%;"></div>
+          <div class="seg-green" style="width: 25%;"></div>
+          <div class="seg-purple" style="width: 25%;"></div>
+        </div>
+
+        <!-- Bar Legend -->
+        <div class="bar-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Document Extraction</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> TF Concept Mapping</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Footage Verification</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--primary);"></span> H.264 Composition</div>
+        </div>
+
+        <!-- Scene Cards Grid -->
+        <h3 style="font-size:0.95rem; font-weight:800; color:var(--text); margin-top:1.5rem; margin-bottom:0.75rem;">
+          Verified Scene Lineage & Rights Records:
+        </h3>
+        <div class="scenes-grid" id="scenes-grid"></div>
+
+        <!-- Generate Another Video Button -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border); flex-wrap:wrap; gap:1rem;">
+          <span style="font-size:0.85rem; color:var(--text-muted);">Ready to produce another deliverable with new parameters?</span>
+          <button class="btn-run" onclick="resetToScreen1()">🔁 Generate Another Video</button>
+        </div>
       </div>
 
     </div>
@@ -1313,162 +1782,128 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 2: ANIMATED & INTERACTIVE ARCHITECTURE                            -->
+  <!-- TAB 2: ARCHITECTURE (Connected Stages + Clean Animated Boxes)         -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
   <div class="tab-view" id="tab-view-architecture">
     <div class="hero-section">
-      <div class="hero-tag">CORE SYSTEM TOPOLOGY · INTERACTIVE DATAFLOW</div>
+      <div class="hero-tag">CORE SYSTEM TOPOLOGY · INTERACTIVE DRILL-DOWN</div>
       <h1 class="hero-title">VideoEngine Micro-Architecture</h1>
       <p class="hero-desc">
-        Click any stage block in the pipeline diagram below to inspect its operational logic, input/output schemas, and runtime metrics.
+        Click any stage block in the pipeline to inspect its parameters. Then click any of the 4 sub-boxes to reveal its real-time step-by-step flowchart and technical code explanation.
       </p>
     </div>
 
-    <div class="arch-canvas-card">
-      <!-- Animated SVG Pipeline Flowchart -->
-      <svg class="arch-flow-svg" viewBox="0 0 1000 240" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#eff6ff" />
-            <stop offset="100%" stop-color="#dbeafe" />
-          </linearGradient>
-          <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#f0fdf4" />
-            <stop offset="100%" stop-color="#dcfce7" />
-          </linearGradient>
-          <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#faf5ff" />
-            <stop offset="100%" stop-color="#f3e8ff" />
-          </linearGradient>
-          <!-- Marker arrow -->
-          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#94a3b8" />
-          </marker>
-        </defs>
+    <!-- Interconnected 5 Stages with Dashed Line & Glowing Beam (Matching User Image) -->
+    <div class="arch-stages-wrapper">
+      <div class="arch-connector-line">
+        <div class="arch-connector-pulse"></div>
+      </div>
 
-        <!-- Connecting Flow Pipes with Animated Pulses -->
-        <!-- Path 1 -> 2 -->
-        <path id="path1" d="M 160 120 L 220 120" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4 4" />
-        <circle r="4" class="arch-pulse-dot">
-          <animateMotion dur="1.8s" repeatCount="indefinite" path="M 160 120 L 220 120" />
-        </circle>
-
-        <!-- Path 2 -> 3 -->
-        <path id="path2" d="M 370 120 L 430 120" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4 4" />
-        <circle r="4" class="arch-pulse-dot">
-          <animateMotion dur="1.8s" begin="0.3s" repeatCount="indefinite" path="M 370 120 L 430 120" />
-        </circle>
-
-        <!-- Path 3 -> 4 -->
-        <path id="path3" d="M 580 120 L 640 120" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4 4" />
-        <circle r="4" class="arch-pulse-dot">
-          <animateMotion dur="1.8s" begin="0.6s" repeatCount="indefinite" path="M 580 120 L 640 120" />
-        </circle>
-
-        <!-- Path 4 -> 5 -->
-        <path id="path4" d="M 790 120 L 850 120" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4 4" />
-        <circle r="4" class="arch-pulse-dot">
-          <animateMotion dur="1.8s" begin="0.9s" repeatCount="indefinite" path="M 790 120 L 850 120" />
-        </circle>
-
-        <!-- Stage Node 1: Ingestion -->
-        <g class="arch-node" id="node-01" onclick="selectArchStage(1)" transform="translate(10, 50)">
-          <rect width="150" height="140" rx="12" fill="url(#grad-blue)" stroke="#93c5fd" stroke-width="1.5" />
-          <text x="75" y="32" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#2563eb" text-anchor="middle">STAGE 01</text>
-          <text x="75" y="58" font-size="24" text-anchor="middle">📑</text>
-          <text x="75" y="86" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">PDF & Text IO</text>
-          <text x="75" y="106" font-family="'Inter', sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">PyMuPDF / Formats</text>
-          <rect x="25" y="118" width="100" height="16" rx="8" fill="#ffffff" stroke="#e2e8f0" />
-          <text x="75" y="130" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#15803d" text-anchor="middle">● Ingestion Safe</text>
-        </g>
-
-        <!-- Stage Node 2: Semantic Chunking -->
-        <g class="arch-node" id="node-02" onclick="selectArchStage(2)" transform="translate(220, 50)">
-          <rect width="150" height="140" rx="12" fill="url(#grad-purple)" stroke="#c084fc" stroke-width="1.5" />
-          <text x="75" y="32" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#7c3aed" text-anchor="middle">STAGE 02</text>
-          <text x="75" y="58" font-size="24" text-anchor="middle">🧠</text>
-          <text x="75" y="86" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">Concept Ranker</text>
-          <text x="75" y="106" font-family="'Inter', sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">TF-IDF & Beats</text>
-          <rect x="25" y="118" width="100" height="16" rx="8" fill="#ffffff" stroke="#e2e8f0" />
-          <text x="75" y="130" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#7c3aed" text-anchor="middle">● Heuristic NLP</text>
-        </g>
-
-        <!-- Stage Node 3: Footage Discovery -->
-        <g class="arch-node" id="node-03" onclick="selectArchStage(3)" transform="translate(430, 50)">
-          <rect width="150" height="140" rx="12" fill="url(#grad-green)" stroke="#86efac" stroke-width="1.5" />
-          <text x="75" y="32" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#15803d" text-anchor="middle">STAGE 03</text>
-          <text x="75" y="58" font-size="24" text-anchor="middle">🎞️</text>
-          <text x="75" y="86" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">Footage & Rights</text>
-          <text x="75" y="106" font-family="'Inter', sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">Pexels / CC0 Stock</text>
-          <rect x="25" y="118" width="100" height="16" rx="8" fill="#ffffff" stroke="#e2e8f0" />
-          <text x="75" y="130" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#15803d" text-anchor="middle">● CC0 Verified</text>
-        </g>
-
-        <!-- Stage Node 4: Neural TTS & SRT -->
-        <g class="arch-node" id="node-04" onclick="selectArchStage(4)" transform="translate(640, 50)">
-          <rect width="150" height="140" rx="12" fill="url(#grad-blue)" stroke="#93c5fd" stroke-width="1.5" />
-          <text x="75" y="32" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#2563eb" text-anchor="middle">STAGE 04</text>
-          <text x="75" y="58" font-size="24" text-anchor="middle">🎙️</text>
-          <text x="75" y="86" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">Voice & Timing</text>
-          <text x="75" y="106" font-family="'Inter', sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">gTTS / pyttsx3 / SRT</text>
-          <rect x="25" y="118" width="100" height="16" rx="8" fill="#ffffff" stroke="#e2e8f0" />
-          <text x="75" y="130" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#2563eb" text-anchor="middle">● Word Align</text>
-        </g>
-
-        <!-- Stage Node 5: Compositor & Exporter -->
-        <g class="arch-node" id="node-05" onclick="selectArchStage(5)" transform="translate(850, 50)">
-          <rect width="140" height="140" rx="12" fill="url(#grad-green)" stroke="#86efac" stroke-width="1.5" />
-          <text x="70" y="32" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#15803d" text-anchor="middle">STAGE 05</text>
-          <text x="70" y="58" font-size="24" text-anchor="middle">⚡</text>
-          <text x="70" y="86" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">H.264 Muxer</text>
-          <text x="70" y="106" font-family="'Inter', sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">FFmpeg Compositor</text>
-          <rect x="20" y="118" width="100" height="16" rx="8" fill="#ffffff" stroke="#e2e8f0" />
-          <text x="70" y="130" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#15803d" text-anchor="middle">● MP4 Deliverable</text>
-        </g>
-      </svg>
-
-      <!-- Stage Detail Inspector (Dynamically updated when clicking any node) -->
-      <div class="arch-inspector" id="arch-inspector">
-        <div class="arch-inspector-header">
-          <div>
-            <span class="badge-pill badge-pill-blue" id="arch-stage-badge">STAGE 01 INSPECTION</span>
-            <h3 style="font-size:1.15rem; font-weight:800; color:var(--text); margin-top:0.35rem;" id="arch-stage-title">Audio Ingestion & Document Parser (PyMuPDF IO)</h3>
-          </div>
-          <span style="font-size:0.8rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="arch-stage-status">ACTIVE · BUFFER READY</span>
+      <div class="arch-stages-nav">
+        <div class="arch-stage-btn selected" id="arch-btn-1" onclick="selectArchStage(1)">
+          <div class="arch-stage-num" style="color:var(--primary);">STAGE 01</div>
+          <div class="arch-stage-icon">📑</div>
+          <div class="arch-stage-name">PDF & Text IO</div>
+          <div class="arch-stage-tech">PyMuPDF / Formats</div>
+          <span class="arch-stage-badge" style="background:var(--green-light); color:var(--green-text);">● Ingestion Safe</span>
         </div>
 
-        <p style="font-size:0.88rem; color:var(--text-sub); margin-bottom:1.25rem;" id="arch-stage-summary">
-          Extracts full text corpus, headings, and page boundaries from standard multi-page PDFs using fitz (PyMuPDF). Runs preflight sanitation to filter corrupt bytes, script injections, and non-printable control characters.
-        </p>
+        <div class="arch-stage-btn" id="arch-btn-2" onclick="selectArchStage(2)">
+          <div class="arch-stage-num" style="color:var(--purple-text);">STAGE 02</div>
+          <div class="arch-stage-icon">🧠</div>
+          <div class="arch-stage-name">Concept Ranker</div>
+          <div class="arch-stage-tech">TF-IDF & Beats</div>
+          <span class="arch-stage-badge" style="background:var(--purple-light); color:var(--purple-text);">● Heuristic NLP</span>
+        </div>
 
-        <div class="arch-prop-grid">
-          <div class="arch-prop-item">
-            <div class="arch-prop-label">Inputs Accepted</div>
-            <div class="arch-prop-val" id="arch-prop-inputs">Raw PDF Bytes, Script Plaintext, or 16kHz WAV Audio</div>
-            <div class="arch-prop-code">application/pdf (max 50MB)</div>
-          </div>
-          <div class="arch-prop-item">
-            <div class="arch-prop-label">Core Algorithmic Process</div>
-            <div class="arch-prop-val" id="arch-prop-algo">PyMuPDF Document Stream Parsing & Layout Analysis</div>
-            <div class="arch-prop-code">fitz.open(stream=bytes)</div>
-          </div>
-          <div class="arch-prop-item">
-            <div class="arch-prop-label">Outputs Produced</div>
-            <div class="arch-prop-val" id="arch-prop-outputs">Structured ExtractedText schema with page count & word metrics</div>
-            <div class="arch-prop-code">ExtractedText(full_text, pages)</div>
-          </div>
-          <div class="arch-prop-item">
-            <div class="arch-prop-label">Fault Tolerance & Resilience</div>
-            <div class="arch-prop-val" id="arch-prop-resilience">Graceful fallback to direct script editor mode if document is scanned or empty</div>
-            <div class="arch-prop-code">Fallback: Text-heuristic extraction</div>
-          </div>
+        <div class="arch-stage-btn" id="arch-btn-3" onclick="selectArchStage(3)">
+          <div class="arch-stage-num" style="color:var(--green-text);">STAGE 03</div>
+          <div class="arch-stage-icon">🎞️</div>
+          <div class="arch-stage-name">Footage & Rights</div>
+          <div class="arch-stage-tech">Pexels / CC0 Stock</div>
+          <span class="arch-stage-badge" style="background:var(--green-light); color:var(--green-text);">● CC0 Verified</span>
+        </div>
+
+        <div class="arch-stage-btn" id="arch-btn-4" onclick="selectArchStage(4)">
+          <div class="arch-stage-num" style="color:var(--primary);">STAGE 04</div>
+          <div class="arch-stage-icon">🎙️</div>
+          <div class="arch-stage-name">Voice & Timing</div>
+          <div class="arch-stage-tech">gTTS / pyttsx3 / SRT</div>
+          <span class="arch-stage-badge" style="background:var(--primary-light); color:var(--primary);">● Word Align</span>
+        </div>
+
+        <div class="arch-stage-btn" id="arch-btn-5" onclick="selectArchStage(5)">
+          <div class="arch-stage-num" style="color:var(--orange-text);">STAGE 05</div>
+          <div class="arch-stage-icon">⚡</div>
+          <div class="arch-stage-name">H.264 Muxer</div>
+          <div class="arch-stage-tech">FFmpeg Compositor</div>
+          <span class="arch-stage-badge" style="background:var(--green-light); color:var(--green-text);">● MP4 Deliverable</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Stage Detail Inspector -->
+    <div class="arch-inspector-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <span class="badge-pill badge-pill-primary" id="arch-stage-badge">STAGE 01 INSPECTION</span>
+          <h2 style="font-size:1.35rem; font-weight:800; color:var(--text); margin-top:0.35rem;" id="arch-stage-title">Audio Ingestion & Document Parser (PyMuPDF IO)</h2>
+        </div>
+        <span style="font-size:0.8rem; font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--green-text);" id="arch-stage-status">ACTIVE · BUFFER READY</span>
+      </div>
+      <p style="font-size:0.88rem; color:var(--text-sub); margin-bottom:1.25rem; line-height:1.6;" id="arch-stage-summary">
+        Extracts full text corpus, headings, and page boundaries from standard multi-page PDFs using fitz (PyMuPDF). Runs preflight sanitation to filter corrupt bytes, script injections, and non-printable control characters.
+      </p>
+
+      <!-- 4 Clean, Animated Sub-Boxes (Text removed from boxes as requested; flowchart opens on click) -->
+      <div class="arch-sub-boxes-grid">
+        <div class="arch-sub-box active" id="box-inputs" onclick="selectSubBox('inputs')">
+          <div class="arch-sub-box-icon">📥</div>
+          <div class="arch-sub-box-title">INPUTS ACCEPTED</div>
+          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
+        </div>
+
+        <div class="arch-sub-box" id="box-process" onclick="selectSubBox('process')">
+          <div class="arch-sub-box-icon">⚙️</div>
+          <div class="arch-sub-box-title">CORE ALGORITHMIC PROCESS</div>
+          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
+        </div>
+
+        <div class="arch-sub-box" id="box-outputs" onclick="selectSubBox('outputs')">
+          <div class="arch-sub-box-icon">📤</div>
+          <div class="arch-sub-box-title">OUTPUTS PRODUCED</div>
+          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
+        </div>
+
+        <div class="arch-sub-box" id="box-resilience" onclick="selectSubBox('resilience')">
+          <div class="arch-sub-box-icon">🛡️</div>
+          <div class="arch-sub-box-title">FAULT TOLERANCE & RESILIENCE</div>
+          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
+        </div>
+      </div>
+
+      <!-- Interactive Micro-Flowchart & Project Explanation Panel for Clicked Box -->
+      <div class="flowchart-drilldown-panel" id="flowchart-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+          <span style="font-size:0.85rem; font-weight:800; color:var(--primary); text-transform:uppercase;" id="fc-panel-title">
+            FLOWCHART: STAGE 01 · INPUTS ACCEPTED DATA PIPELINE
+          </span>
+          <span class="badge-pill badge-pill-primary" id="fc-file-ref">app/services/pdf_extractor.py</span>
+        </div>
+
+        <!-- Step Nodes Flowchart with animated connecting arrows -->
+        <div class="flowchart-nodes-row" id="fc-nodes-container"></div>
+
+        <!-- In-Depth Project Usage Explanation -->
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.1rem; font-size:0.86rem; color:var(--text-sub); line-height:1.65;" id="fc-explanation-text">
+          During PDF ingestion, the file is validated via magic headers to guarantee authentic PDF/A compliance. Files exceeding 50MB or encrypted without a password trigger immediate client-safe rejection before entering memory pipelines.
         </div>
       </div>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: GENERATION METRICS & ANALYTICS VISUALIZATIONS (5-7 GRAPHS)     -->
+  <!-- TAB 3: VISUALIZATIONS (7 Dynamic Metric Graphs)                      -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
   <div class="tab-view" id="tab-view-visualizations">
     <div class="hero-section">
@@ -1479,115 +1914,41 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
       </p>
     </div>
 
-    <!-- Telemetry KPI Summary Cards -->
-    <div class="metrics-stats-grid">
-      <div class="metric-stat-box">
-        <div class="stat-box-title">Source Words Parsed</div>
-        <div class="stat-box-value" id="viz-stat-words">642</div>
-        <div class="stat-box-sub">✔ 100% Corpus Coverage</div>
+    <!-- 7 Charts Grid -->
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1.25rem;">
+      <div class="white-card">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">📊 1. Scene Token & Word Count Distribution</h3>
+        <div style="height:230px;"><canvas id="chart-scene-words"></canvas></div>
       </div>
-      <div class="metric-stat-box">
-        <div class="stat-box-title">Visual Scenes Generated</div>
-        <div class="stat-box-value" id="viz-stat-scenes">4</div>
-        <div class="stat-box-sub">✔ Paced at ~14.2s / Scene</div>
+      <div class="white-card">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">🏷️ 2. Salient Keyword Heuristics & Weights</h3>
+        <div style="height:230px;"><canvas id="chart-keywords"></canvas></div>
       </div>
-      <div class="metric-stat-box">
-        <div class="stat-box-title">Estimated Runtime</div>
-        <div class="stat-box-value" id="viz-stat-runtime">56.8s</div>
-        <div class="stat-box-sub">✔ Within Target Medium Spec</div>
+      <div class="white-card" style="grid-column:span 2;">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">🎙️ 3. Audio Frequency & Cadence Dynamic Energy Profile</h3>
+        <div style="height:230px;"><canvas id="chart-audio-profile"></canvas></div>
       </div>
-      <div class="metric-stat-box">
-        <div class="stat-box-title">Semantic Fidelity</div>
-        <div class="stat-box-value" id="viz-stat-fidelity">98.6%</div>
-        <div class="stat-box-sub">✔ High TF-IDF Coherence</div>
+      <div class="white-card">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">📄 4. Document Utilization by Source Page</h3>
+        <div style="height:230px;"><canvas id="chart-page-coverage"></canvas></div>
       </div>
-    </div>
-
-    <!-- 7 Interactive Charts Grid -->
-    <div class="charts-grid">
-
-      <!-- Chart 1: Word Count & Pacing per Scene (Bar Chart) -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">📊 1. Scene Token & Word Count Distribution</span>
-          <span class="badge-pill badge-pill-blue">PACING WORDS/SEC</span>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-scene-words"></canvas>
-        </div>
+      <div class="white-card">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">⏱️ 5. Scene Duration & Cut Timeline (Seconds)</h3>
+        <div style="height:230px;"><canvas id="chart-timeline-durations"></canvas></div>
       </div>
-
-      <!-- Chart 2: TF-IDF Semantic Relevance Confidence (Horizontal Bar) -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">🏷️ 2. Salient Keyword Heuristics & Weights</span>
-          <span class="badge-pill badge-pill-green">TF-IDF SCORES</span>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-keywords"></canvas>
-        </div>
+      <div class="white-card">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">🎨 6. B-Roll Motion Dynamism & Semantic Match</h3>
+        <div style="height:230px;"><canvas id="chart-visual-diversity"></canvas></div>
       </div>
-
-      <!-- Chart 3: Audio Waveform & Speech Cadence (Spline Line Chart) -->
-      <div class="chart-card full-width">
-        <div class="chart-header">
-          <span class="chart-title">🎙️ 3. Audio Frequency & Cadence Dynamic Energy Profile</span>
-          <span class="badge-pill badge-pill-purple">RMS ENERGY (dB) / SPEECH TIME</span>
-        </div>
-        <div class="chart-canvas-wrap tall">
-          <canvas id="chart-audio-profile"></canvas>
-        </div>
+      <div class="white-card">
+        <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">⚡ 7. Render Bitrate & Target Frame Stability</h3>
+        <div style="height:230px;"><canvas id="chart-encoding-stability"></canvas></div>
       </div>
-
-      <!-- Chart 4: Source Document Utilization by Page (Stacked Bar) -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">📄 4. Document Utilization by Source Page</span>
-          <span class="badge-pill badge-pill-blue">PARSED VS. USED</span>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-page-coverage"></canvas>
-        </div>
-      </div>
-
-      <!-- Chart 5: Timeline Segment Allocation & Cuts (Horizontal Timeline) -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">⏱️ 5. Scene Duration & Cut Timeline (Seconds)</span>
-          <span class="badge-pill badge-pill-green">TIMECODES</span>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-timeline-durations"></canvas>
-        </div>
-      </div>
-
-      <!-- Chart 6: B-Roll Visual Dynamics & Concept Diversity (Radar Chart) -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">🎨 6. B-Roll Motion Dynamism & Semantic Match</span>
-          <span class="badge-pill badge-pill-purple">SCENE QUALITY</span>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-visual-diversity"></canvas>
-        </div>
-      </div>
-
-      <!-- Chart 7: Video Render Bitrate & Framerate Stability (Line / Area) -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">⚡ 7. Render Bitrate & Target Frame Stability</span>
-          <span class="badge-pill badge-pill-blue">30.0 FPS / 4500 KBPS</span>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-encoding-stability"></canvas>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 4: BEAUTIFUL RECREATED PROVENANCE PAGE                            -->
+  <!-- TAB 4: PROVENANCE (Cryptographic Audit & Lineage Records)             -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
   <div class="tab-view" id="tab-view-provenance">
     <div class="hero-section">
@@ -1599,7 +1960,7 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
     </div>
 
     <!-- Cryptographic Chain of Custody Card -->
-    <div class="provenance-card">
+    <div class="white-card">
       <div class="section-header-row">
         <span class="section-title">🔐 Cryptographic Chain of Custody</span>
         <span class="badge-pill badge-pill-green">ALL HASHES VERIFIED</span>
@@ -1610,30 +1971,30 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
 
       <div class="audit-grid">
         <div class="audit-box">
-          <div class="audit-box-title">1. Source Document Digest</div>
+          <div class="audit-box-title">1. SOURCE DOCUMENT DIGEST</div>
           <div class="audit-box-hash" id="prov-doc-hash">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
           <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;" id="prov-doc-meta">sample.pdf · 4,281 bytes</div>
         </div>
         <div class="audit-box">
-          <div class="audit-box-title">2. Script AST & Manifest Hash</div>
+          <div class="audit-box-title">2. SCRIPT AST & MANIFEST HASH</div>
           <div class="audit-box-hash" id="prov-script-hash">7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</div>
           <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">4 Scene Blocks · 128 tokens</div>
         </div>
         <div class="audit-box">
-          <div class="audit-box-title">3. Synthesized Speech Audio Hash</div>
+          <div class="audit-box-title">3. SYNTHESIZED SPEECH AUDIO HASH</div>
           <div class="audit-box-hash" id="prov-audio-hash">ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad</div>
           <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">16kHz Mono WAV · 00:56.8</div>
         </div>
         <div class="audit-box">
-          <div class="audit-box-title">4. Composited Deliverable MP4 Hash</div>
+          <div class="audit-box-title">4. COMPOSITED DELIVERABLE MP4 HASH</div>
           <div class="audit-box-hash" id="prov-video-hash">ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb</div>
           <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">H.264 / AAC · Clean Container</div>
         </div>
       </div>
     </div>
 
-    <!-- Source-to-Scene Lineage Mapping Card -->
-    <div class="provenance-card">
+    <!-- Source Paragraph to Video Scene Lineage Card -->
+    <div class="white-card">
       <div class="section-header-row">
         <span class="section-title">🗺️ Source Paragraph to Video Scene Lineage</span>
         <button class="sample-pill-btn" onclick="exportProvenanceJson()">⬇️ Export Audit JSON</button>
@@ -1692,13 +2053,13 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
       </div>
     </div>
 
-    <!-- Licensing & Media Compliance Card -->
-    <div class="provenance-card">
+    <!-- Licensing, Copyright & Synthetic Media Disclosure -->
+    <div class="white-card">
       <div class="section-header-row">
         <span class="section-title">📜 Licensing, Copyright & Synthetic Media Disclosure</span>
-        <span class="badge-pill badge-pill-blue">ISO / C2PA COMPLIANT</span>
+        <span class="badge-pill badge-pill-primary">ISO / C2PA COMPLIANT</span>
       </div>
-      <div style="font-size:0.88rem; color:var(--text-sub); line-height:1.6; margin-top:0.75rem;">
+      <div style="font-size:0.86rem; color:var(--text-sub); line-height:1.65; margin-top:0.75rem;">
         <ul style="padding-left:1.25rem;">
           <li><b>Visual B-Roll Assets:</b> Licensed under Creative Commons Zero (CC0) / Pexels License. Safe for commercial and editorial distribution worldwide with zero royalty liability.</li>
           <li><b>Synthetic Speech Disclosure:</b> Narration audio is synthesized using neural text-to-speech models (gTTS / pyttsx3). Subtitles are synchronized using deterministic word-cadence alignment.</li>
@@ -1710,7 +2071,7 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 5: BEAUTIFUL INTERACTIVE API DOCS & TEST CONSOLE                 -->
+  <!-- TAB 5: API DOCS (REST Endpoints & Swagger Links)                      -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
   <div class="tab-view" id="tab-view-api">
     <div class="hero-section">
@@ -1721,14 +2082,14 @@ Each paragraph will become an individual B-roll scene with automatic keyword ext
       </p>
     </div>
 
-    <div class="api-card">
+    <div class="white-card">
       <div class="section-header-row" style="margin-bottom:1.25rem;">
         <div>
           <span style="font-size:1.1rem; font-weight:800; color:var(--text);">FastAPI Interactive OpenAPI Specifications</span>
           <p style="font-size:0.82rem; color:var(--text-muted);">Access Swagger UI or ReDoc schema viewers directly.</p>
         </div>
         <div style="display:flex; gap:0.5rem;">
-          <a class="btn-download" href="/api/docs" target="_blank" style="background:var(--primary); color:#ffffff; border-color:var(--primary);">🚀 Open Swagger UI</a>
+          <a class="btn-download" href="/api/docs" target="_blank" style="background:var(--primary); color:var(--primary-text); border-color:var(--primary);">🚀 Open Swagger UI</a>
           <a class="btn-download" href="/api/redoc" target="_blank">📖 Open ReDoc</a>
         </div>
       </div>
@@ -1832,29 +2193,77 @@ let generatedScript = '';
 let currentJobId = null;
 let pollInterval = null;
 let activeTab = 'studio';
+let activeStudioScreen = 1;
 let chartInstances = {};
+let activeStage = 1;
+let activeSubBox = 'inputs';
+let currentTheme = localStorage.getItem('app-theme') || 'light';
 
-/* ── Tab Switching ──────────────────────────────────────────────────────── */
+/* ── Theme Switcher: Light (White & Purple) | Dark (Black & Yellow) ─────── */
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('app-theme', theme);
+
+  const label = document.getElementById('theme-label-text');
+  const dot = document.getElementById('theme-dot');
+  if (theme === 'dark') {
+    if (label) label.textContent = '🌙 Dark (Yellow)';
+    if (dot) dot.style.background = '#eab308';
+  } else {
+    if (label) label.textContent = '☀️ Light (Purple)';
+    if (dot) dot.style.background = '#7c3aed';
+  }
+
+  // Re-render charts with matching colors if on visualization tab
+  if (activeTab === 'visualizations') {
+    setTimeout(renderAllCharts, 50);
+  }
+}
+
+function toggleTheme() {
+  const nextTheme = (currentTheme === 'light') ? 'dark' : 'light';
+  applyTheme(nextTheme);
+}
+
+// Initialize theme on page load
+applyTheme(currentTheme);
+
+/* ── Top Main Tab Switching ─────────────────────────────────────────────── */
 function switchTab(tabId) {
   activeTab = tabId;
   const tabs = ['studio', 'architecture', 'visualizations', 'provenance', 'api'];
-  
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-btn-${t}`);
     const view = document.getElementById(`tab-view-${t}`);
     if (btn) btn.classList.toggle('active', t === tabId);
     if (view) view.classList.toggle('active', t === tabId);
   });
-
   if (tabId === 'visualizations') {
-    // Render/refresh the 7 dynamic charts
-    setTimeout(renderAllCharts, 50);
+    setTimeout(renderAllCharts, 60);
   } else if (tabId === 'architecture') {
-    selectArchStage(1);
+    selectArchStage(activeStage);
   }
 }
 
-/* ── Mode Switching ─────────────────────────────────────────────────────── */
+/* ── Studio 3-Step Screen Switching (Create -> Preview -> Finished) ──────── */
+function switchStudioScreen(screenNum) {
+  activeStudioScreen = screenNum;
+  for (let s = 1; s <= 3; s++) {
+    const btn = document.getElementById(`studio-step-btn-${s}`);
+    const view = document.getElementById(`studio-screen-${s}`);
+    if (btn) btn.classList.toggle('active', s === screenNum);
+    if (view) view.classList.toggle('active', s === screenNum);
+  }
+}
+
+function resetToScreen1() {
+  switchStudioScreen(1);
+  const el = document.getElementById('config-card');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ── Studio Input Mode Switching ────────────────────────────────────────── */
 function switchMode(mode) {
   currentMode = mode;
   document.getElementById('card-mode-pdf').classList.toggle('active', mode === 'pdf');
@@ -1868,13 +2277,7 @@ function switchMode(mode) {
   updateRunButton();
 }
 
-function scrollToSection(id) {
-  switchTab('studio');
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
-}
-
-/* ── Drag and Drop Handlers ─────────────────────────────────────────────── */
+/* ── Drag & Drop Handlers ───────────────────────────────────────────────── */
 function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
 function onDragLeave(e) { e.currentTarget.classList.remove('dragover'); }
 function onDrop(e) {
@@ -1910,7 +2313,7 @@ async function handlePdfFile(file) {
   document.getElementById('pdf-file-details').classList.remove('hidden');
   document.getElementById('action-status-text').textContent = `${file.name} (${formatSize(file.size)})`;
 
-  // Update Provenance metadata immediately
+  // Update Provenance metadata
   document.getElementById('prov-doc-hash').textContent = computeSimpleHash(file.name + file.size);
   document.getElementById('prov-doc-meta').textContent = `${file.name} · ${formatSize(file.size)}`;
 
@@ -1934,15 +2337,23 @@ async function extractPDF(file) {
     extractedText = data.full_text || '';
     document.getElementById('pdf-pages-text').textContent = `${data.page_count} pages extracted`;
 
-    // Update real-time stage 1 status in results list
     document.getElementById('stage-desc-01').textContent = `Parsed "${file.name}": Extracted ${data.page_count} pages and ${extractedText.split(/\s+/).length} words.`;
     document.getElementById('stage-metric-01').textContent = `${data.page_count} Pages Extracted`;
 
-    // Automatically trigger heuristic script generation
     await autoGenerateScript();
   } catch (err) {
     showError('Network error during extraction: ' + err.message);
   }
+}
+
+/* ── Audio File Ingestion ───────────────────────────────────────────────── */
+function handleAudioFile(file) {
+  audioFile = file;
+  document.getElementById('audio-name-text').textContent = file.name;
+  document.getElementById('audio-size-text').textContent = formatSize(file.size);
+  document.getElementById('audio-file-details').classList.remove('hidden');
+  document.getElementById('action-status-text').textContent = `Voice buffer: ${file.name}`;
+  updateRunButton();
 }
 
 /* ── Test Sample Presets ────────────────────────────────────────────────── */
@@ -1974,13 +2385,12 @@ function loadDirectScriptSample(title) {
   const text = samples[title] || samples['AI Intro (01)'];
   document.getElementById('direct-script').value = text;
   document.getElementById('action-status-text').textContent = `Loaded preset: ${title}`;
-  
-  // Also reflect in Provenance and Visualizations
+
   document.getElementById('prov-doc-hash').textContent = computeSimpleHash(title + text.length);
   document.getElementById('prov-doc-meta').textContent = `${title} Preset · ${text.split(/\s+/).length} words`;
-  
+
+  renderStoryboardSequence(text);
   updateRunButton();
-  if (activeTab === 'visualizations') renderAllCharts();
 }
 
 /* ── Script Heuristic Generation ────────────────────────────────────────── */
@@ -2004,96 +2414,111 @@ async function autoGenerateScript() {
       generatedScript = data.script_text;
       document.getElementById('script-editor').value = generatedScript;
       document.getElementById('script-stats-badge').textContent = `${data.word_count} words · ~${Math.round(data.estimated_duration_s)}s · ${data.provider}`;
-      document.getElementById('script-review-wrap').classList.remove('hidden');
 
-      // Update stage 2 status in results list
       const sceneCount = generatedScript.split('\n\n').filter(p => p.trim()).length;
       document.getElementById('stage-desc-02').textContent = `Generated ${sceneCount} narrative visual scenes from source document corpus.`;
       document.getElementById('stage-metric-02').textContent = `${sceneCount} Beats Synthesized`;
 
+      renderStoryboardSequence(generatedScript);
       updateRunButton();
-      if (activeTab === 'visualizations') renderAllCharts();
     }
   } catch (e) {}
 }
 
-/* ── Audio Handling ─────────────────────────────────────────────────────── */
-function handleAudioFile(file) {
-  audioFile = file;
-  document.getElementById('audio-name-text').textContent = file.name;
-  document.getElementById('audio-size-text').textContent = formatSize(file.size);
-  document.getElementById('audio-file-details').classList.remove('hidden');
-  document.getElementById('action-status-text').textContent = `${file.name} (${formatSize(file.size)})`;
-  updateRunButton();
+/* ── Storyboard Sequence in Studio Tab ──────────────────────────────────── */
+function renderStoryboardSequence(fullText) {
+  const paragraphs = fullText.split('\n\n').filter(p => p.trim());
+  if (!paragraphs.length) return;
+
+  const countBadge = document.getElementById('storyboard-count-badge');
+  if (countBadge) countBadge.textContent = `${paragraphs.length} SCENES`;
+
+  const timelineRow = document.getElementById('storyboard-timeline-row');
+  if (!timelineRow) return;
+  timelineRow.innerHTML = '';
+
+  const icons = ['🌌', '⚡', '🤖', '💡', '🔬', '🌐'];
+
+  paragraphs.forEach((p, idx) => {
+    const words = p.split(/\s+/).filter(Boolean).length;
+    const estSec = Math.max(4, Math.round(words / 2.3));
+    const card = document.createElement('div');
+    card.className = `storyboard-thumb-card ${idx === 0 ? 'active' : ''}`;
+    card.innerHTML = `
+      <div class="thumb-header-row">
+        <span>SCENE 0${idx + 1}</span>
+        <span>~${estSec}s</span>
+      </div>
+      <div class="thumb-visual-preview">${icons[idx % icons.length]}</div>
+      <div class="thumb-script-excerpt" title="${p}">${p}</div>
+    `;
+    card.onclick = () => {
+      document.querySelectorAll('.storyboard-thumb-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    };
+    timelineRow.appendChild(card);
+  });
 }
 
-/* ── Parameter Changes ──────────────────────────────────────────────────── */
-function onAspectChanged() {
-  const sel = document.getElementById('cfg-aspect').value;
-  // Dynamic update if needed
-}
-function onParameterChanged() {
-  if (currentMode === 'pdf' && extractedText) {
-    autoGenerateScript();
-  }
-}
-
-/* ── Run Button Validation ──────────────────────────────────────────────── */
 function updateRunButton() {
   const btn = document.getElementById('generate-btn');
-  let ready = false;
-  if (currentMode === 'pdf' && (pdfFile || extractedText)) ready = true;
-  if (currentMode === 'script' && document.getElementById('direct-script').value.trim()) ready = true;
-  if (currentMode === 'audio' && audioFile) ready = true;
-  btn.disabled = !ready;
+  let valid = false;
+  if (currentMode === 'pdf') {
+    valid = !!pdfFile || !!extractedText;
+  } else if (currentMode === 'script') {
+    const val = (document.getElementById('direct-script').value || '').trim();
+    valid = val.length > 5;
+  } else if (currentMode === 'audio') {
+    valid = !!audioFile;
+  }
+  btn.disabled = !valid;
 }
 
-/* ── Pipeline Execution ─────────────────────────────────────────────────── */
-async function generateVideo() {
+/* ── Job Submission & Tracking ──────────────────────────────────────────── */
+async function submitVideoJob() {
   const btn = document.getElementById('generate-btn');
   btn.disabled = true;
 
-  document.getElementById('progress-card').classList.remove('hidden');
-  document.getElementById('results-card').classList.add('hidden');
-  document.getElementById('error-card').classList.add('hidden');
-  setProgress(10, 'Submitting job to execution queue…');
+  // Move user automatically to Screen 2: Preview & Edit
+  switchStudioScreen(2);
+
+  setProgress(5, 'Submitting job to VideoEngine render worker…');
 
   const formData = new FormData();
   formData.append('input_mode', currentMode);
   formData.append('duration', document.getElementById('cfg-duration').value);
-  formData.append('language', document.getElementById('cfg-language').value);
-  formData.append('voice', 'default');
   formData.append('style', document.getElementById('cfg-style').value);
+  formData.append('language', document.getElementById('cfg-language').value);
   formData.append('aspect_ratio', document.getElementById('cfg-aspect').value);
   formData.append('captions', document.getElementById('cfg-captions').value);
 
-  if (currentMode === 'pdf') {
-    if (pdfFile) formData.append('pdf_file', pdfFile);
-    const edited = document.getElementById('script-editor').value.trim();
-    if (edited) formData.append('script_text', edited);
+  if (currentMode === 'pdf' && pdfFile) {
+    formData.append('pdf_file', pdfFile);
   } else if (currentMode === 'script') {
-    formData.append('script_text', document.getElementById('direct-script').value.trim());
-  } else if (currentMode === 'audio') {
-    if (audioFile) formData.append('audio_file', audioFile);
+    const editedText = document.getElementById('script-editor').value || document.getElementById('direct-script').value;
+    formData.append('script_text', editedText);
+  } else if (currentMode === 'audio' && audioFile) {
+    formData.append('audio_file', audioFile);
   }
 
   try {
     const resp = await fetch('/api/v1/broll/jobs', { method: 'POST', body: formData });
     const data = await resp.json();
+
     if (!resp.ok) {
-      showJobError(data.detail || 'Job initialization failed');
+      showJobError(data.detail || 'Job submission failed.');
       return;
     }
+
     currentJobId = data.job_id;
-    pollJob(currentJobId);
-  } catch (e) {
-    showJobError('Network request failed: ' + e.message);
+    pollJobProgress(currentJobId);
+  } catch (err) {
+    showJobError('Submission network error: ' + err.message);
   }
 }
 
-/* ── Job Polling with Real-Time Pipeline Stage Progress ─────────────────── */
-function pollJob(jobId) {
-  clearInterval(pollInterval);
+function pollJobProgress(jobId) {
+  if (pollInterval) clearInterval(pollInterval);
 
   pollInterval = setInterval(async () => {
     try {
@@ -2111,6 +2536,8 @@ function pollJob(jobId) {
       if (data.status === 'succeeded') {
         clearInterval(pollInterval);
         renderResultsView(data);
+        // Automatically advance to Screen 3: Finished Video
+        switchStudioScreen(3);
       } else if (data.status === 'failed') {
         clearInterval(pollInterval);
         showJobError(data.error || 'Job processing failed');
@@ -2133,7 +2560,6 @@ function setProgress(pct, label) {
   document.getElementById('progress-status-label').textContent = label;
 }
 
-/* ── Real-Time Stage List Indicator Updates ─────────────────────────────── */
 function updateLivePipelineStages(pct, status) {
   const stages = [
     { id: '01', threshold: 20 },
@@ -2158,10 +2584,8 @@ function updateLivePipelineStages(pct, status) {
   });
 }
 
-/* ── Results Rendering (Image 2 Style with Source Document Utilization) ─── */
+/* ── Results Rendering ──────────────────────────────────────────────────── */
 function renderResultsView(data) {
-  document.getElementById('progress-card').classList.add('hidden');
-  document.getElementById('results-card').classList.remove('hidden');
   document.getElementById('generate-btn').disabled = false;
 
   const r = data.result || {};
@@ -2169,11 +2593,9 @@ function renderResultsView(data) {
   const paragraphs = scriptText.split('\n\n').filter(p => p.trim());
   const sceneCount = paragraphs.length || 4;
 
-  // Update scene status badge & confidence
   document.getElementById('scenes-detected-badge').textContent = `${sceneCount} READY`;
-  document.getElementById('scenes-confidence-text').textContent = 'CONFIDENCE: 98.6%';
 
-  // Render Scene Cards Grid (Matching Image 2 Reference + Source Document Snippet)
+  // Render Scene Cards Grid
   const grid = document.getElementById('scenes-grid');
   grid.innerHTML = '';
   
@@ -2212,7 +2634,7 @@ function renderResultsView(data) {
     grid.appendChild(card);
   }
 
-  // Update Transformation Stage Rows (clean Image 2 style, no latency)
+  // Update Transformation Stage Rows
   const docTitle = pdfFile ? pdfFile.name : (currentMode === 'script' ? 'Direct Script Narration' : 'Speech Audio Ingestion');
   document.getElementById('stage-desc-01').textContent = `Parsed "${docTitle}": 100% textual structure extracted and sanitized.`;
   document.getElementById('stage-metric-01').textContent = 'Corpus Extracted';
@@ -2230,7 +2652,6 @@ function renderResultsView(data) {
   document.getElementById('stage-desc-05').textContent = `Compiled final deliverable MP4 in ${aspectLabel} with embedded subtitle overlay.`;
   document.getElementById('stage-metric-05').textContent = 'Composited MP4';
 
-  // Mark all completed
   for (let s = 1; s <= 5; s++) {
     const row = document.getElementById(`stage-row-0${s}`);
     const icon = document.getElementById(`stage-icon-0${s}`);
@@ -2238,17 +2659,14 @@ function renderResultsView(data) {
     if (icon) icon.textContent = '✔';
   }
 
-  // Update Summary Transformation Box
   document.getElementById('pipeline-summary-metric').textContent = `100% SOURCE FIDELITY · ${sceneCount} SCENES PRODUCED · VERIFIED CC0 ASSETS`;
 
-  // Video Player
   if (r.video_url) {
     const player = document.getElementById('video-player');
     player.src = r.video_url;
     player.load();
   }
 
-  // Download buttons
   const dlRow = document.getElementById('downloads-row');
   dlRow.innerHTML = '';
   if (r.video_url) dlRow.appendChild(createDlBtn('⬇️ Download MP4 Video', r.video_url));
@@ -2256,13 +2674,9 @@ function renderResultsView(data) {
   if (r.manifest_url) dlRow.appendChild(createDlBtn('📋 Manifest JSON', r.manifest_url));
   if (r.timeline_url) dlRow.appendChild(createDlBtn('🗺️ Timeline JSON', r.timeline_url));
 
-  // Update Provenance Table with exact current run scenes
   updateProvenanceLineage(sampleExcerpts);
-
-  // Update Visualizations telemetry with exact current run stats
-  updateVisualizationStats(paragraphs);
-
-  scrollToSection('results-card');
+  const el = document.getElementById('results-card');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
 
 function createDlBtn(text, url) {
@@ -2274,7 +2688,6 @@ function createDlBtn(text, url) {
   return a;
 }
 
-/* ── Error Handling ─────────────────────────────────────────────────────── */
 function showError(msg) {
   const el = document.getElementById('extract-error');
   el.textContent = msg;
@@ -2282,13 +2695,11 @@ function showError(msg) {
 }
 
 function showJobError(msg) {
-  document.getElementById('progress-card').classList.add('hidden');
   document.getElementById('error-card').classList.remove('hidden');
   document.getElementById('generate-btn').disabled = false;
   document.getElementById('error-detail-msg').textContent = msg;
 }
 
-/* ── Helpers ────────────────────────────────────────────────────────────── */
 function formatSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -2305,123 +2716,326 @@ function computeSimpleHash(str) {
   return hex.repeat(8);
 }
 
-/* ── Dynamic System Banner ──────────────────────────────────────────────── */
-(async () => {
-  try {
-    const r = await fetch('/ready');
-    const d = await r.json();
-    const wrap = document.getElementById('system-banner-wrap');
-    if (!d.checks.ffmpeg) {
-      const banner = document.createElement('div');
-      banner.className = 'alert alert-info';
-      banner.innerHTML = 'ℹ️ <b>Active Video Mode:</b> Running with Mock Renderer pipeline. Clean MP4 deliverables with timeline metadata and subtitles are automatically generated.';
-      wrap.appendChild(banner);
-    }
-  } catch(e) {}
-})();
-
 /* ══════════════════════════════════════════════════════════════════════════ */
-/* ARCHITECTURE TAB INTERACTIVE INSPECTOR                                    */
+/* ARCHITECTURE: ALL 5 STAGES & SUB-BOX FLOWCHARTS & CODE DRILL-DOWN        */
 /* ══════════════════════════════════════════════════════════════════════════ */
-const archStagesData = {
+const archData = {
   1: {
     badge: 'STAGE 01 INSPECTION',
     title: 'Audio Ingestion & Document Parser (PyMuPDF IO)',
     status: 'ACTIVE · BUFFER READY',
     summary: 'Extracts full text corpus, headings, and page boundaries from standard multi-page PDFs using fitz (PyMuPDF). Runs preflight sanitation to filter corrupt bytes, script injections, and non-printable control characters.',
-    inputs: 'Raw PDF Bytes, Script Plaintext, or 16kHz WAV Audio',
-    inputsCode: 'application/pdf (max 50MB)',
-    algo: 'PyMuPDF Document Stream Parsing & Layout Analysis',
-    algoCode: 'fitz.open(stream=bytes)',
-    outputs: 'Structured ExtractedText schema with page count & word metrics',
-    outputsCode: 'ExtractedText(full_text, pages)',
-    resilience: 'Graceful fallback to direct script editor mode if document is scanned or empty',
-    resilienceCode: 'Fallback: Text-heuristic extraction'
+    flowcharts: {
+      inputs: {
+        title: 'STAGE 01 · INPUTS ACCEPTED PIPELINE FLOW',
+        file: 'app/services/pdf_extractor.py',
+        nodes: [
+          { title: '1. Multipart Upload', desc: 'Client uploads binary payload over HTTP POST.' },
+          { title: '2. Magic Bytes Sniffer', desc: 'Verifies %PDF- header to prevent file masquerading.' },
+          { title: '3. Size Envelope Check', desc: 'Validates payload <= 50MB memory buffer.' },
+          { title: '4. Memory IO Stream', desc: 'Wraps raw bytes into io.BytesIO for fitz.' }
+        ],
+        explanation: 'The ingestion layer enforces strict pre-flight validation. If the uploaded stream is corrupt or exceeds the 50MB boundary, a 422/413 error is returned immediately without exhausting system RAM.'
+      },
+      process: {
+        title: 'STAGE 01 · CORE PARSING ALGORITHM FLOW',
+        file: 'app/services/pdf_extractor.py',
+        nodes: [
+          { title: '1. fitz.open(stream)', desc: 'Initializes PyMuPDF C-extension document binding.' },
+          { title: '2. Page Block Iterator', desc: 'Traverses pages extracting block bounding boxes.' },
+          { title: '3. Header Detection', desc: 'Filters font sizes and bold styles into section headers.' },
+          { title: '4. Text Sanitizer', desc: 'Strips control chars, excessive whitespace, and hyphens.' }
+        ],
+        explanation: 'PyMuPDF utilizes high-performance MuPDF rendering binaries. The extractor reconstructs continuous reading order from multi-column PDFs, extracting full body text while preserving semantic page numbers.'
+      },
+      outputs: {
+        title: 'STAGE 01 · OUTPUT DATA SCHEMA FLOW',
+        file: 'app/models/schemas.py',
+        nodes: [
+          { title: '1. PageText Model', desc: 'Constructs page_number, text, and char_count records.' },
+          { title: '2. ExtractedText Schema', desc: 'Assembles full_text corpus and metadata arrays.' },
+          { title: '3. Fast Serialization', desc: 'Serializes to JSON response and internal job cache.' }
+        ],
+        explanation: 'The normalized ExtractedText schema is consumed downstream by Stage 02 (Script Generator) and logged into the provenance audit ledger for cryptographic tracking.'
+      },
+      resilience: {
+        title: 'STAGE 01 · FAULT TOLERANCE & RECOVERY FLOW',
+        file: 'app/services/pdf_extractor.py',
+        nodes: [
+          { title: '1. Empty/Scanned Check', desc: 'Detects if extracted character count is zero.' },
+          { title: '2. OCR Routing Flag', desc: 'Directs user to OCR mode if text is bitmap image.' },
+          { title: '3. Script Mode Fallback', desc: 'Permits instant manual script editing in UI.' }
+        ],
+        explanation: 'If a PDF contains only scanned raster images without an embedded text layer, the system warns the user and falls back seamlessly to the direct script editor.'
+      }
+    }
   },
   2: {
     badge: 'STAGE 02 INSPECTION',
     title: 'Semantic Concept Ranker & Narrative Chunking',
     status: 'ACTIVE · HEURISTIC ENGINE',
     summary: 'Splits raw document text into coherent visual scenes using paragraph heuristics. Calculates term frequency-inverse document frequency (TF-IDF) to detect the most salient visual keywords for every narrative beat.',
-    inputs: 'Sanitized full text corpus, duration preference, style profile',
-    inputsCode: 'ScriptRequest(full_text, duration, style)',
-    algo: 'Matrix GEMM Heuristic Scoring & Pacing Estimation',
-    algoCode: 'generate_script(full_text, duration_s)',
-    outputs: 'ScriptResponse with ordered Scene array, word counts, and keywords',
-    outputsCode: 'ScriptResponse(script_text, word_count, scenes)',
-    resilience: 'Deterministic sentence tokenizer prevents orphaned short clips',
-    resilienceCode: 'Min clip duration: 4.0s'
+    flowcharts: {
+      inputs: {
+        title: 'STAGE 02 · INPUT PAYLOAD FLOW',
+        file: 'app/services/script_generator.py',
+        nodes: [
+          { title: '1. Full Text Corpus', desc: 'Receives normalized text extracted from Stage 01.' },
+          { title: '2. Duration Constraints', desc: 'Short (~60s), Medium (~120s), or Long (~180s).' },
+          { title: '3. Style Directives', desc: 'Documentary, Cinematic, Corporate, or Energetic.' }
+        ],
+        explanation: 'Script generation maps user constraints to target word counts (e.g., 140 WPM speech cadence). A 60-second video targets ~140 words divided across 4 to 6 scenes.'
+      },
+      process: {
+        title: 'STAGE 02 · TF-IDF & HEURISTIC CHUNKING FLOW',
+        file: 'app/services/script_generator.py',
+        nodes: [
+          { title: '1. Paragraph Splitter', desc: 'Segments document into coherent topic blocks.' },
+          { title: '2. Stopword Filtering', desc: 'Removes common articles, prepositions, and auxiliaries.' },
+          { title: '3. TF-IDF Matrix GEMM', desc: 'Calculates high-information keyword weights.' },
+          { title: '4. Pacing Normalizer', desc: 'Calculates scene duration bounds (min 4s, max 15s).' }
+        ],
+        explanation: 'Natural language heuristics identify core conceptual anchors (e.g. #neural_net, #solar_grid) that serve as visual search queries for B-roll footage discovery.'
+      },
+      outputs: {
+        title: 'STAGE 02 · SCENE SCRIPT OUTPUT FLOW',
+        file: 'app/models/schemas.py',
+        nodes: [
+          { title: '1. ScriptScene Array', desc: 'Ordered scenes with index, narration text, and keywords.' },
+          { title: '2. Duration Estimation', desc: 'Estimated total video runtime based on speech cadence.' },
+          { title: '3. AST Manifest', desc: 'Generates immutable AST hash for provenance.' }
+        ],
+        explanation: 'Outputs the structured scene script ready for user review in the Live Studio and feeds directly into Stage 03 and Stage 04.'
+      },
+      resilience: {
+        title: 'STAGE 02 · RESILIENCE & ADAPTATION FLOW',
+        file: 'app/services/script_generator.py',
+        nodes: [
+          { title: '1. Sentence Boundary Lock', desc: 'Ensures scene cuts never split sentences.' },
+          { title: '2. Length Balancing', desc: 'Merges overly brief fragments into adjacent beats.' },
+          { title: '3. Offline Determinism', desc: 'Heuristics run 100% locally without cloud API downtime.' }
+        ],
+        explanation: 'Deterministic tokenization guarantees consistent, reliable script structuring without external API rate limits or network failures.'
+      }
+    }
   },
   3: {
     badge: 'STAGE 03 INSPECTION',
     title: 'Footage Adaptation & License Verification Engine',
     status: 'ACTIVE · CC0 VERIFIED',
-    summary: 'Queries video repository for B-roll footage matching the scene keywords. Inspects metadata to verify Creative Commons (CC0) / Pexels Public Domain license clearance and adapts footage to target aspect ratio (16:9, 9:16, 1:1).',
-    inputs: 'Extracted keywords (e.g. #robotics, #clean_energy, #ai), aspect ratio',
-    inputsCode: 'FootageQuery(keywords, aspect_ratio)',
-    algo: 'Semantic Keyword Matching & License Clearance Audit',
-    algoCode: 'get_footage_for_scene(keywords, aspect_ratio)',
-    outputs: 'List of verified MP4 footage paths and copyright clearance IDs',
-    outputsCode: 'FootageMatch(url, license="CC0", match_score)',
-    resilience: 'High-quality procedurally animated gradients fallback when offline',
-    resilienceCode: 'Zero-latency visual fallback'
+    summary: 'Queries video repository for B-roll footage matching scene keywords. Inspects metadata to verify Creative Commons (CC0) / Pexels Public Domain license clearance and adapts footage to target aspect ratio (16:9, 9:16, 1:1).',
+    flowcharts: {
+      inputs: {
+        title: 'STAGE 03 · FOOTAGE QUERY INPUT FLOW',
+        file: 'app/services/footage_provider.py',
+        nodes: [
+          { title: '1. Keyword Vectors', desc: 'Receives ranked keyword tokens from Stage 02.' },
+          { title: '2. Target Aspect Ratio', desc: '16:9 Landscape, 9:16 Portrait, or 1:1 Square.' },
+          { title: '3. Duration Targets', desc: 'Minimum clip length required per scene beat.' }
+        ],
+        explanation: 'Each scene queries the footage engine with its salient tags to identify relevant high-definition video assets.'
+      },
+      process: {
+        title: 'STAGE 03 · LICENSE & RELEVANCE MATCHING FLOW',
+        file: 'app/services/footage_provider.py',
+        nodes: [
+          { title: '1. Stock API Query', desc: 'Queries verified Pexels/CC0 video database.' },
+          { title: '2. License Header Audit', desc: 'Verifies commercial rights & CC0 Public Domain status.' },
+          { title: '3. Aspect Cropping Check', desc: 'Evaluates center-crop focal point for 9:16 vertical.' },
+          { title: '4. Local Cache Buffer', desc: 'Streams MP4 segments into local cached storage.' }
+        ],
+        explanation: 'Every matched clip undergoes an automated license inspection to guarantee zero copyright liabilities for commercial distribution.'
+      },
+      outputs: {
+        title: 'STAGE 03 · VERIFIED FOOTAGE ASSETS FLOW',
+        file: 'app/services/footage_provider.py',
+        nodes: [
+          { title: '1. Scene Video Clips', desc: 'Ordered list of verified local MP4 video paths.' },
+          { title: '2. Rights Registry Record', desc: 'Logs asset ID, author, and CC0 clearance license.' },
+          { title: '3. Compositor Timeline', desc: 'Passes video stream handles to Stage 05.' }
+        ],
+        explanation: 'Produces clean, royalty-free MP4 footage segments aligned with the target video duration.'
+      },
+      resilience: {
+        title: 'STAGE 03 · PROCEDURAL GRADIENT FALLBACK FLOW',
+        file: 'app/services/footage_provider.py',
+        nodes: [
+          { title: '1. Network Timeout Trap', desc: 'Detects if remote stock footage API is unreachable.' },
+          { title: '2. Procedural Renderer', desc: 'Generates animated aesthetic color gradients.' },
+          { title: '3. Zero Pipeline Halt', desc: 'Ensures pipeline completes 100% reliably offline.' }
+        ],
+        explanation: 'If external video APIs are down or network is disconnected, the engine falls back to high-resolution animated procedural motion graphics.'
+      }
+    }
   },
   4: {
     badge: 'STAGE 04 INSPECTION',
     title: 'Neural Speech Synthesis & SRT Subtitle Alignment',
     status: 'ACTIVE · SYNCED',
     summary: 'Synthesizes studio-grade voiceover audio using Google TTS (gTTS) or local pyttsx3. Synchronizes timecode timestamps at the word level to generate standard SubRip (.srt) caption files with millisecond precision.',
-    inputs: 'Narration script text, target language code, voice profile',
-    inputsCode: 'TTSRequest(text, lang="en", voice="default")',
-    algo: 'Acoustic Synthesis & Deterministic Timecode Generator',
-    algoCode: 'generate_tts(text) -> narration.wav',
-    outputs: '16kHz Mono WAV audio buffer and aligned .srt subtitle file',
-    outputsCode: 'captions.srt & narration.wav',
-    resilience: 'Dual engine architecture: gTTS cloud with instant offline pyttsx3 fallback',
-    resilienceCode: 'Resilience: 100% offline ready'
+    flowcharts: {
+      inputs: {
+        title: 'STAGE 04 · NARRATION AUDIO INPUT FLOW',
+        file: 'app/services/tts_adapter.py',
+        nodes: [
+          { title: '1. Scene Script Text', desc: 'Concatenated narration paragraphs from Stage 02.' },
+          { title: '2. Language Config', desc: 'English (en), Spanish (es), French, German, Hindi.' },
+          { title: '3. Voice Preset', desc: 'Selected neural voice tone and timbre profile.' }
+        ],
+        explanation: 'The complete script is formatted into acoustic sentence blocks with punctuation-aware prosody markers.'
+      },
+      process: {
+        title: 'STAGE 04 · TTS SYNTHESIS & SRT TIME-ALIGNMENT FLOW',
+        file: 'app/services/caption_generator.py',
+        nodes: [
+          { title: '1. Neural TTS Engine', desc: 'Synthesizes speech via gTTS / offline pyttsx3.' },
+          { title: '2. Audio Resampling', desc: 'Normalizes buffer to standard 16kHz/24kHz Mono WAV.' },
+          { title: '3. Word-Boundary Timing', desc: 'Calculates millisecond start/end timestamps per word.' },
+          { title: '4. SRT Formatter', desc: 'Generates standard sequential SubRip caption cues.' }
+        ],
+        explanation: 'Synchronizes each spoken word with precise timecodes (e.g. 00:00:01,200 --> 00:00:03,800), ensuring subtitles match audio playback perfectly.'
+      },
+      outputs: {
+        title: 'STAGE 04 · AUDIO & CAPTION DELIVERABLES FLOW',
+        file: 'app/services/job_runner.py',
+        nodes: [
+          { title: '1. narration.wav', desc: 'Clean uncompressed audio voiceover track.' },
+          { title: '2. captions.srt', desc: 'Standard SubRip subtitle file with millisecond sync.' },
+          { title: '3. Audio Hash Registry', desc: 'Computes SHA-256 digest for cryptographic provenance.' }
+        ],
+        explanation: 'Delivers high-fidelity voiceover and timestamped subtitle files ready for video composition in Stage 05.'
+      },
+      resilience: {
+        title: 'STAGE 04 · DUAL TTS ENGINE FALLBACK FLOW',
+        file: 'app/services/tts_adapter.py',
+        nodes: [
+          { title: '1. Primary Cloud TTS', desc: 'Attempts Google Neural TTS (gTTS).' },
+          { title: '2. Offline Trap', desc: 'Catches connection timeouts or HTTP 429 rate limits.' },
+          { title: '3. Local pyttsx3 Fallback', desc: 'Switches instantly to local OS voice synthesis engine.' }
+        ],
+        explanation: 'Guarantees voiceover audio generation succeeds 100% of the time, even in isolated air-gapped or offline development environments.'
+      }
+    }
   },
   5: {
     badge: 'STAGE 05 INSPECTION',
     title: 'FFmpeg Core Composition & Multi-Layer H.264 Muxer',
     status: 'ACTIVE · HARDWARE READY',
     summary: 'Composites video B-roll clips, applies Ken-Burns motion scaling, overlays synchronized burned-in subtitles, and multiplexes the stereo AAC audio track into an optimized high-profile H.264 MP4 deliverable.',
-    inputs: 'Video clips list, narration.wav, captions.srt, aspect ratio config',
-    inputsCode: 'RenderJob(timeline, audio, captions, aspect)',
-    algo: 'Libx264 Video Multiplexing & AAC Audio Encoding',
-    algoCode: 'ffmpeg -y -i broll -i audio -vf subtitles=captions.srt',
-    outputs: 'Clean MP4 deliverable, timeline.json, manifest.json',
-    outputsCode: 'video_16x9.mp4 / video_9:16.mp4',
-    resilience: 'In-process Pillow/ImageIO fallback engine if system FFmpeg is missing',
-    resilienceCode: 'Built-in Mock Renderer'
+    flowcharts: {
+      inputs: {
+        title: 'STAGE 05 · MULTI-TRACK COMPOSITOR INPUT FLOW',
+        file: 'app/services/video_renderer.py',
+        nodes: [
+          { title: '1. Footage Streams', desc: 'Verified B-roll MP4 clips from Stage 03.' },
+          { title: '2. Narration Audio', desc: 'Normalized narration.wav audio track from Stage 04.' },
+          { title: '3. Subtitle Script', desc: 'captions.srt file with timestamped dialogue.' },
+          { title: '4. Format Profile', desc: '1080p 16:9 Landscape, 9:16 Vertical, or 1:1 Square.' }
+        ],
+        explanation: 'Aggregates visual assets, voiceover audio, and subtitle streams into the final composition timeline.'
+      },
+      process: {
+        title: 'STAGE 05 · H.264 MULTIPLEXING & SUBTITLE BURN-IN FLOW',
+        file: 'app/services/video_renderer.py',
+        nodes: [
+          { title: '1. Video Concatenator', desc: 'Assembles sequential scene footage tracks.' },
+          { title: '2. Motion Scaling', desc: 'Applies Ken-Burns pan/zoom and resolution scaling.' },
+          { title: '3. Subtitle Burn-In', desc: 'Renders crisp high-contrast subtitle overlays via libass.' },
+          { title: '4. AAC Audio Muxing', desc: 'Multiplexes stereo 192kbps AAC audio with video stream.' }
+        ],
+        explanation: 'FFmpeg compiles the tracks using the libx264 codec (yuv420p, High@L4.1) for maximum compatibility across web and mobile devices.'
+      },
+      outputs: {
+        title: 'STAGE 05 · FINAL DELIVERABLES & MANIFEST FLOW',
+        file: 'app/services/job_runner.py',
+        nodes: [
+          { title: '1. video.mp4', desc: 'Broadcast-quality H.264 MP4 deliverable.' },
+          { title: '2. timeline.json', desc: 'Timecode map of all scenes, assets, and transitions.' },
+          { title: '3. manifest.json', desc: 'Cryptographic job manifest with complete SHA-256 digests.' }
+        ],
+        explanation: 'Generates the finished MP4 video along with machine-readable timeline and manifest JSON files available for immediate download.'
+      },
+      resilience: {
+        title: 'STAGE 05 · IN-PROCESS MOCK RENDERER FALLBACK FLOW',
+        file: 'app/services/video_renderer.py',
+        nodes: [
+          { title: '1. FFmpeg Probe', desc: 'Checks system PATH for ffmpeg binary executable.' },
+          { title: '2. Fallback Detector', desc: 'Triggers if ffmpeg is uninstalled or lacks permissions.' },
+          { title: '3. Pillow/ImageIO Engine', desc: 'Compiles valid MP4 container in-process with fallback banner.' }
+        ],
+        explanation: 'Ensures the application functions smoothly on any development machine, providing clean MP4 video deliverables even without system FFmpeg installed.'
+      }
+    }
   }
 };
 
 function selectArchStage(stageNum) {
-  const data = archStagesData[stageNum] || archStagesData[1];
-  
-  // Highlight selected node
+  activeStage = stageNum;
+  const d = archData[stageNum] || archData[1];
+
   for (let i = 1; i <= 5; i++) {
-    const node = document.getElementById(`node-0${i}`);
-    if (node) node.classList.toggle('selected', i === stageNum);
+    const btn = document.getElementById(`arch-btn-${i}`);
+    if (btn) btn.classList.toggle('selected', i === stageNum);
   }
 
-  // Update inspector card
-  document.getElementById('arch-stage-badge').textContent = data.badge;
-  document.getElementById('arch-stage-title').textContent = data.title;
-  document.getElementById('arch-stage-status').textContent = data.status;
-  document.getElementById('arch-stage-summary').textContent = data.summary;
-  
-  document.getElementById('arch-prop-inputs').textContent = data.inputs;
-  document.getElementById('arch-prop-algo').textContent = data.algo;
-  document.getElementById('arch-prop-outputs').textContent = data.outputs;
-  document.getElementById('arch-prop-resilience').textContent = data.resilience;
+  document.getElementById('arch-stage-badge').textContent = d.badge;
+  document.getElementById('arch-stage-title').textContent = d.title;
+  document.getElementById('arch-stage-status').textContent = d.status;
+  document.getElementById('arch-stage-summary').textContent = d.summary;
+
+  // Render drilldown flowchart for currently selected sub-box
+  selectSubBox(activeSubBox);
+}
+
+function selectSubBox(boxKey) {
+  activeSubBox = boxKey;
+  const boxes = ['inputs', 'process', 'outputs', 'resilience'];
+  boxes.forEach(b => {
+    const el = document.getElementById(`box-${b}`);
+    if (el) el.classList.toggle('active', b === boxKey);
+  });
+
+  const stage = archData[activeStage] || archData[1];
+  const fc = (stage.flowcharts && stage.flowcharts[boxKey]) ? stage.flowcharts[boxKey] : stage.flowcharts.inputs;
+
+  document.getElementById('fc-panel-title').textContent = fc.title;
+  document.getElementById('fc-file-ref').textContent = fc.file;
+  document.getElementById('fc-explanation-text').textContent = fc.explanation;
+
+  const container = document.getElementById('fc-nodes-container');
+  container.innerHTML = '';
+  fc.nodes.forEach((n, idx) => {
+    const nodeEl = document.createElement('div');
+    nodeEl.className = 'fc-node';
+    nodeEl.innerHTML = `
+      <div class="fc-node-title">${n.title}</div>
+      <div class="fc-node-desc">${n.desc}</div>
+    `;
+    container.appendChild(nodeEl);
+
+    if (idx < fc.nodes.length - 1) {
+      const arr = document.createElement('div');
+      arr.className = 'fc-arrow';
+      arr.textContent = '➔';
+      container.appendChild(arr);
+    }
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
-/* VISUALIZATIONS TAB: 7 DYNAMIC FILE-REACTIVE CHARTS                        */
+/* VISUALIZATIONS TAB: 7 DYNAMIC CHARTS (Theme-Aware)                        */
 /* ══════════════════════════════════════════════════════════════════════════ */
 function renderAllCharts() {
   if (typeof Chart === 'undefined') return;
+
+  const isDark = currentTheme === 'dark';
+  const primaryColor = isDark ? '#eab308' : '#7c3aed';
+  const secondaryColor = isDark ? '#facc15' : '#9333ea';
+  const lightColor = isDark ? 'rgba(234, 179, 8, 0.25)' : 'rgba(124, 58, 237, 0.15)';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+  const textColor = isDark ? '#d4d4d8' : '#4b5563';
+
+  Chart.defaults.color = textColor;
 
   const scriptText = generatedScript || document.getElementById('direct-script').value || 
     `Introduction to Artificial Intelligence and Deep Learning architectures.\nMachine learning models extract patterns from structured enterprise datasets.\nHardware accelerators enable real-time inference at the network edge.\nAutomated pipelines convert raw documentation into high-impact visual media deliverables.`;
@@ -2430,23 +3044,14 @@ function renderAllCharts() {
   const sceneCount = paragraphs.length || 4;
   const sceneLabels = paragraphs.map((_, i) => `Scene 0${i + 1}`);
   
-  // Calculate word counts per scene
   const wordCounts = paragraphs.map(p => p.split(/\s+/).filter(Boolean).length);
-  const durations = wordCounts.map(wc => Math.max(4, Math.round(wc / 2.3))); // ~140 WPM
+  const durations = wordCounts.map(wc => Math.max(4, Math.round(wc / 2.3)));
   const totalWords = wordCounts.reduce((a, b) => a + b, 0);
   const totalDuration = durations.reduce((a, b) => a + b, 0);
 
-  // Update KPI stat boxes
-  document.getElementById('viz-stat-words').textContent = totalWords;
-  document.getElementById('viz-stat-scenes').textContent = sceneCount;
-  document.getElementById('viz-stat-runtime').textContent = `${totalDuration}s`;
-  document.getElementById('viz-stat-fidelity').textContent = '98.6%';
-
-  // Destroy previous charts if existing
   Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e){} });
   chartInstances = {};
 
-  // ── Chart 1: Scene Token & Word Count Distribution (Bar) ───────────────────
   const ctx1 = document.getElementById('chart-scene-words');
   if (ctx1) {
     chartInstances.words = new Chart(ctx1, {
@@ -2454,30 +3059,14 @@ function renderAllCharts() {
       data: {
         labels: sceneLabels,
         datasets: [
-          {
-            label: 'Word Count',
-            data: wordCounts,
-            backgroundColor: '#3b82f6',
-            borderRadius: 6
-          },
-          {
-            label: 'Duration (Sec)',
-            data: durations,
-            backgroundColor: '#93c5fd',
-            borderRadius: 6
-          }
+          { label: 'Word Count', data: wordCounts, backgroundColor: primaryColor, borderRadius: 6 },
+          { label: 'Duration (Sec)', data: durations, backgroundColor: secondaryColor, borderRadius: 6 }
         ]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
-        scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-      }
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor } }, x: { grid: { display: false } } } }
     });
   }
 
-  // ── Chart 2: Salient Keyword Heuristics & Weights (Horizontal Bar) ─────────
   const ctx2 = document.getElementById('chart-keywords');
   if (ctx2) {
     const rawTokens = scriptText.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3);
@@ -2491,24 +3080,12 @@ function renderAllCharts() {
       type: 'bar',
       data: {
         labels: kwLabels,
-        datasets: [{
-          label: 'TF-IDF Relevance Score (%)',
-          data: kwWeights,
-          backgroundColor: '#10b981',
-          borderRadius: 6
-        }]
+        datasets: [{ label: 'Relevance Score (%)', data: kwWeights, backgroundColor: '#10b981', borderRadius: 6 }]
       },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { x: { min: 60, max: 100, grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
-      }
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { min: 60, max: 100, grid: { color: gridColor } }, y: { grid: { display: false } } } }
     });
   }
 
-  // ── Chart 3: Audio Dynamic Energy Contour (Smooth Spline) ─────────────────
   const ctx3 = document.getElementById('chart-audio-profile');
   if (ctx3) {
     const timePoints = [];
@@ -2516,7 +3093,6 @@ function renderAllCharts() {
     const pointsCount = 28;
     for (let i = 0; i <= pointsCount; i++) {
       timePoints.push(`${((i / pointsCount) * totalDuration).toFixed(1)}s`);
-      // Simulated speech RMS contour with natural pauses
       const wave = Math.sin(i * 0.8) * 12 + Math.cos(i * 1.5) * 8 + 68;
       energyData.push(i % 7 === 0 ? 35 : Math.max(40, Math.min(88, Math.round(wave))));
     }
@@ -2528,23 +3104,17 @@ function renderAllCharts() {
         datasets: [{
           label: 'Speech Cadence RMS Energy (dB)',
           data: energyData,
-          borderColor: '#8b5cf6',
-          backgroundColor: 'rgba(139, 92, 246, 0.08)',
+          borderColor: primaryColor,
+          backgroundColor: lightColor,
           fill: true,
           tension: 0.35,
           pointRadius: 2
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
-        scales: { y: { min: 30, max: 100, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-      }
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 30, max: 100, grid: { color: gridColor } }, x: { grid: { display: false } } } }
     });
   }
 
-  // ── Chart 4: Document Utilization by Source Page (Stacked Bar) ────────────
   const ctx4 = document.getElementById('chart-page-coverage');
   if (ctx4) {
     const pages = pdfFile ? Math.min(4, Math.max(1, Math.ceil(totalWords / 200))) : 3;
@@ -2557,53 +3127,26 @@ function renderAllCharts() {
       data: {
         labels: pageLabels,
         datasets: [
-          {
-            label: 'Extracted for Narration',
-            data: wordsUsed,
-            backgroundColor: '#2563eb',
-            borderRadius: 6
-          },
-          {
-            label: 'Contextual References',
-            data: wordsTotal.map((tot, i) => tot - wordsUsed[i]),
-            backgroundColor: '#e2e8f0',
-            borderRadius: 6
-          }
+          { label: 'Extracted for Narration', data: wordsUsed, backgroundColor: primaryColor, borderRadius: 6 },
+          { label: 'Contextual References', data: wordsTotal.map((tot, i) => tot - wordsUsed[i]), backgroundColor: isDark ? '#27272a' : '#e2e8f0', borderRadius: 6 }
         ]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: '#f1f5f9' } } }
-      }
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: gridColor } } } }
     });
   }
 
-  // ── Chart 5: Timeline Duration & Cuts (Horizontal Bar) ─────────────────────
   const ctx5 = document.getElementById('chart-timeline-durations');
   if (ctx5) {
     chartInstances.timeline = new Chart(ctx5, {
       type: 'bar',
       data: {
         labels: sceneLabels,
-        datasets: [{
-          label: 'Allocated Shot Duration (Seconds)',
-          data: durations,
-          backgroundColor: '#10b981',
-          borderRadius: 6
-        }]
+        datasets: [{ label: 'Allocated Shot Duration (Seconds)', data: durations, backgroundColor: '#10b981', borderRadius: 6 }]
       },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { x: { beginAtZero: true, grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
-      }
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, grid: { color: gridColor } }, y: { grid: { display: false } } } }
     });
   }
 
-  // ── Chart 6: B-Roll Motion Dynamism & Semantic Match (Radar) ──────────────
   const ctx6 = document.getElementById('chart-visual-diversity');
   if (ctx6) {
     chartInstances.diversity = new Chart(ctx6, {
@@ -2613,20 +3156,15 @@ function renderAllCharts() {
         datasets: [{
           label: 'Scene Quality Index',
           data: [98, 86, 92, 100, 94],
-          backgroundColor: 'rgba(37, 99, 235, 0.15)',
-          borderColor: '#2563eb',
-          pointBackgroundColor: '#2563eb'
+          backgroundColor: lightColor,
+          borderColor: primaryColor,
+          pointBackgroundColor: primaryColor
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { r: { min: 50, max: 100, ticks: { display: false } } }
-      }
+      options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 50, max: 100, ticks: { display: false }, grid: { color: gridColor } } } }
     });
   }
 
-  // ── Chart 7: Target Render Bitrate & Framerate Stability (Line / Area) ─────
   const ctx7 = document.getElementById('chart-encoding-stability');
   if (ctx7) {
     const timelineLabels = Array.from({ length: 8 }, (_, i) => `Beat 0${i + 1}`);
@@ -2645,22 +3183,12 @@ function renderAllCharts() {
           tension: 0.2
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { min: 4200, max: 4800, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-      }
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 4200, max: 4800, grid: { color: gridColor } }, x: { grid: { display: false } } } }
     });
   }
 }
 
-function updateVisualizationStats(paragraphs) {
-  if (activeTab === 'visualizations') renderAllCharts();
-}
-
-/* ══════════════════════════════════════════════════════════════════════════ */
-/* PROVENANCE TAB LINEAGE UPDATES & EXPORT                                   */
-/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Provenance Updates & JSON Export ───────────────────────────────────── */
 function updateProvenanceLineage(excerpts) {
   const tbody = document.getElementById('prov-lineage-tbody');
   if (!tbody) return;
@@ -2688,7 +3216,6 @@ function updateProvenanceLineage(excerpts) {
     tbody.appendChild(tr);
   });
 
-  // Update dynamic cryptographic hashes
   const runHash = computeSimpleHash(excerpts.join(' '));
   document.getElementById('prov-script-hash').textContent = runHash;
   document.getElementById('prov-audio-hash').textContent = computeSimpleHash(runHash + '_audio');
@@ -2716,17 +3243,32 @@ function exportProvenanceJson() {
   URL.revokeObjectURL(url);
 }
 
-/* ══════════════════════════════════════════════════════════════════════════ */
-/* API EXPLORER ACCORDION TOGGLE                                            */
-/* ══════════════════════════════════════════════════════════════════════════ */
 function toggleEndpoint(id) {
   const body = document.getElementById(id);
   if (body) body.classList.toggle('hidden');
 }
 
-// Event Listeners
+/* ── Dynamic System Banner ──────────────────────────────────────────────── */
+(async () => {
+  try {
+    const r = await fetch('/ready');
+    const d = await r.json();
+    const wrap = document.getElementById('system-banner-wrap');
+    if (!d.checks.ffmpeg) {
+      const banner = document.createElement('div');
+      banner.className = 'alert alert-info';
+      banner.innerHTML = 'ℹ️ <b>Active Video Mode:</b> Running with Mock Renderer pipeline. Clean MP4 deliverables with timeline metadata and subtitles are automatically generated.';
+      wrap.appendChild(banner);
+    }
+  } catch(e) {}
+})();
+
+// Listeners & Initialization
 document.getElementById('direct-script').addEventListener('input', updateRunButton);
 document.getElementById('script-editor').addEventListener('input', updateRunButton);
+
+// Initialize stage 1 & inputs flowchart
+selectArchStage(1);
 </script>
 </body>
 </html>

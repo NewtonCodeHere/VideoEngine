@@ -120,6 +120,8 @@ class ClipInfo(BaseModel):
     relevance_score: float
     selection_reason: str
     is_mock: bool = False
+    download_url: Optional[str] = None
+    local_path: Optional[str] = None
 
 
 class SceneResult(BaseModel):

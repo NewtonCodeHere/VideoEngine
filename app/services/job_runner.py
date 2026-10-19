@@ -111,6 +111,23 @@ def run_job(
                 clips = [c for c in clips if c.relevance_score >= cfg.FOOTAGE_MIN_RELEVANCE]
                 if clips:
                     chosen = clips[0]
+                    if chosen.download_url and not chosen.is_mock:
+                        try:
+                            clean_id = re.sub(r"[^\w\-]", "_", chosen.asset_id)
+                            ext = ".webm" if ".webm" in chosen.download_url.lower() else ".mp4"
+                            clip_save = cfg.UPLOAD_DIR / f"clip_{clean_id}{ext}"
+                            if not clip_save.exists() or clip_save.stat().st_size == 0:
+                                headers = {"User-Agent": "Mozilla/5.0"}
+                                with httpx.Client(timeout=30.0, follow_redirects=True) as dl_client:
+                                    r_dl = dl_client.get(chosen.download_url, headers=headers)
+                                    if r_dl.status_code == 200 and len(r_dl.content) > 1000:
+                                        clip_save.write_bytes(r_dl.content)
+                                        chosen.local_path = str(clip_save)
+                            else:
+                                chosen.local_path = str(clip_save)
+                        except Exception as dl_exc:
+                            warnings.append(f"Footage download failed for scene {i}: {dl_exc}")
+
                     clip_map[i] = chosen
                     used_clip_ids.add(chosen.asset_id)
                 else:
@@ -126,7 +143,7 @@ def run_job(
     if cfg.FOOTAGE_PROVIDER == "mock":
         warnings.append(
             "Footage is provided by the MOCK provider for offline testing. "
-            "Set FOOTAGE_PROVIDER=pexels and PEXELS_API_KEY for real stock footage."
+            "Set FOOTAGE_PROVIDER=auto or FOOTAGE_PROVIDER=pexels for real stock footage."
         )
 
     _progress(40)
