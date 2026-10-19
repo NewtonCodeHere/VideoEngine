@@ -1395,7 +1395,7 @@
       <!-- Theme Switcher Button (Light: White & Purple | Dark: Black & Yellow) -->
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light & Dark Theme">
         <span class="theme-indicator-dot" id="theme-dot"></span>
-        <span id="theme-label-text">☀️ Light (Purple)</span>
+        <span id="theme-label-text">☀️ Light</span>
       </button>
 
       <!-- Main Navigation Tabs -->
@@ -2208,10 +2208,10 @@ function applyTheme(theme) {
   const label = document.getElementById('theme-label-text');
   const dot = document.getElementById('theme-dot');
   if (theme === 'dark') {
-    if (label) label.textContent = '🌙 Dark (Yellow)';
+    if (label) label.textContent = '🌙 Dark';
     if (dot) dot.style.background = '#eab308';
   } else {
-    if (label) label.textContent = '☀️ Light (Purple)';
+    if (label) label.textContent = '☀️ Light';
     if (dot) dot.style.background = '#7c3aed';
   }
 
