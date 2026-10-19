@@ -34,21 +34,37 @@ class TTSAdapter(Protocol):
 class GTTSAdapter:
     """
     Uses the gTTS library (Google TTS over HTTP).
-    Requires: pip install gtts
+    Falls back to pyttsx3 offline synthesizer if network unavailable.
     """
     name = "gtts"
 
     def synthesize(self, text: str, output_path: Path, language: str = "en", voice: str = "default") -> Path:
         try:
             from gtts import gTTS
-        except ImportError:
-            raise RuntimeError(
-                "gTTS is not installed. Run: pip install gtts\n"
-                "Alternatively, set TTS_PROVIDER=espeak or TTS_PROVIDER=mock."
-            )
-        tts = gTTS(text=text, lang=language, slow=False)
-        tts.save(str(output_path))
-        return output_path
+            tts = gTTS(text=text, lang=language, slow=False)
+            mp3_path = output_path.with_suffix(".mp3")
+            tts.save(str(mp3_path))
+            return mp3_path
+        except Exception:
+            # Fall back to local pyttsx3
+            return Pyttsx3Adapter().synthesize(text, output_path, language, voice)
+
+
+class Pyttsx3Adapter:
+    """
+    Native offline speech synthesis via pyttsx3 (Windows SAPI5 / macOS / Linux).
+    100% offline, requires no network.
+    """
+    name = "pyttsx3"
+
+    def synthesize(self, text: str, output_path: Path, language: str = "en", voice: str = "default") -> Path:
+        import pyttsx3
+        wav_path = output_path.with_suffix(".wav")
+        engine = pyttsx3.init()
+        engine.setProperty("rate", 160)
+        engine.save_to_file(text, str(wav_path))
+        engine.runAndWait()
+        return wav_path
 
 
 # ── eSpeak ────────────────────────────────────────────────────────────────────
@@ -147,8 +163,10 @@ class MockTTSAdapter:
 # ── Factory ───────────────────────────────────────────────────────────────────
 
 def get_tts_adapter(provider: str, edge_voice: str = "en-US-AriaNeural") -> TTSAdapter:
-    if provider == "gtts":
+    if provider in ("gtts", "auto", "default"):
         return GTTSAdapter()
+    elif provider == "pyttsx3":
+        return Pyttsx3Adapter()
     elif provider == "espeak":
         return ESpeakAdapter()
     elif provider == "edge":
