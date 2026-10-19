@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.pytest_cache/
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+batch_results/*
+.env
+venv/
+.coverage
+htmlcov/

@@ -1,0 +1,406 @@
+openapi: "3.1.0"
+info:
+  title: PDF to Video AI
+  description: |
+    Lightweight PDF-to-video engine satisfying the IncuBrix Assessment 3 requirements.
+    Upload a PDF, review the extracted script, and generate a narrated MP4 with B-roll and captions.
+  version: "1.0.0"
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Web UI
+      description: Serves the responsive HTML single-page application.
+      responses:
+        "200":
+          description: HTML page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /health:
+    get:
+      summary: Liveness probe
+      tags: [health]
+      responses:
+        "200":
+          description: Server is alive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /ready:
+    get:
+      summary: Readiness probe
+      tags: [health]
+      responses:
+        "200":
+          description: Readiness status with component checks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadyResponse"
+
+  /api/v1/pdf/extract:
+    post:
+      summary: Extract text from a PDF
+      tags: [pdf]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF file (max 50 MB, max 200 pages)
+                use_ocr:
+                  type: boolean
+                  default: false
+                  description: Enable Tesseract OCR for scanned pages
+      responses:
+        "200":
+          description: Extracted text by page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PDFExtractResponse"
+        "413":
+          description: File too large
+        "415":
+          description: Not a PDF file
+        "422":
+          description: Invalid, encrypted, empty, or corrupted PDF
+
+  /api/v1/pdf/script:
+    post:
+      summary: Generate a narration script from PDF text
+      tags: [pdf]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFScriptRequest"
+      responses:
+        "200":
+          description: Generated script with scenes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScriptResponse"
+        "422":
+          description: Empty or invalid text
+
+  /api/v1/broll/jobs:
+    post:
+      summary: Create a B-roll video generation job
+      tags: [jobs]
+      description: |
+        Returns HTTP 202 immediately with a job_id. Poll GET /api/v1/jobs/{job_id} for progress.
+        Supports Idempotency-Key header for safe retries.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+          description: Unique key for idempotent job creation
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [input_mode]
+              properties:
+                input_mode:
+                  type: string
+                  enum: [pdf, script, audio]
+                  default: pdf
+                script_text:
+                  type: string
+                  description: Required for input_mode=script
+                pdf_file:
+                  type: string
+                  format: binary
+                  description: Required for input_mode=pdf
+                audio_file:
+                  type: string
+                  format: binary
+                  description: Required for input_mode=audio (MP3, WAV, M4A)
+                duration:
+                  type: string
+                  enum: [short, medium, long]
+                  default: medium
+                language:
+                  type: string
+                  default: en
+                voice:
+                  type: string
+                  default: default
+                style:
+                  type: string
+                  enum: [cinematic, documentary, corporate, energetic]
+                  default: documentary
+                aspect_ratio:
+                  type: string
+                  enum: ["16:9", "9:16", "1:1"]
+                  default: "16:9"
+                captions:
+                  type: boolean
+                  default: true
+                avoid:
+                  type: string
+                  description: Comma-separated terms to avoid in footage search
+      responses:
+        "202":
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResponse"
+        "422":
+          description: Validation error
+        "429":
+          description: Server at max concurrent job capacity
+
+  /api/v1/jobs/{job_id}:
+    get:
+      summary: Poll job status
+      tags: [jobs]
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job status and result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResponse"
+        "404":
+          description: Job not found
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        version:
+          type: string
+          example: "1.0.0"
+
+    ReadyResponse:
+      type: object
+      properties:
+        ready:
+          type: boolean
+        checks:
+          type: object
+          additionalProperties:
+            type: boolean
+
+    PageText:
+      type: object
+      properties:
+        page_number:
+          type: integer
+        text:
+          type: string
+        headings:
+          type: array
+          items:
+            type: string
+
+    PDFExtractResponse:
+      type: object
+      properties:
+        filename:
+          type: string
+        page_count:
+          type: integer
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageText"
+        full_text:
+          type: string
+        ocr_used:
+          type: boolean
+        ocr_available:
+          type: boolean
+        warnings:
+          type: array
+          items:
+            type: string
+
+    PDFScriptRequest:
+      type: object
+      required: [full_text]
+      properties:
+        full_text:
+          type: string
+        duration:
+          type: string
+          enum: [short, medium, long]
+          default: medium
+        language:
+          type: string
+          default: en
+        style:
+          type: string
+          enum: [cinematic, documentary, corporate, energetic]
+          default: documentary
+
+    ScriptScene:
+      type: object
+      properties:
+        index:
+          type: integer
+        text:
+          type: string
+        source_page:
+          type: integer
+          nullable: true
+        visual_query:
+          type: string
+        duration_hint:
+          type: number
+
+    ScriptResponse:
+      type: object
+      properties:
+        script_text:
+          type: string
+        scenes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScriptScene"
+        word_count:
+          type: integer
+        estimated_duration_s:
+          type: number
+        provider:
+          type: string
+          example: heuristic
+
+    ClipInfo:
+      type: object
+      properties:
+        asset_id:
+          type: string
+        provider:
+          type: string
+        source_url:
+          type: string
+        licence_name:
+          type: string
+        licence_url:
+          type: string
+        attribution:
+          type: string
+        relevance_score:
+          type: number
+        selection_reason:
+          type: string
+        is_mock:
+          type: boolean
+
+    SceneResult:
+      type: object
+      properties:
+        index:
+          type: integer
+        text:
+          type: string
+        start_s:
+          type: number
+        end_s:
+          type: number
+        source_page:
+          type: integer
+          nullable: true
+        clip:
+          $ref: "#/components/schemas/ClipInfo"
+          nullable: true
+        caption_lines:
+          type: array
+          items:
+            type: string
+
+    JobResult:
+      type: object
+      properties:
+        video_url:
+          type: string
+          nullable: true
+        captions_url:
+          type: string
+          nullable: true
+        timeline_url:
+          type: string
+          nullable: true
+        manifest_url:
+          type: string
+          nullable: true
+        duration_s:
+          type: number
+          nullable: true
+        scenes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SceneResult"
+        aspect_ratio:
+          type: string
+          nullable: true
+
+    JobResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, succeeded, failed]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        input_mode:
+          type: string
+          enum: [pdf, script, audio]
+        settings:
+          type: object
+        result:
+          $ref: "#/components/schemas/JobResult"
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        warnings:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: number
+        started_at:
+          type: number
+          nullable: true
+        finished_at:
+          type: number
+          nullable: true
