@@ -1,538 +1,537 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF to Video AI Production Studio</title>
+  <title>NovaCut AI — PDF to Video AI Autonomous Production Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Chart.js CDN for dynamic metric graphs -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN for telemetry analysis -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    /* ── Theme Definitions: Light (White & Purple) | Dark (Black & Yellow) ─ */
+    /* ══════════════════════════════════════════════════════════════════════ */
+    /* THEME SYSTEM: DARK (Obsidian & Radiant Coral) | LIGHT (Alabaster & Burnt Coral) */
+    /* ══════════════════════════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    :root, [data-theme="light"] {
-      --theme-name: 'light';
-      --bg:           #faf8ff;
-      --bg-grid:      rgba(124, 58, 237, 0.05);
-      --surface:      #ffffff;
-      --surface-sub:  #f5f3ff;
-      --surface-hover:#ede9fe;
-      --border:       #e9d5ff;
-      --border-focus: #7c3aed;
-      --border-accent:#c4b5fd;
-      --primary:      #7c3aed;
-      --primary-hover:#6d28d9;
-      --primary-light:#f3e8ff;
-      --primary-border:#ddd6fe;
-      --primary-text: #ffffff;
-      --accent:       #9333ea;
-      --accent-glow:  rgba(124, 58, 237, 0.25);
-      --text:         #1e1b4b;
-      --text-muted:   #6b7280;
-      --text-sub:     #4b5563;
-      --green:        #10b981;
-      --green-light:  #ecfdf5;
-      --green-text:   #047857;
-      --orange:       #f97316;
-      --orange-light: #fff7ed;
-      --orange-text:  #c2410c;
-      --purple:       #7c3aed;
-      --purple-light: #f3e8ff;
-      --purple-text:  #6d28d9;
-      --red:          #ef4444;
-      --red-light:    #fee2e2;
-      --radius-sm:    8px;
-      --radius:       14px;
-      --radius-pill:  9999px;
-      --shadow-sm:    0 1px 3px rgba(124, 58, 237, 0.05);
-      --shadow:       0 4px 16px rgba(124, 58, 237, 0.08);
-      --shadow-lg:    0 12px 30px rgba(124, 58, 237, 0.12);
-      --flow-dot:     #7c3aed;
-      --card-highlight: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(147, 51, 234, 0.02));
+
+    :root, [data-theme="dark"] {
+      --theme-name: 'dark';
+      --bg:             #0a0a0d;
+      --bg-card:        #131318;
+      --bg-sub:         #1a1a22;
+      --bg-hover:       #22222d;
+      --border:         #272733;
+      --border-accent:  #ff5722;
+      --border-subtle:  #1e1e28;
+      --primary:        #ff5722;
+      --primary-hover:  #ea4a16;
+      --primary-glow:   rgba(255, 87, 34, 0.35);
+      --primary-glow-sm:rgba(255, 87, 34, 0.15);
+      --primary-gradient: linear-gradient(135deg, #ff6b3d, #ea4a16);
+      --secondary:      #ff9800;
+      --text:           #f4f4f7;
+      --text-muted:     #8f8f9e;
+      --text-sub:       #bebeca;
+      --green:          #10b981;
+      --green-bg:       rgba(16, 185, 129, 0.12);
+      --green-text:     #34d399;
+      --blue:           #38bdf8;
+      --red:            #f43f5e;
+      --red-bg:         rgba(244, 63, 94, 0.15);
+      --radius-sm:      8px;
+      --radius:         16px;
+      --radius-pill:    9999px;
+      --shadow-sm:      0 2px 8px rgba(0, 0, 0, 0.4);
+      --shadow:         0 8px 30px rgba(0, 0, 0, 0.6);
+      --shadow-glow:    0 10px 40px rgba(255, 87, 34, 0.22);
+      --window-dots:    #ff5f56, #ffbd2e, #27c93f;
+      --orb-opacity:    0.2;
     }
 
-    [data-theme="dark"] {
-      --theme-name: 'dark';
-      --bg:           #09090b;
-      --bg-grid:      rgba(234, 179, 8, 0.04);
-      --surface:      #141416;
-      --surface-sub:  #1c1c20;
-      --surface-hover:#27272a;
-      --border:       #2e2e33;
-      --border-focus: #eab308;
-      --border-accent:#facc15;
-      --primary:      #eab308;
-      --primary-hover:#ca8a04;
-      --primary-light: rgba(234, 179, 8, 0.14);
-      --primary-border: rgba(234, 179, 8, 0.35);
-      --primary-text: #09090b;
-      --accent:       #facc15;
-      --accent-glow:  rgba(234, 179, 8, 0.3);
-      --text:         #f4f4f5;
-      --text-muted:   #a1a1aa;
-      --text-sub:     #d4d4d8;
-      --green:        #10b981;
-      --green-light:  rgba(16, 185, 129, 0.15);
-      --green-text:   #34d399;
-      --orange:       #fb923c;
-      --orange-light: rgba(251, 146, 60, 0.15);
-      --orange-text:  #fdba74;
-      --purple:       #facc15;
-      --purple-light: rgba(234, 179, 8, 0.14);
-      --purple-text:  #fde047;
-      --red:          #f87171;
-      --red-light:    rgba(248, 113, 113, 0.15);
-      --radius-sm:    8px;
-      --radius:       14px;
-      --radius-pill:  9999px;
-      --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.4);
-      --shadow:       0 4px 20px rgba(0, 0, 0, 0.6);
-      --shadow-lg:    0 12px 35px rgba(0, 0, 0, 0.8);
-      --flow-dot:     #eab308;
-      --card-highlight: linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(202, 138, 4, 0.02));
+    [data-theme="light"] {
+      --theme-name: 'light';
+      --bg:             #faf8f5;
+      --bg-card:        #ffffff;
+      --bg-sub:         #f4efe9;
+      --bg-hover:       #eee6dc;
+      --border:         #e5ded4;
+      --border-accent:  #ea580c;
+      --border-subtle:  #ede6dc;
+      --primary:        #ea580c;
+      --primary-hover:  #c2410c;
+      --primary-glow:   rgba(234, 88, 12, 0.28);
+      --primary-glow-sm:rgba(234, 88, 12, 0.12);
+      --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
+      --secondary:      #f59e0b;
+      --text:           #1c1917;
+      --text-muted:     #78716c;
+      --text-sub:       #44403c;
+      --green:          #059669;
+      --green-bg:       #ecfdf5;
+      --green-text:     #047857;
+      --blue:           #0284c7;
+      --red:            #e11d48;
+      --red-bg:         #ffe4e6;
+      --radius-sm:      8px;
+      --radius:         16px;
+      --radius-pill:    9999px;
+      --shadow-sm:      0 2px 6px rgba(0, 0, 0, 0.04);
+      --shadow:         0 8px 24px rgba(234, 88, 12, 0.06);
+      --shadow-glow:    0 10px 30px rgba(234, 88, 12, 0.15);
+      --window-dots:    #fdba74, #fcd34d, #86efac;
+      --orb-opacity:    0.07;
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg);
-      background-image: 
-        linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
-      background-size: 24px 24px;
       color: var(--text);
       min-height: 100vh;
       line-height: 1.5;
-      padding-bottom: 4rem;
+      position: relative;
+      overflow-x: hidden;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* ── Layout Container ────────────────────────────────────────────────── */
-    .container {
-      max-width: 1140px;
-      margin: 0 auto;
-      padding: 1.5rem 1.25rem;
-    }
-
-    /* ── Global Animated Pulse & Shimmers ────────────────────────────────── */
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
-      50% { box-shadow: 0 0 12px 4px var(--accent-glow); }
-    }
-    @keyframes flowBeam {
-      0% { transform: translateX(-100%); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translateX(200%); opacity: 0; }
-    }
-    @keyframes fadeInScale {
-      from { opacity: 0; transform: scale(0.985) translateY(6px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    @keyframes slideInRight {
-      from { opacity: 0; transform: translateX(12px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes cardFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-    @keyframes shimmerBar {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    /* ── Top Header Bar ─────────────────────────────────────────────────── */
-    .top-pill-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .system-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      padding: 0.4rem 1rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-sub);
-      box-shadow: var(--shadow-sm);
-      transition: all 0.25s ease;
-    }
-    .system-status-pill:hover {
-      border-color: var(--primary);
-      transform: translateY(-1px);
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
+    /* ── Atmospheric Ambient Orb Glow (Matching Reference Image) ────────── */
+    .ambient-glow-orb {
+      position: fixed;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 480px;
       border-radius: 50%;
-      background-color: var(--green);
-      display: inline-block;
-      animation: pulseGlow 2s infinite ease-in-out;
+      background: radial-gradient(ellipse at center, rgba(255, 87, 34, var(--orb-opacity)) 0%, rgba(234, 88, 12, 0.04) 50%, transparent 75%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(50px);
     }
-    .status-divider { color: var(--border); }
-
-    .header-actions-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    /* Theme Switcher Button */
-    .theme-toggle-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-pill);
-      padding: 0.4rem 0.95rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: var(--shadow-sm);
-      user-select: none;
-    }
-    .theme-toggle-btn:hover {
-      border-color: var(--primary);
-      transform: translateY(-1px);
-      box-shadow: 0 3px 10px var(--accent-glow);
-    }
-    .theme-indicator-dot {
-      width: 10px;
-      height: 10px;
+    .ambient-glow-orb-secondary {
+      position: fixed;
+      bottom: -150px;
+      right: -100px;
+      width: 600px;
+      height: 450px;
       border-radius: 50%;
-      background: var(--primary);
+      background: radial-gradient(ellipse at center, rgba(255, 152, 0, calc(var(--orb-opacity) * 0.7)) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(60px);
     }
 
-    .nav-pill-row {
-      display: flex;
-      gap: 0.35rem;
-      background: var(--surface);
-      padding: 0.3rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      box-shadow: var(--shadow-sm);
-      overflow-x: auto;
-    }
-    .nav-pill {
-      padding: 0.38rem 0.95rem;
-      border-radius: var(--radius-pill);
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: 1px solid transparent;
-      white-space: nowrap;
-      user-select: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      background: transparent;
-    }
-    .nav-pill:hover {
-      color: var(--primary);
-      background: var(--surface-sub);
-    }
-    .nav-pill.active {
-      background: var(--primary-light);
-      color: var(--primary);
-      border-color: var(--primary-border);
-      box-shadow: 0 2px 8px var(--accent-glow);
-      font-weight: 700;
-    }
-
-    /* ── Tab Views ───────────────────────────────────────────────────────── */
-    .tab-view { display: none; }
-    .tab-view.active {
-      display: block;
-      animation: fadeInScale 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* ── Hero Title Section ──────────────────────────────────────────────── */
-    .hero-section {
-      margin-bottom: 1.5rem;
-      animation: fadeInScale 0.35s ease-out;
-    }
-    .hero-tag {
-      display: inline-block;
-      background: var(--primary-light);
-      border: 1px solid var(--primary-border);
-      color: var(--primary);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      padding: 0.25rem 0.8rem;
-      border-radius: var(--radius-pill);
-      margin-bottom: 0.6rem;
-      font-family: 'JetBrains Mono', monospace;
-      box-shadow: 0 1px 4px var(--accent-glow);
-    }
-    .hero-title {
-      font-size: 2.1rem;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.2;
-      letter-spacing: -0.025em;
-      margin-bottom: 0.35rem;
-    }
-    .hero-desc {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-    .hero-desc b { color: var(--text); }
-
-    /* ── Studio Step Tabs (3 Sub-Tabs inside Live Studio) ─────────────────── */
-    .studio-steps-nav {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-    }
-    .studio-step-btn {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 0.85rem 1rem;
-      cursor: pointer;
-      transition: all 0.22s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      box-shadow: var(--shadow-sm);
+    /* ── Main Container ─────────────────────────────────────────────────── */
+    .app-wrapper {
       position: relative;
-      overflow: hidden;
-    }
-    .studio-step-btn::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: transparent;
-      transition: background 0.2s ease;
-    }
-    .studio-step-btn:hover {
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-    .studio-step-btn.active {
-      border-color: var(--primary);
-      background: var(--card-highlight);
-      box-shadow: 0 4px 15px var(--accent-glow);
-    }
-    .studio-step-btn.active::after {
-      background: var(--primary);
-    }
-    .studio-step-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--surface-sub);
-      color: var(--text-sub);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
-    .studio-step-btn.active .studio-step-badge {
-      background: var(--primary);
-      color: var(--primary-text);
-      box-shadow: 0 2px 8px var(--accent-glow);
-    }
-    .studio-step-info { display: flex; flex-direction: column; text-align: left; }
-    .studio-step-title {
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: var(--text);
-    }
-    .studio-step-subtitle {
-      font-size: 0.74rem;
-      color: var(--text-muted);
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem 4rem 1.5rem;
     }
 
-    /* Studio Screen Panels */
-    .studio-screen-view { display: none; }
-    .studio-screen-view.active {
-      display: block;
-      animation: fadeInScale 0.25s ease-out;
-    }
-
-    /* ── Mode Selection Cards (Horizontal Split) ─────────────────────────── */
-    .mode-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .mode-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      box-shadow: var(--shadow-sm);
-    }
-    .mode-card:hover {
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-    .mode-card.active {
-      background: var(--card-highlight);
-      border: 2px solid var(--primary);
-      box-shadow: 0 4px 16px var(--accent-glow);
-    }
-    .mode-icon {
-      font-size: 1.75rem;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--surface-sub);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
-    .mode-card.active .mode-icon {
-      background: var(--primary-light);
-      border-color: var(--primary-border);
-      color: var(--primary);
-      transform: scale(1.05);
-    }
-    .mode-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text);
-      margin-bottom: 0.15rem;
-    }
-    .mode-card.active .mode-title { color: var(--primary); font-weight: 800; }
-    .mode-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.3;
-    }
-
-    /* ── Surface Card Base ───────────────────────────────────────────────── */
-    .white-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem 1.75rem;
-      margin-bottom: 1.5rem;
-      box-shadow: var(--shadow);
-      transition: all 0.25s ease;
-    }
-    .white-card:hover {
-      box-shadow: var(--shadow-lg);
-    }
-
-    /* ── Config Rows ─────────────────────────────────────────────────────── */
-    .config-row {
+    /* ── Top Brand & Navigation Header ───────────────────────────────────── */
+    .header-nav-shell {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1.25rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
+      padding: 0.85rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(12px);
     }
-    .config-label {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-sub);
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+    }
+    .brand-logo-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px var(--primary-glow);
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+    .brand-titles {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      letter-spacing: 0.03em;
     }
-    .select-engine {
-      flex: 1;
-      max-width: 580px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 0.65rem 0.95rem;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text);
-      outline: none;
-      transition: all 0.2s ease;
+    .brand-name span.brand-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
     }
-    .select-engine:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--accent-glow);
+    .brand-tagline {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* ── Test Samples Pills Row ──────────────────────────────────────────── */
-    .samples-row {
+    .nav-tabs-center {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--bg-sub);
+      padding: 0.3rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+    }
+    .nav-tab-btn {
+      padding: 0.42rem 1.05rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+    .nav-tab-btn:hover {
+      color: var(--text);
+      background: var(--bg-hover);
+    }
+    .nav-tab-btn.active {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      box-shadow: 0 2px 10px var(--primary-glow);
+      font-weight: 700;
+    }
+
+    .header-controls-right {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+    }
+    .status-cluster-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 0.38rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pulse-dot-green {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 3px var(--green-bg);
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+    }
+
+    .theme-switch-btn {
+      background: var(--bg-sub);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-pill);
+      padding: 0.38rem 0.95rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s ease;
+    }
+    .theme-switch-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 10px var(--primary-glow-sm);
+    }
+    .theme-color-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 6px var(--primary);
+    }
+
+    /* ── Tab Views Container ─────────────────────────────────────────────── */
+    .tab-view { display: none; }
+    .tab-view.active {
+      display: block;
+      animation: viewSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes viewSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Hero Banner Section ─────────────────────────────────────────────── */
+    .studio-hero-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .hero-badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--primary-glow-sm);
+      border: 1px solid var(--border-accent);
+      color: var(--primary);
+      padding: 0.28rem 0.85rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.6rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .studio-title-main {
+      font-size: 2.15rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+    }
+    .studio-subtitle-text {
+      font-size: 0.94rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+      max-width: 650px;
+    }
+    .studio-subtitle-text b { color: var(--text); }
+
+    /* ── Format Cards Quick Selector ─────────────────────────────────────── */
+    .aspect-selector-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .aspect-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1.15rem;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .aspect-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .aspect-card.active {
+      border-color: var(--primary);
+      background: var(--bg-sub);
+      box-shadow: 0 4px 18px var(--primary-glow-sm);
+    }
+    .aspect-card-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .aspect-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .aspect-card.active .aspect-icon-box {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+    .aspect-meta { display: flex; flex-direction: column; }
+    .aspect-name { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+    .aspect-sub { font-size: 0.74rem; color: var(--text-muted); }
+    .aspect-check {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--primary);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .aspect-card.active .aspect-check { opacity: 1; }
+
+    /* ── Two-Column Command Studio Layout ────────────────────────────────── */
+    .studio-console-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Mac-Window Framed Card (Praffot Style from Uploaded Reference) ──── */
+    .window-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .window-card:hover {
+      border-color: rgba(255, 87, 34, 0.4);
+    }
+    .window-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 1.25rem;
+      background: var(--bg-sub);
+      border-bottom: 1px solid var(--border);
+    }
+    .window-dots-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red   { background-color: #ff5f56; }
+    .dot-yellow{ background-color: #ffbd2e; }
+    .dot-green { background-color: #27c93f; }
+    .window-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.03em;
+    }
+    .window-body {
+      padding: 1.5rem;
+    }
+
+    /* Mode Selection Tabs in Left Console */
+    .mode-tab-strip {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--bg-sub);
+      padding: 0.35rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .mode-pill-tab {
+      flex: 1;
+      padding: 0.45rem 0.5rem;
+      text-align: center;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mode-pill-tab:hover { color: var(--text); }
+    .mode-pill-tab.active {
+      background: var(--bg-card);
+      color: var(--primary);
+      border-color: var(--border);
+      box-shadow: 0 1px 4px var(--shadow-sm);
+    }
+
+    /* Fast Preset Buttons */
+    .presets-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       margin-bottom: 1.25rem;
       flex-wrap: wrap;
     }
-    .sample-pill-btn {
-      background: var(--surface);
+    .preset-label {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .preset-btn {
+      background: var(--bg-sub);
       border: 1px solid var(--border);
       border-radius: var(--radius-pill);
-      padding: 0.35rem 0.9rem;
-      font-size: 0.8rem;
-      font-weight: 600;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 700;
       color: var(--text-sub);
       cursor: pointer;
       transition: all 0.18s ease;
     }
-    .sample-pill-btn:hover {
-      background: var(--primary-light);
+    .preset-btn:hover {
+      background: var(--primary-glow-sm);
       color: var(--primary);
-      border-color: var(--primary-border);
+      border-color: var(--border-accent);
       transform: translateY(-1px);
     }
 
-    /* ── Dropzone ────────────────────────────────────────────────────────── */
-    .dropzone {
-      border: 2px dashed var(--border-accent);
-      background: var(--surface-sub);
-      border-radius: var(--radius);
-      padding: 2.5rem 1.5rem;
+    /* Dropzone Area */
+    .dropzone-box {
+      border: 2px dashed var(--border);
+      background: var(--bg-sub);
+      border-radius: 12px;
+      padding: 2.25rem 1.25rem;
       text-align: center;
       cursor: pointer;
       position: relative;
       transition: all 0.25s ease;
       margin-bottom: 1.25rem;
     }
-    .dropzone:hover, .dropzone.dragover {
+    .dropzone-box:hover, .dropzone-box.dragover {
       border-color: var(--primary);
-      background: var(--primary-light);
-      transform: scale(1.005);
-      box-shadow: 0 6px 20px var(--accent-glow);
+      background: var(--primary-glow-sm);
+      transform: scale(1.008);
     }
-    .dropzone input[type=file] {
+    .dropzone-box input[type=file] {
       position: absolute;
       inset: 0;
       opacity: 0;
@@ -540,102 +539,91 @@
       width: 100%;
       height: 100%;
     }
-    .upload-icon-circle {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: var(--primary-light);
-      border: 1px solid var(--primary-border);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      color: var(--primary);
-      margin-bottom: 0.75rem;
-      animation: cardFloat 3s ease-in-out infinite;
+    .dropzone-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+      animation: floatPulse 3s infinite ease-in-out;
     }
-    .dropzone-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 0.25rem;
+    @keyframes floatPulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
-    .dropzone-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
+    .dropzone-head { font-size: 0.95rem; font-weight: 800; color: var(--text); margin-bottom: 0.2rem; }
+    .dropzone-desc { font-size: 0.78rem; color: var(--text-muted); }
 
-    /* ── Secondary Controls ──────────────────────────────────────────────── */
-    .controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-      background: var(--surface-sub);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-    }
-    .control-item { display: flex; flex-direction: column; gap: 0.35rem; }
-    .control-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .control-select, .control-input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.85rem;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .control-select:focus, .control-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px var(--accent-glow);
-    }
-
-    /* ── Bottom Action Bar ───────────────────────────────────────────────── */
-    .action-bar {
+    .file-chip {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .file-status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      font-weight: 600;
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.82rem;
       color: var(--text-sub);
     }
-    .btn-run {
-      background: var(--primary);
-      color: var(--primary-text);
+
+    /* Form Controls */
+    .input-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .field-select, .field-input, .field-textarea {
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .field-select:focus, .field-input:focus, .field-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow-sm);
+    }
+    .field-textarea {
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    /* Action Trigger Button */
+    .btn-launch-glow {
+      width: 100%;
+      background: var(--primary-gradient);
+      color: #ffffff;
       border: none;
-      border-radius: var(--radius-sm);
-      padding: 0.8rem 2.2rem;
-      font-size: 0.96rem;
+      border-radius: 12px;
+      padding: 0.95rem 1.5rem;
+      font-size: 1rem;
       font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.55rem;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px var(--accent-glow);
+      justify-content: center;
+      gap: 0.6rem;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-glow);
+      user-select: none;
     }
-    .btn-run:hover:not(:disabled) {
-      background: var(--primary-hover);
+    .btn-launch-glow:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px var(--accent-glow);
+      box-shadow: 0 12px 35px var(--primary-glow);
     }
-    .btn-run:disabled {
+    .btn-launch-glow:disabled {
       background: var(--border);
       color: var(--text-muted);
       cursor: not-allowed;
@@ -643,513 +631,250 @@
       transform: none;
     }
 
-    /* ── Direct Script & Extracted Text Areas ────────────────────────────── */
-    .editor-textarea {
+    /* ── Right Console: Real-Time Pipeline & Deliverables ────────────────── */
+    .progress-bar-shell {
       width: 100%;
-      background: var(--surface);
+      height: 8px;
+      background: var(--bg-sub);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      margin: 0.85rem 0 1.25rem 0;
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 0.9rem;
-      font-size: 0.9rem;
-      font-family: inherit;
-      color: var(--text);
-      resize: vertical;
-      line-height: 1.6;
-      outline: none;
-      transition: border-color 0.2s;
     }
-    .editor-textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    /* ── Results Dashboard ───────────────────────────────────────────────── */
-    .section-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .section-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .badge-pill {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.2rem 0.6rem;
-      border-radius: var(--radius-pill);
-      letter-spacing: 0.03em;
-    }
-    .badge-pill-green { background: var(--green-light); color: var(--green-text); }
-    .badge-pill-purple { background: var(--purple-light); color: var(--purple-text); font-family: 'JetBrains Mono', monospace; }
-    .badge-pill-primary { background: var(--primary-light); color: var(--primary); font-family: 'JetBrains Mono', monospace; }
-
-    /* ── Scene Detection Grid ────────────────────────────────────────────── */
-    .scenes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0 1.5rem 0;
-    }
-    .scene-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 0.95rem 1rem;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.25s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .scene-card.active { border-color: var(--green); }
-    .scene-card:hover {
-      box-shadow: var(--shadow);
-      transform: translateY(-3px);
-      border-color: var(--primary);
-    }
-    .scene-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.4rem;
-    }
-    .scene-card-title {
-      font-weight: 800;
-      font-size: 0.85rem;
-      color: var(--text);
-      text-transform: uppercase;
-    }
-    .scene-text-excerpt {
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      line-height: 1.4;
-      margin-bottom: 0.6rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      background: var(--surface-sub);
-      padding: 0.45rem 0.55rem;
-      border-radius: 6px;
-      border-left: 3px solid var(--primary);
-    }
-    .scene-stat-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.35rem;
-    }
-    .scene-stat-row b { color: var(--text); }
-    .scene-bar-track {
-      width: 100%;
-      height: 4px;
-      background: var(--border);
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-      margin-bottom: 0.45rem;
-    }
-    .scene-bar-fill {
+    .progress-bar-fill-coral {
       height: 100%;
-      background: var(--green);
+      width: 0%;
+      background: var(--primary-gradient);
       border-radius: var(--radius-pill);
-    }
-    .scene-keywords {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'JetBrains Mono', monospace;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px var(--primary);
     }
 
-    /* ── Storyboard Interactive Scrubber Strip ───────────────────────────── */
-    .storyboard-preview-box {
-      background: var(--surface-sub);
+    .pipeline-stage-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-sub);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin: 1.25rem 0;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.55rem;
+      font-size: 0.84rem;
+      transition: all 0.25s ease;
     }
-    .storyboard-timeline-row {
+    .pipeline-stage-card.in-progress {
+      border-color: var(--border-accent);
+      background: var(--primary-glow-sm);
+      box-shadow: 0 2px 12px var(--primary-glow-sm);
+    }
+    .pipeline-stage-card.completed {
+      border-color: var(--green);
+      background: var(--green-bg);
+    }
+    .stage-id-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: var(--border);
+      color: var(--text-muted);
+    }
+    .pipeline-stage-card.completed .stage-id-badge {
+      background: var(--green);
+      color: #ffffff;
+    }
+    .pipeline-stage-card.in-progress .stage-id-badge {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    /* Video Player Frame */
+    .video-viewport-wrapper {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 1.5px solid var(--border);
+      margin: 1.25rem 0;
+      box-shadow: var(--shadow);
+    }
+    video { width: 100%; display: block; max-height: 380px; }
+
+    .downloads-button-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .btn-pill-action {
+      background: var(--bg-sub);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 0.45rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .btn-pill-action:hover {
+      border-color: var(--primary);
+      background: var(--primary-glow-sm);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Storyboard Scrubber */
+    .storyboard-strip-scroll {
       display: flex;
       gap: 0.75rem;
       overflow-x: auto;
-      padding-bottom: 0.5rem;
+      padding: 0.4rem 0 0.8rem 0;
     }
-    .storyboard-thumb-card {
-      min-width: 155px;
-      background: var(--surface);
+    .storyboard-item-thumb {
+      min-width: 140px;
+      background: var(--bg-sub);
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      padding: 0.65rem;
+      padding: 0.55rem;
       cursor: pointer;
       transition: all 0.2s ease;
       flex-shrink: 0;
     }
-    .storyboard-thumb-card:hover, .storyboard-thumb-card.active {
+    .storyboard-item-thumb:hover, .storyboard-item-thumb.active {
       border-color: var(--primary);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px var(--accent-glow);
+      box-shadow: 0 4px 12px var(--primary-glow-sm);
     }
-    .thumb-header-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 0.35rem;
-    }
-    .thumb-visual-preview {
-      height: 52px;
+    .thumb-preview-gradient {
+      height: 48px;
       border-radius: 6px;
-      background: linear-gradient(135deg, var(--primary), #38bdf8);
-      margin-bottom: 0.45rem;
+      background: linear-gradient(135deg, var(--primary), #fb923c);
+      margin-bottom: 0.4rem;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
       font-size: 1.1rem;
     }
-    .thumb-script-excerpt {
-      font-size: 0.72rem;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ── Source Utilization & Pipeline Transformation List ───────────────── */
-    .stage-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--surface-sub);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.85rem 1.15rem;
-      margin-bottom: 0.55rem;
-      font-size: 0.86rem;
-      transition: all 0.25s ease;
-      gap: 1rem;
-    }
-    .stage-row.in-progress {
-      background: var(--primary-light);
-      border-color: var(--primary-border);
-      box-shadow: 0 2px 10px var(--accent-glow);
-    }
-    .stage-row.completed {
-      background: var(--surface);
-      border-color: var(--border);
-    }
-    .stage-left {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.85rem;
-      flex: 1;
-    }
-    .stage-id {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      background: var(--border);
-      padding: 0.15rem 0.45rem;
-      border-radius: 4px;
-    }
-    .stage-row.completed .stage-id {
-      background: var(--green-light);
-      color: var(--green-text);
-    }
-    .stage-row.in-progress .stage-id {
-      background: var(--primary);
-      color: var(--primary-text);
-    }
-    .stage-content { display: flex; flex-direction: column; gap: 0.2rem; }
-    .stage-name { font-weight: 700; color: var(--text); font-size: 0.88rem; }
-    .stage-desc { font-size: 0.78rem; color: var(--text-muted); }
-    .stage-metric-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      font-size: 0.78rem;
-      padding: 0.25rem 0.65rem;
-      border-radius: var(--radius-pill);
-      white-space: nowrap;
-    }
-
-    /* ── Transformation Summary Box ───────────────────────────────────────── */
-    .total-latency-box {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--primary-light);
-      border: 1.5px solid var(--primary-border);
-      border-radius: 10px;
-      padding: 0.95rem 1.3rem;
-      margin: 1.25rem 0 0.8rem 0;
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 0.92rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .total-latency-metric {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.95rem;
-      letter-spacing: 0.02em;
-    }
-
-    /* ── Segmented Multi-Color Progress Bar & Shimmer ─────────────────────── */
-    .segmented-bar {
-      display: flex;
-      height: 8px;
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-      margin-bottom: 0.8rem;
-    }
-    .seg-blue   { background-color: #38bdf8; }
-    .seg-orange { background-color: #f97316; }
-    .seg-green  { background-color: #10b981; }
-    .seg-purple { background-color: var(--primary); }
-
-    .bar-legend {
-      display: flex;
-      justify-content: center;
-      gap: 1.75rem;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .legend-item { display: flex; align-items: center; gap: 0.4rem; }
-    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-    /* ── Video Player & Downloads ────────────────────────────────────────── */
-    .video-preview-wrapper {
-      border-radius: 14px;
-      overflow: hidden;
-      background: #000;
-      margin: 1rem 0;
-      border: 1.5px solid var(--border);
-      box-shadow: var(--shadow);
-    }
-    video { width: 100%; display: block; max-height: 480px; }
-    .downloads-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-    }
-    .btn-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.15rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text-sub);
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .btn-download:hover {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    /* ── Alerts ──────────────────────────────────────────────────────────── */
-    .alert {
-      padding: 0.8rem 1rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.86rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .alert-error { background: var(--red-light); border: 1px solid var(--red); color: var(--red); }
-    .alert-info { background: var(--primary-light); border: 1px solid var(--primary-border); color: var(--primary); }
 
     /* ══════════════════════════════════════════════════════════════════════ */
-    /* ARCHITECTURE PIPELINE (Matching Uploaded Image Flow + Animated Dots)  */
+    /* ARCHITECTURE PIPELINE (Connected Stages & Clean Animated Boxes)       */
     /* ══════════════════════════════════════════════════════════════════════ */
-    .arch-stages-wrapper {
+    .arch-pipeline-container {
       position: relative;
       margin-bottom: 2rem;
     }
-    /* Dashed line connecting all 5 stages horizontally */
-    .arch-connector-line {
+    .arch-connecting-beam {
       position: absolute;
       top: 50%;
-      left: 6%;
-      right: 6%;
+      left: 5%;
+      right: 5%;
       height: 2px;
-      background-image: repeating-linear-gradient(to right, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px);
-      z-index: 1;
+      background: repeating-linear-gradient(to right, var(--border) 0, var(--border) 8px, transparent 8px, transparent 16px);
       transform: translateY(-50%);
+      z-index: 1;
     }
-    /* Flowing pulse beam along the line */
-    .arch-connector-pulse {
+    .arch-particle-glow {
       position: absolute;
       top: -3px;
       left: 0;
-      width: 60px;
+      width: 70px;
       height: 8px;
       border-radius: 4px;
-      background: radial-gradient(circle, var(--flow-dot) 0%, transparent 70%);
-      animation: flowBeam 3s infinite linear;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      animation: particleMove 3.5s infinite linear;
       z-index: 2;
     }
-
-    .arch-stages-nav {
+    @keyframes particleMove {
+      0% { transform: translateX(-100%); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateX(1800%); opacity: 0; }
+    }
+    .arch-stages-deck {
       position: relative;
       z-index: 3;
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 0.85rem;
     }
-    .arch-stage-btn {
-      background: var(--surface);
+    .arch-stage-card {
+      background: var(--bg-card);
       border: 1.5px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       padding: 1.1rem 0.85rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
       box-shadow: var(--shadow-sm);
-      position: relative;
     }
-    .arch-stage-btn:hover {
-      transform: translateY(-4px);
+    .arch-stage-card:hover {
+      transform: translateY(-3px);
       border-color: var(--border-accent);
       box-shadow: var(--shadow);
     }
-    .arch-stage-btn.selected {
+    .arch-stage-card.selected {
       border: 2px solid var(--primary);
-      box-shadow: 0 6px 20px var(--accent-glow);
-      background: var(--card-highlight);
+      box-shadow: 0 6px 20px var(--primary-glow);
+      background: var(--bg-sub);
     }
-    /* Glowing dot indicator between stages */
-    .arch-stage-btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: -10px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--flow-dot);
-      box-shadow: 0 0 6px var(--flow-dot);
-      transform: translateY(-50%);
-      z-index: 4;
-    }
-    .arch-stage-btn:last-child::after { display: none; }
-
     .arch-stage-num {
-      font-family: 'JetBrains Mono', monospace;
       font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
-    }
-    .arch-stage-icon {
-      font-size: 1.8rem;
-      margin-bottom: 0.4rem;
-      display: inline-block;
-      transition: transform 0.2s;
-    }
-    .arch-stage-btn:hover .arch-stage-icon {
-      transform: scale(1.12);
-    }
-    .arch-stage-name {
-      font-size: 0.92rem;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.25;
-      margin-bottom: 0.2rem;
-    }
-    .arch-stage-tech {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-    }
-    .arch-stage-badge {
-      display: inline-block;
+      color: var(--primary);
       font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 0.25rem;
+    }
+    .arch-stage-icon { font-size: 1.7rem; margin-bottom: 0.35rem; }
+    .arch-stage-name { font-size: 0.9rem; font-weight: 800; color: var(--text); }
+    .arch-stage-tech { font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.45rem; }
+    .arch-badge-pill {
       font-size: 0.68rem;
       font-weight: 700;
-      padding: 0.2rem 0.55rem;
+      padding: 0.18rem 0.55rem;
       border-radius: var(--radius-pill);
-      background: var(--surface-sub);
+      background: var(--bg-sub);
       color: var(--text-sub);
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Architecture Stage Detail Card */
-    .arch-inspector-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 1.75rem;
-      box-shadow: var(--shadow);
-      margin-bottom: 1.5rem;
-    }
-
-    /* Clean 4 Sub-Boxes (without cluttered descriptive paragraphs, sleek & animated) */
-    .arch-sub-boxes-grid {
+    /* 4 Clickable Sub-Boxes (Clean, uncluttered, interactive) */
+    .arch-boxes-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-top: 1.25rem;
     }
-    .arch-sub-box {
-      background: var(--surface);
+    .arch-sub-box-card {
+      background: var(--bg-card);
       border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 1.1rem 1rem;
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      text-align: center;
       cursor: pointer;
       transition: all 0.22s ease;
-      position: relative;
-      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 120px;
-      box-shadow: var(--shadow-sm);
+      min-height: 125px;
     }
-    .arch-sub-box:hover {
+    .arch-sub-box-card:hover {
       border-color: var(--primary);
       transform: translateY(-3px);
-      box-shadow: 0 6px 18px var(--accent-glow);
+      box-shadow: 0 4px 16px var(--primary-glow-sm);
     }
-    .arch-sub-box.active {
+    .arch-sub-box-card.active {
       border: 2px solid var(--primary);
-      background: var(--card-highlight);
-      box-shadow: 0 6px 20px var(--accent-glow);
-      animation: cardFloat 3s ease-in-out infinite;
+      background: var(--bg-sub);
+      box-shadow: 0 6px 20px var(--primary-glow);
     }
-    .arch-sub-box-icon {
-      font-size: 1.7rem;
-      margin-bottom: 0.4rem;
-      transition: transform 0.2s;
-    }
-    .arch-sub-box:hover .arch-sub-box-icon {
-      transform: scale(1.15);
-    }
-    .arch-sub-box-title {
+    .arch-box-icon { font-size: 1.75rem; margin-bottom: 0.45rem; }
+    .arch-box-title {
       font-size: 0.78rem;
       font-weight: 800;
       color: var(--text);
@@ -1157,180 +882,152 @@
       letter-spacing: 0.04em;
       margin-bottom: 0.35rem;
     }
-    .arch-sub-box-pill {
+    .arch-box-action-pill {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
       font-weight: 700;
       padding: 0.2rem 0.6rem;
       border-radius: var(--radius-pill);
-      background: var(--primary-light);
+      background: var(--primary-glow-sm);
       color: var(--primary);
-      border: 1px solid var(--primary-border);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
+      border: 1px solid var(--border-accent);
     }
 
-    /* Flowchart Drill-Down Drawer for Clicked Box */
-    .flowchart-drilldown-panel {
-      background: var(--surface-sub);
-      border: 1.5px solid var(--primary-border);
-      border-radius: 16px;
+    /* Interactive Flowchart Drilldown */
+    .flowchart-drawer {
+      background: var(--bg-sub);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
       padding: 1.5rem;
       margin-top: 1.5rem;
-      animation: fadeInScale 0.3s ease-out;
+      animation: viewSlideIn 0.28s ease-out;
     }
-    .flowchart-nodes-row {
+    .fc-step-row {
       display: flex;
       align-items: center;
       gap: 0.85rem;
       overflow-x: auto;
-      padding: 1rem 0.5rem;
+      padding: 0.75rem 0.25rem;
       margin-bottom: 1rem;
     }
-    .fc-node {
-      background: var(--surface);
+    .fc-step-node {
+      background: var(--bg-card);
       border: 1.5px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
       padding: 0.85rem 1.1rem;
       min-width: 180px;
       box-shadow: var(--shadow-sm);
       flex-shrink: 0;
       transition: all 0.2s ease;
-      animation: fadeInScale 0.35s ease-out;
     }
-    .fc-node:hover {
+    .fc-step-node:hover {
       border-color: var(--primary);
       transform: translateY(-2px);
-      box-shadow: var(--shadow);
     }
-    .fc-node-title {
-      font-size: 0.8rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 0.3rem;
-    }
-    .fc-node-desc {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-    }
-    .fc-arrow {
+    .fc-step-title { font-size: 0.82rem; font-weight: 800; color: var(--text); margin-bottom: 0.25rem; }
+    .fc-step-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; }
+    .fc-flow-arrow {
       color: var(--primary);
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
       flex-shrink: 0;
-      animation: pulseGlow 1.5s infinite;
+      animation: pulseAnim 1.5s infinite;
     }
 
-    /* ── Provenance Tab Styles ───────────────────────────────────────────── */
-    .audit-grid {
+    /* ══════════════════════════════════════════════════════════════════════ */
+    /* VISUALIZATIONS, PROVENANCE & API DOCS STYLES                         */
+    /* ══════════════════════════════════════════════════════════════════════ */
+    .charts-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .chart-panel-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .audit-hash-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1rem;
       margin: 1.25rem 0;
     }
-    .audit-box {
-      background: var(--surface-sub);
+    .audit-hash-card {
+      background: var(--bg-sub);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1rem;
-      transition: all 0.2s ease;
     }
-    .audit-box:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
-    .audit-box-title {
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: var(--text-muted);
-      margin-bottom: 0.45rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .audit-box-hash {
+    .audit-code-box {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--primary);
       word-break: break-all;
-      background: var(--surface);
+      background: var(--bg-card);
       padding: 0.45rem 0.55rem;
       border: 1px solid var(--border);
       border-radius: 6px;
+      margin-top: 0.4rem;
     }
-    .provenance-table-wrap {
+    .table-responsive-box {
       overflow-x: auto;
       margin: 1.25rem 0;
       border: 1px solid var(--border);
       border-radius: 12px;
     }
-    .provenance-table {
+    .data-table-modern {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
+      font-size: 0.83rem;
       text-align: left;
     }
-    .provenance-table th {
-      background: var(--surface-sub);
+    .data-table-modern th {
+      background: var(--bg-sub);
       padding: 0.8rem 1rem;
       font-weight: 700;
       color: var(--text-sub);
       border-bottom: 1px solid var(--border);
     }
-    .provenance-table td {
+    .data-table-modern td {
       padding: 0.8rem 1rem;
       border-bottom: 1px solid var(--border);
       color: var(--text);
     }
-    .provenance-table tr:last-child td { border-bottom: none; }
-    .provenance-table tr:hover td { background: var(--surface-hover); }
+    .data-table-modern tr:last-child td { border-bottom: none; }
+    .data-table-modern tr:hover td { background: var(--bg-hover); }
 
-    /* ── API Explorer Tab Styles ─────────────────────────────────────────── */
-    .endpoint-item {
+    .api-card-wrapper {
       border: 1px solid var(--border);
       border-radius: 12px;
       margin-bottom: 1rem;
       overflow: hidden;
-      background: var(--surface);
-      transition: all 0.2s ease;
+      background: var(--bg-card);
     }
-    .endpoint-item:hover {
-      border-color: var(--primary);
-      box-shadow: var(--shadow-sm);
-    }
-    .endpoint-header {
+    .api-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0.9rem 1.2rem;
-      background: var(--surface-sub);
+      background: var(--bg-sub);
       cursor: pointer;
       user-select: none;
     }
-    .endpoint-badge {
+    .method-badge {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 800;
-      padding: 0.25rem 0.6rem;
+      padding: 0.25rem 0.55rem;
       border-radius: 6px;
       margin-right: 0.75rem;
     }
-    .badge-post { background: var(--primary-light); color: var(--primary); }
-    .badge-get  { background: var(--green-light); color: var(--green-text); }
-    .endpoint-path {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
-      font-size: 0.86rem;
-      color: var(--text);
-    }
-    .endpoint-body {
-      padding: 1.25rem;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
-    }
-    .code-block {
-      background: #09090b;
+    .method-post { background: var(--primary-glow-sm); color: var(--primary); }
+    .method-get  { background: var(--green-bg); color: var(--green-text); }
+    .code-terminal {
+      background: #060608;
       color: #f4f4f5;
       padding: 1rem;
       border-radius: 8px;
@@ -1338,26 +1035,7 @@
       font-size: 0.8rem;
       overflow-x: auto;
       margin: 0.6rem 0;
-      border: 1px solid #27272a;
-    }
-
-    /* ── Progress Shimmer Bar ────────────────────────────────────────────── */
-    .progress-bar-container {
-      width: 100%;
-      height: 8px;
-      background: var(--border);
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-      position: relative;
-    }
-    .progress-bar-active-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
-      background-size: 200% 100%;
-      animation: shimmerBar 2s infinite linear;
-      border-radius: var(--radius-pill);
-      transition: width 0.3s ease;
+      border: 1px solid #1f1f28;
     }
 
     /* ── Utilities ───────────────────────────────────────────────────────── */
@@ -1366,861 +1044,782 @@
     .spin { animation: spin 1s linear infinite; display: inline-block; }
 
     /* ── Responsive ──────────────────────────────────────────────────────── */
-    @media (max-width: 868px) {
-      .mode-cards-grid { grid-template-columns: 1fr; }
-      .studio-steps-nav { grid-template-columns: 1fr; }
-      .arch-stages-nav { grid-template-columns: repeat(2, 1fr); }
-      .arch-sub-boxes-grid { grid-template-columns: 1fr 1fr; }
-      .hero-title { font-size: 1.6rem; }
-      .config-row { flex-direction: column; align-items: flex-start; }
-      .select-engine { max-width: 100%; width: 100%; }
-      .arch-connector-line { display: none; }
+    @media (max-width: 900px) {
+      .header-nav-shell { flex-direction: column; align-items: flex-start; }
+      .studio-console-grid { grid-template-columns: 1fr; }
+      .aspect-selector-row { grid-template-columns: 1fr; }
+      .arch-stages-deck { grid-template-columns: repeat(2, 1fr); }
+      .arch-boxes-grid { grid-template-columns: 1fr 1fr; }
+      .charts-grid-2 { grid-template-columns: 1fr; }
+      .arch-connecting-beam { display: none; }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Ambient Atmospheric Glow Orbs -->
+<div class="ambient-glow-orb"></div>
+<div class="ambient-glow-orb-secondary"></div>
 
-  <!-- ── Top Header Bar (With Brand, Live Dot, Nav Tabs, & Theme Toggle) ── -->
-  <div class="top-pill-bar">
-    <div class="system-status-pill">
-      <span class="status-dot"></span>
-      <span>VIDEOENGINE CORE / H.264 B-ROLL PIPELINE v1.0.0</span>
-      <span class="status-divider">|</span>
-      <span style="color:var(--text-muted);">INCUBRIX PRODUCTION ENGINE</span>
-    </div>
+<div class="app-wrapper">
 
-    <div class="header-actions-row">
-      <!-- Theme Switcher Button (Light: White & Purple | Dark: Black & Yellow) -->
-      <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light & Dark Theme">
-        <span class="theme-indicator-dot" id="theme-dot"></span>
-        <span id="theme-label-text">☀️ Light</span>
-      </button>
-
-      <!-- Main Navigation Tabs -->
-      <div class="nav-pill-row">
-        <button class="nav-pill active" id="tab-btn-studio" onclick="switchTab('studio')">🚀 Live Studio</button>
-        <button class="nav-pill" id="tab-btn-architecture" onclick="switchTab('architecture')">🎯 Architecture</button>
-        <button class="nav-pill" id="tab-btn-visualizations" onclick="switchTab('visualizations')">📊 Visualizations</button>
-        <button class="nav-pill" id="tab-btn-provenance" onclick="switchTab('provenance')">📋 Provenance</button>
-        <button class="nav-pill" id="tab-btn-api" onclick="switchTab('api')">⚡ API Docs</button>
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TOP BRAND & NAVIGATION BAR                                             -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <header class="header-nav-shell">
+    <a href="#" class="brand-group">
+      <div class="brand-logo-mark">⚡</div>
+      <div class="brand-titles">
+        <div class="brand-name">NovaCut<span class="brand-dot"></span></div>
+        <div class="brand-tagline">AI B-ROLL PRODUCTION ENGINE</div>
       </div>
+    </a>
+
+    <!-- Top Tab Navigation -->
+    <nav class="nav-tabs-center">
+      <button class="nav-tab-btn active" id="tab-btn-studio" onclick="switchTab('studio')">🎬 Studio</button>
+      <button class="nav-tab-btn" id="tab-btn-architecture" onclick="switchTab('architecture')">🎯 Architecture</button>
+      <button class="nav-tab-btn" id="tab-btn-visualizations" onclick="switchTab('visualizations')">📊 Visualizations</button>
+      <button class="nav-tab-btn" id="tab-btn-provenance" onclick="switchTab('provenance')">📋 Provenance</button>
+      <button class="nav-tab-btn" id="tab-btn-api" onclick="switchTab('api')">⚡ API Docs</button>
+    </nav>
+
+    <!-- Cluster Status & Theme Toggle -->
+    <div class="header-controls-right">
+      <div class="status-cluster-pill">
+        <span class="pulse-dot-green"></span>
+        <span>CLUSTER ACTIVE</span>
+      </div>
+
+      <button class="theme-switch-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark Mode">
+        <span class="theme-color-indicator" id="theme-dot"></span>
+        <span id="theme-label-text">🌙 Dark Mode</span>
+      </button>
     </div>
-  </div>
+  </header>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 1: LIVE STUDIO (With 3 Sub-Tabs: Screen 1, Screen 2, Screen 3)    -->
+  <!-- TAB 1: STUDIO (Modern Split Console Workspace)                        -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-view active" id="tab-view-studio">
+  <main class="tab-view active" id="tab-view-studio">
 
-    <!-- Hero Title Section -->
-    <div class="hero-section">
-      <div class="hero-tag">DOCUMENT-TO-VIDEO PRODUCTION ENGINE · PDF TO VIDEO AI</div>
-      <h1 class="hero-title">Live Document & B-Roll Video Studio</h1>
-      <p class="hero-desc">
-        Automated document transformation pipeline converting PDFs and scripts into synchronized B-roll videos across <b>YouTube 16:9</b>, <b>Shorts/Reels 9:16</b>, and <b>Square 1:1</b>.
-      </p>
+    <!-- Hero Header Strip -->
+    <div class="studio-hero-strip">
+      <div>
+        <div class="hero-badge-tag">AUTONOMOUS PIPELINE · PDF TO VIDEO AI</div>
+        <h1 class="studio-title-main">Synthesize Studio Videos from Documents</h1>
+        <p class="studio-subtitle-text">
+          Converts multi-page PDFs, direct scripts, or neural voiceover into synced broadcast videos with <b>verified CC0 B-roll footage</b> and burned-in captions.
+        </p>
+      </div>
+
+      <!-- Hidden select engine for backend aspect ratio compatibility -->
+      <select id="cfg-aspect" class="hidden">
+        <option value="16:9" selected>16:9</option>
+        <option value="9:16">9:16</option>
+        <option value="1:1">1:1</option>
+      </select>
     </div>
 
     <!-- System Warnings Banner -->
     <div id="system-banner-wrap"></div>
 
-    <!-- ── Studio 3-Step Navigation Bar ──────────────────────────────────── -->
-    <div class="studio-steps-nav">
-      <button class="studio-step-btn active" id="studio-step-btn-1" onclick="switchStudioScreen(1)">
-        <div class="studio-step-badge">1</div>
-        <div class="studio-step-info">
-          <span class="studio-step-title">Screen 1 — Create a Video</span>
-          <span class="studio-step-subtitle">Upload PDF, script & parameters</span>
-        </div>
-      </button>
-
-      <button class="studio-step-btn" id="studio-step-btn-2" onclick="switchStudioScreen(2)">
-        <div class="studio-step-badge">2</div>
-        <div class="studio-step-info">
-          <span class="studio-step-title">Screen 2 — Preview & Edit</span>
-          <span class="studio-step-subtitle">Storyboard beats & pipeline progress</span>
-        </div>
-      </button>
-
-      <button class="studio-step-btn" id="studio-step-btn-3" onclick="switchStudioScreen(3)">
-        <div class="studio-step-badge">3</div>
-        <div class="studio-step-info">
-          <span class="studio-step-title">Screen 3 — Finished Video</span>
-          <span class="studio-step-subtitle">MP4 playback, downloads & audit</span>
-        </div>
-      </button>
-    </div>
-
-    <!-- ────────────────────────────────────────────────────────────────── -->
-    <!-- SCREEN 1: CREATE A VIDEO                                           -->
-    <!-- ────────────────────────────────────────────────────────────────── -->
-    <div class="studio-screen-view active" id="studio-screen-1">
-      
-      <!-- Mode Selection Cards (Horizontal Split) -->
-      <div class="mode-cards-grid">
-        <div class="mode-card active" id="card-mode-pdf" onclick="switchMode('pdf')">
-          <div class="mode-icon">📄</div>
-          <div>
-            <div class="mode-title">1. Passive PDF Data Mode</div>
-            <div class="mode-subtitle">Extract document headings, pages & structure</div>
+    <!-- Quick Format Selector Strip -->
+    <div class="aspect-selector-row">
+      <div class="aspect-card active" id="aspect-card-16x9" onclick="selectFormat('16:9')">
+        <div class="aspect-card-left">
+          <div class="aspect-icon-box">📺</div>
+          <div class="aspect-meta">
+            <span class="aspect-name">YouTube & Widescreen</span>
+            <span class="aspect-sub">1280x720 · 16:9 Landscape</span>
           </div>
         </div>
-        <div class="mode-card" id="card-mode-script" onclick="switchMode('script')">
-          <div class="mode-icon">📝</div>
-          <div>
-            <div class="mode-title">2. Direct Script Editor</div>
-            <div class="mode-subtitle">Multi-scene custom narration script</div>
-          </div>
-        </div>
-        <div class="mode-card" id="card-mode-audio" onclick="switchMode('audio')">
-          <div class="mode-icon">🎙️</div>
-          <div>
-            <div class="mode-title">3. Real-Time Voice Mode</div>
-            <div class="mode-subtitle">Voiceover audio capture & sync buffer</div>
-          </div>
-        </div>
+        <span class="aspect-check">✔</span>
       </div>
 
-      <!-- Main Creation Configuration Card -->
-      <div class="white-card" id="config-card">
-
-        <!-- Target Video Format Dropdown -->
-        <div class="config-row">
-          <span class="config-label">⚙️ TARGET EXECUTION ENGINE:</span>
-          <select class="select-engine" id="cfg-aspect">
-            <option value="16:9" selected>YouTube & Widescreen · 1080p 16:9 (Desktop, Presentation & Television)</option>
-            <option value="9:16">Mobile Vertical · 1080x1920 9:16 (YouTube Shorts, IG Reels & TikTok)</option>
-            <option value="1:1">Social Feed Square · 1080x1080 1:1 (Instagram Post & LinkedIn Feed)</option>
-          </select>
-        </div>
-
-        <!-- Test Samples Preset Pills -->
-        <div class="samples-row">
-          <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">FAST PRESETS:</span>
-          <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'Robotics (03)')">🤖 Robotics (03)</button>
-          <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'Clean Energy (04)')">🌱 Clean Energy (04)</button>
-          <button class="sample-pill-btn" onclick="loadSamplePreset('sample.pdf', 'AI Intro (01)')">🧠 AI Intro (01)</button>
-          <button class="sample-pill-btn" onclick="loadSamplePreset('multipage.pdf', 'Multipage Tech (02)')">📚 Multipage Tech (02)</button>
-        </div>
-
-        <!-- Mode 1: PDF Dropzone -->
-        <div id="dropzone-pdf-wrap">
-          <div class="dropzone" id="pdf-dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-            <input type="file" id="pdf-file-input" accept=".pdf" onchange="onFileSelected(event)" />
-            <div class="upload-icon-circle">📄</div>
-            <div class="dropzone-title">Drag & drop your PDF file here, or click to browse</div>
-            <div class="dropzone-subtitle">Supports PDF documents up to 50MB (PyMuPDF IO Engine)</div>
-          </div>
-          <div id="pdf-file-details" class="hidden" style="margin-bottom:1.25rem; font-size:0.85rem; color:var(--text-sub); display:flex; gap:1.5rem; align-items:center;">
-            <span>📎 <b id="pdf-name-text">filename.pdf</b></span>
-            <span>💾 <span id="pdf-size-text">0 KB</span></span>
-            <span class="badge-pill badge-pill-green" id="pdf-pages-text">1 page</span>
+      <div class="aspect-card" id="aspect-card-9x16" onclick="selectFormat('9:16')">
+        <div class="aspect-card-left">
+          <div class="aspect-icon-box">📱</div>
+          <div class="aspect-meta">
+            <span class="aspect-name">Reels, Shorts & TikTok</span>
+            <span class="aspect-sub">720x1280 · 9:16 Portrait</span>
           </div>
         </div>
+        <span class="aspect-check">✔</span>
+      </div>
 
-        <!-- Mode 2: Direct Script Editor Wrap -->
-        <div id="mode-script-wrap" class="hidden">
-          <div style="margin-bottom:1rem;">
-            <label class="control-label" style="display:block; margin-bottom:0.4rem;">ENTER NARRATION SCRIPT (Separate scenes with double blank line):</label>
-            <textarea class="editor-textarea" id="direct-script" rows="6" placeholder="Enter narration script here. Double line break indicates a new video scene..."></textarea>
+      <div class="aspect-card" id="aspect-card-1x1" onclick="selectFormat('1:1')">
+        <div class="aspect-card-left">
+          <div class="aspect-icon-box">⏹️</div>
+          <div class="aspect-meta">
+            <span class="aspect-name">Social Square Feed</span>
+            <span class="aspect-sub">720x720 · 1:1 Square</span>
           </div>
         </div>
+        <span class="aspect-check">✔</span>
+      </div>
+    </div>
 
-        <!-- Mode 3: Real-Time Audio Mode Wrap -->
-        <div id="mode-audio-wrap" class="hidden">
-          <div class="dropzone" id="audio-dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDropAudio(event)">
-            <input type="file" id="audio-file-input" accept=".wav,.mp3" onchange="onAudioSelected(event)" />
-            <div class="upload-icon-circle">🎙️</div>
-            <div class="dropzone-title">Upload speech narration audio (.WAV or .MP3)</div>
-            <div class="dropzone-subtitle">Audio cadence will be transcribed and synchronized with B-roll</div>
+    <!-- ── Two-Column Command Console ────────────────────────────────────── -->
+    <div class="studio-console-grid">
+
+      <!-- LEFT CONSOLE: INGESTION & SCRIPT CONTROLS -->
+      <div class="window-card">
+        <div class="window-header-bar">
+          <div class="window-dots-row">
+            <span class="window-dot dot-red"></span>
+            <span class="window-dot dot-yellow"></span>
+            <span class="window-dot dot-green"></span>
           </div>
-          <div id="audio-file-details" class="hidden" style="margin-bottom:1.25rem; font-size:0.85rem; color:var(--text-sub);">
-            <span>🎙️ <b id="audio-name-text">audio.wav</b></span>
-            <span id="audio-size-text" style="margin-left:1rem;">0 KB</span>
-          </div>
+          <div class="window-title">INPUT_DISCOVERY_STUDIO.IO</div>
+          <span style="font-size:0.75rem; color:var(--primary); font-weight:700;">READY</span>
         </div>
 
-        <!-- Secondary Controls: Duration, Style, Captions, Voice -->
-        <div class="controls-grid">
-          <div class="control-item">
-            <label class="control-label">VIDEO GENERATION ENGINE</label>
-            <select class="control-select" id="cfg-generation-mode" onchange="toggleApiModeFields()">
-              <option value="local" selected>💻 Local Engine (Fast Stock / CC B-roll & Offline)</option>
-              <option value="api">✨ AI API Mode (Gemini Omni Flash Animated Engine)</option>
-            </select>
-          </div>
-          <div class="control-item" id="api-key-container" style="display:none;">
-            <label class="control-label">GEMINI API KEY (OPTIONAL / FREE TIER)</label>
-            <input type="password" class="control-select" id="cfg-api-key" style="height:38px; padding:6px 10px; font-size:0.82rem;" placeholder="AIzaSy... (or leave blank for env / free tier)" />
-          </div>
-          <div class="control-item">
-            <label class="control-label">VIDEO DURATION</label>
-            <select class="control-select" id="cfg-duration">
-              <option value="short" selected>Short (~60s · 4 Scenes)</option>
-              <option value="medium">Medium (~120s · 8 Scenes)</option>
-              <option value="long">Long (~180s · 12 Scenes)</option>
-            </select>
-          </div>
-          <div class="control-item">
-            <label class="control-label">NARRATION STYLE</label>
-            <select class="control-select" id="cfg-style">
-              <option value="documentary" selected>Documentary & Educational</option>
-              <option value="cinematic">Cinematic & Dramatic</option>
-              <option value="corporate">Corporate & Professional</option>
-              <option value="energetic">Energetic & Social Media</option>
-            </select>
-          </div>
-          <div class="control-item">
-            <label class="control-label">LANGUAGE</label>
-            <select class="control-select" id="cfg-language">
-              <option value="en" selected>English (Neural Standard)</option>
-              <option value="es">Spanish (Español)</option>
-              <option value="fr">French (Français)</option>
-              <option value="de">German (Deutsch)</option>
-              <option value="hi">Hindi (हिंदी)</option>
-            </select>
-          </div>
-          <div class="control-item">
-            <label class="control-label">BURNED SUBTITLES</label>
-            <select class="control-select" id="cfg-captions">
-              <option value="true" selected>Enabled (SRT Burn-In)</option>
-              <option value="false">Disabled (Audio Only)</option>
-            </select>
-          </div>
-        </div>
+        <div class="window-body">
 
-        <!-- Bottom Action Bar with Prominent Generate Button -->
-        <div class="action-bar">
-          <div class="file-status-indicator">
-            <span id="action-status-dot" class="status-dot"></span>
-            <span id="action-status-text">Ready for file upload or preset selection</span>
+          <!-- Mode Selector Tabs -->
+          <div class="mode-tab-strip">
+            <button class="mode-pill-tab active" id="card-mode-pdf" onclick="switchMode('pdf')">📄 Passive PDF Mode</button>
+            <button class="mode-pill-tab" id="card-mode-script" onclick="switchMode('script')">✍️ Direct Script Editor</button>
+            <button class="mode-pill-tab" id="card-mode-audio" onclick="switchMode('audio')">🎙️ Neural Voice Mode</button>
           </div>
-          <button class="btn-run" id="generate-btn" onclick="submitVideoJob()" disabled>
-            <span>✨ Generate Video</span>
+
+          <!-- Presets Row -->
+          <div class="presets-row">
+            <span class="preset-label">FAST PRESETS:</span>
+            <button class="preset-btn" onclick="loadSamplePreset('sample.pdf', 'Robotics (03)')">🤖 Robotics</button>
+            <button class="preset-btn" onclick="loadSamplePreset('sample.pdf', 'Clean Energy (04)')">🌱 Clean Energy</button>
+            <button class="preset-btn" onclick="loadSamplePreset('sample.pdf', 'AI Intro (01)')">🧠 AI Intro</button>
+            <button class="preset-btn" onclick="loadSamplePreset('multipage.pdf', 'Multipage Tech (02)')">📚 Multipage</button>
+          </div>
+
+          <!-- Mode 1: PDF Dropzone -->
+          <div id="dropzone-pdf-wrap">
+            <div class="dropzone-box" id="pdf-dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+              <input type="file" id="pdf-file-input" accept=".pdf" onchange="onFileSelected(event)" />
+              <div class="dropzone-icon">📄</div>
+              <div class="dropzone-head">Drop your source PDF here, or click to browse</div>
+              <div class="dropzone-desc">PyMuPDF extractor parses headings, text, and page boundaries (Max 50MB)</div>
+            </div>
+            <div id="pdf-file-details" class="file-chip hidden">
+              <div>📎 <b id="pdf-name-text">document.pdf</b> (<span id="pdf-size-text">0 KB</span>)</div>
+              <span class="arch-badge-pill" id="pdf-pages-text" style="color:var(--green-text);">Ready</span>
+            </div>
+          </div>
+
+          <!-- Mode 2: Direct Script Editor -->
+          <div id="mode-script-wrap" class="hidden">
+            <div class="field-group" style="margin-bottom:1rem;">
+              <label class="field-label">Custom Narration Script (Double newline separates scenes):</label>
+              <textarea class="field-textarea" id="direct-script" rows="6" placeholder="Enter script here. Double line break indicates a new video scene..."></textarea>
+            </div>
+          </div>
+
+          <!-- Mode 3: Audio File Upload -->
+          <div id="mode-audio-wrap" class="hidden">
+            <div class="dropzone-box" id="audio-dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDropAudio(event)">
+              <input type="file" id="audio-file-input" accept=".wav,.mp3" onchange="onAudioSelected(event)" />
+              <div class="dropzone-icon">🎙️</div>
+              <div class="dropzone-head">Upload Voiceover Audio (.WAV or .MP3)</div>
+              <div class="dropzone-desc">Speech cadence will be transcribed and synchronized with B-roll</div>
+            </div>
+            <div id="audio-file-details" class="file-chip hidden">
+              <div>🎙️ <b id="audio-name-text">voice.wav</b></div>
+              <span id="audio-size-text">0 KB</span>
+            </div>
+          </div>
+
+          <!-- Synthesis Parameters Grid -->
+          <div class="input-grid-2">
+            <div class="field-group">
+              <label class="field-label">Duration Profile</label>
+              <select class="field-select" id="cfg-duration">
+                <option value="short" selected>Short (~60s · 4 Scenes)</option>
+                <option value="medium">Medium (~120s · 8 Scenes)</option>
+                <option value="long">Long (~180s · 12 Scenes)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Visual Narration Style</label>
+              <select class="field-select" id="cfg-style">
+                <option value="documentary" selected>Documentary & Educational</option>
+                <option value="cinematic">Cinematic & Atmospheric</option>
+                <option value="corporate">Corporate & Tech Profile</option>
+                <option value="energetic">Energetic & Social Media</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Speech Synthesis Voice</label>
+              <select class="field-select" id="cfg-language">
+                <option value="en" selected>English (Neural Studio)</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="fr">French (Français)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="hi">Hindi (हिंदी)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Subtitle Burn-In</label>
+              <select class="field-select" id="cfg-captions">
+                <option value="true" selected>Enabled (SRT Overlay)</option>
+                <option value="false">Audio Only (No Captions)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Editable Script Preview Drawer (Visible once PDF is parsed) -->
+          <div id="script-review-wrap" class="hidden" style="margin-bottom:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <label class="field-label">Generated Narration Beats:</label>
+              <span id="script-stats-badge" style="font-size:0.72rem; color:var(--primary); font-family:'JetBrains Mono', monospace;">0 words</span>
+            </div>
+            <textarea class="field-textarea" id="script-editor" rows="4"></textarea>
+          </div>
+
+          <!-- Execution Status Indicator & Launch Button -->
+          <div style="margin-bottom:1rem; font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:0.45rem;">
+            <span class="pulse-dot-green" id="action-status-dot"></span>
+            <span id="action-status-text">Select a preset or upload a PDF to begin</span>
+          </div>
+
+          <button class="btn-launch-glow" id="generate-btn" onclick="submitVideoJob()" disabled>
+            <span>Launch Video Synthesis</span>
+            <span>➔</span>
           </button>
-        </div>
 
-      </div>
+          <!-- Error Alert -->
+          <div id="extract-error" class="file-chip hidden" style="border-color:var(--red); color:var(--red); margin-top:1rem;"></div>
 
-      <!-- Extraction Error Box -->
-      <div id="extract-error" class="alert alert-error hidden"></div>
-    </div>
-
-    <!-- ────────────────────────────────────────────────────────────────── -->
-    <!-- SCREEN 2: PREVIEW AND EDIT                                         -->
-    <!-- ────────────────────────────────────────────────────────────────── -->
-    <div class="studio-screen-view" id="studio-screen-2">
-      
-      <!-- Script Review & Edit Section -->
-      <div class="white-card" id="script-review-card">
-        <div class="section-header-row">
-          <span class="section-title">📝 Extracted Narration Script & Scene Beats</span>
-          <span class="badge-pill badge-pill-primary" id="script-stats-badge">Ready for Review</span>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
-          Edit narration text below. Each paragraph represents a distinct visual scene cut with synchronized B-roll footage.
-        </p>
-        <textarea class="editor-textarea" id="script-editor" rows="6"></textarea>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-          <button class="sample-pill-btn" onclick="autoGenerateScript()">🔄 Re-generate Script from Source</button>
-          <button class="sample-pill-btn" style="background:var(--primary); color:var(--primary-text); border-color:var(--primary);" onclick="submitVideoJob()">🚀 Render with Edited Script</button>
         </div>
       </div>
 
-      <!-- Storyboard Scrubber Preview -->
-      <div class="white-card">
-        <div class="section-header-row">
-          <span class="section-title">🎞️ Scene-by-Scene Storyboard Strip</span>
-          <span class="badge-pill badge-pill-green" id="storyboard-count-badge">4 SCENES</span>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
-          Click any scene beat below to inspect its visual duration and keyword heuristics.
-        </p>
-        <div class="storyboard-timeline-row" id="storyboard-timeline-row"></div>
-      </div>
-
-      <!-- Pipeline Progress Tracking Card -->
-      <div class="white-card" id="progress-card">
-        <div class="section-header-row">
-          <span class="section-title">
-            <span class="spin">⚙️</span>
-            <span>Real-Time Production Pipeline</span>
-          </span>
-          <span class="badge-pill badge-pill-primary" id="progress-percent-badge">0%</span>
-        </div>
-        <div class="progress-bar-container" style="margin:0.75rem 0 1rem 0;">
-          <div class="progress-bar-active-fill" id="progress-bar-fill"></div>
-        </div>
-        <div id="progress-status-label" style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:1rem;">
-          Waiting for job submission…
+      <!-- RIGHT CONSOLE: REAL-TIME PIPELINE MONITOR & DELIVERABLES -->
+      <div class="window-card">
+        <div class="window-header-bar">
+          <div class="window-dots-row">
+            <span class="window-dot dot-red"></span>
+            <span class="window-dot dot-yellow"></span>
+            <span class="window-dot dot-green"></span>
+          </div>
+          <div class="window-title">REALTIME_TELEMETRY_PIPELINE.LOG</div>
+          <span class="arch-badge-pill" id="progress-percent-badge" style="color:var(--primary);">0%</span>
         </div>
 
-        <!-- 5-Stage Live Transformation Status -->
-        <div class="stage-row" id="stage-row-01">
-          <div class="stage-left">
-            <span class="stage-id" id="stage-icon-01">01</span>
-            <div class="stage-content">
-              <span class="stage-name">Audio & Document Ingestion (PyMuPDF Text IO)</span>
-              <span class="stage-desc" id="stage-desc-01">Extracted document corpus and verified reading boundaries</span>
+        <div class="window-body">
+
+          <!-- Shimmer Progress Bar -->
+          <div class="progress-bar-shell">
+            <div class="progress-bar-fill-coral" id="progress-bar-fill"></div>
+          </div>
+          <div id="progress-status-label" style="font-size:0.84rem; font-weight:700; color:var(--text); margin-bottom:1.25rem;">
+            Awaiting job dispatch…
+          </div>
+
+          <!-- 5-Stage Live Pipeline Rows -->
+          <div class="pipeline-stage-card" id="stage-row-01">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="stage-id-badge" id="stage-icon-01">01</span>
+              <div>
+                <div style="font-weight:700; color:var(--text);">Document Corpus Parsing (PyMuPDF)</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);" id="stage-desc-01">Extracts clean text and page boundaries</div>
+              </div>
+            </div>
+            <span class="arch-badge-pill" id="stage-metric-01">Ready</span>
+          </div>
+
+          <div class="pipeline-stage-card" id="stage-row-02">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="stage-id-badge" id="stage-icon-02">02</span>
+              <div>
+                <div style="font-weight:700; color:var(--text);">Semantic Concept Ranker & TF-IDF</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);" id="stage-desc-02">Segments narrative beats and salient visual keywords</div>
+              </div>
+            </div>
+            <span class="arch-badge-pill" id="stage-metric-02">Pending</span>
+          </div>
+
+          <div class="pipeline-stage-card" id="stage-row-03">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="stage-id-badge" id="stage-icon-03">03</span>
+              <div>
+                <div style="font-weight:700; color:var(--text);">Verified CC0 Footage Matching</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);" id="stage-desc-03">Queries Pexels / CC0 stock assets with clearance check</div>
+              </div>
+            </div>
+            <span class="arch-badge-pill" id="stage-metric-03">Pending</span>
+          </div>
+
+          <div class="pipeline-stage-card" id="stage-row-04">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="stage-id-badge" id="stage-icon-04">04</span>
+              <div>
+                <div style="font-weight:700; color:var(--text);">Neural Speech Synthesis & SRT Alignment</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);" id="stage-desc-04">Synthesizes voiceover with word-aligned subtitle cues</div>
+              </div>
+            </div>
+            <span class="arch-badge-pill" id="stage-metric-04">Pending</span>
+          </div>
+
+          <div class="pipeline-stage-card" id="stage-row-05">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="stage-id-badge" id="stage-icon-05">05</span>
+              <div>
+                <div style="font-weight:700; color:var(--text);">H.264 Core Composition Engine</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);" id="stage-desc-05">Multiplexes visual beats, audio and subtitles into MP4</div>
+              </div>
+            </div>
+            <span class="arch-badge-pill" id="stage-metric-05">Pending</span>
+          </div>
+
+          <!-- Storyboard Scrubber Preview -->
+          <div style="margin-top:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <span style="font-size:0.8rem; font-weight:800; color:var(--text-sub);">SCENE STORYBOARD TIMELINE:</span>
+              <span class="arch-badge-pill" id="scenes-detected-badge" style="color:var(--green-text);">4 BEATS</span>
+            </div>
+            <div class="storyboard-strip-scroll" id="storyboard-timeline-row"></div>
+          </div>
+
+          <!-- Video Deliverables Viewport -->
+          <div id="results-card">
+            <div class="video-viewport-wrapper">
+              <video id="video-player" controls preload="metadata"></video>
+            </div>
+
+            <!-- Download Action Pills -->
+            <div class="downloads-button-row" id="downloads-row">
+              <button class="btn-pill-action" onclick="alert('Generate video to enable download')">⬇️ Download MP4</button>
+              <button class="btn-pill-action" onclick="alert('Generate video to enable download')">📄 Subtitles (.SRT)</button>
+              <button class="btn-pill-action" onclick="alert('Generate video to enable download')">📋 Manifest JSON</button>
+            </div>
+
+            <div style="font-size:0.76rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="pipeline-summary-metric">
+              100% SOURCE FIDELITY · 4 SCENES PRODUCED · VERIFIED CC0 ASSETS
             </div>
           </div>
-          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-01">Ready</div>
-        </div>
 
-        <div class="stage-row" id="stage-row-02">
-          <div class="stage-left">
-            <span class="stage-id" id="stage-icon-02">02</span>
-            <div class="stage-content">
-              <span class="stage-name">Semantic Concept Extraction & Narrative Chunking</span>
-              <span class="stage-desc" id="stage-desc-02">Ranked keywords using TF-IDF and segmented into narrative visual scenes</span>
-            </div>
+          <!-- Error Alert Card -->
+          <div class="file-chip hidden" id="error-card" style="border-color:var(--red); color:var(--red); margin-top:1rem;">
+            <div id="error-detail-msg"></div>
+            <button class="preset-btn" onclick="document.getElementById('error-card').classList.add('hidden')">Dismiss</button>
           </div>
-          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-02">Pending</div>
-        </div>
 
-        <div class="stage-row" id="stage-row-03">
-          <div class="stage-left">
-            <span class="stage-id" id="stage-icon-03">03</span>
-            <div class="stage-content">
-              <span class="stage-name">B-Roll Footage Matching & Rights Verification</span>
-              <span class="stage-desc" id="stage-desc-03">Retrieved HD stock footage under Creative Commons (CC0) clearance</span>
-            </div>
-          </div>
-          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-03">Pending</div>
-        </div>
+          <!-- Hidden placeholder to maintain code compatibility -->
+          <div id="scenes-grid" class="hidden"></div>
 
-        <div class="stage-row" id="stage-row-04">
-          <div class="stage-left">
-            <span class="stage-id" id="stage-icon-04">04</span>
-            <div class="stage-content">
-              <span class="stage-name">Neural Speech Synthesis & SRT Subtitle Alignment</span>
-              <span class="stage-desc" id="stage-desc-04">Synthesized voiceover audio and computed millisecond word timecodes</span>
-            </div>
-          </div>
-          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-04">Pending</div>
-        </div>
-
-        <div class="stage-row" id="stage-row-05">
-          <div class="stage-left">
-            <span class="stage-id" id="stage-icon-05">05</span>
-            <div class="stage-content">
-              <span class="stage-name">Video Core Composition & Subtitle Muxing (H.264 Engine)</span>
-              <span class="stage-desc" id="stage-desc-05">Composited visual beats with audio track into broadcast-ready deliverable</span>
-            </div>
-          </div>
-          <div class="stage-metric-badge badge-pill-primary" id="stage-metric-05">Pending</div>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
-          <button class="sample-pill-btn" onclick="switchStudioScreen(3)">Proceed to Finished Video ➔</button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ────────────────────────────────────────────────────────────────── -->
-    <!-- SCREEN 3: FINISHED VIDEO                                           -->
-    <!-- ────────────────────────────────────────────────────────────────── -->
-    <div class="studio-screen-view" id="studio-screen-3">
-
-      <!-- Finished Deliverables Card -->
-      <div class="white-card" id="results-card">
-        <div class="section-header-row">
-          <span class="section-title">🎬 Rendered Deliverables & Video Player</span>
-          <span class="badge-pill badge-pill-green" id="scenes-detected-badge">4 SCENES READY</span>
-        </div>
-
-        <!-- Video Player -->
-        <div class="video-preview-wrapper">
-          <video id="video-player" controls preload="metadata"></video>
-        </div>
-
-        <!-- Action / Download Buttons -->
-        <div class="downloads-row" id="downloads-row">
-          <button class="btn-download" onclick="alert('Please generate a video first')">⬇️ Download MP4 Video</button>
-          <button class="btn-download" onclick="alert('Please generate a video first')">📄 Captions (SRT)</button>
-          <button class="btn-download" onclick="alert('Please generate a video first')">📋 Manifest JSON</button>
-          <button class="btn-download" onclick="alert('Please generate a video first')">🗺️ Timeline JSON</button>
-        </div>
-
-        <!-- Document-to-Video Transformation Summary -->
-        <div class="total-latency-box">
-          <span>DOCUMENT-TO-VIDEO TRANSFORMATION SUMMARY</span>
-          <span class="total-latency-metric" id="pipeline-summary-metric">100% SOURCE FIDELITY · 4 SCENES PRODUCED · VERIFIED CC0 ASSETS</span>
-        </div>
-
-        <!-- Segmented Multi-Color Progress Bar -->
-        <div class="segmented-bar">
-          <div class="seg-blue" style="width: 25%;"></div>
-          <div class="seg-orange" style="width: 25%;"></div>
-          <div class="seg-green" style="width: 25%;"></div>
-          <div class="seg-purple" style="width: 25%;"></div>
-        </div>
-
-        <!-- Bar Legend -->
-        <div class="bar-legend">
-          <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Document Extraction</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> TF Concept Mapping</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Footage Verification</div>
-          <div class="legend-item"><span class="legend-dot" style="background:var(--primary);"></span> H.264 Composition</div>
-        </div>
-
-        <!-- Token Usage & Credit Tracking Card -->
-        <div class="white-card" id="token-usage-card" style="margin-top:1.25rem; border:1px solid var(--border-accent); background:var(--card-highlight);">
-          <div class="section-header-row">
-            <span class="section-title">📊 Token Usage & API Credits Tracker</span>
-            <span class="badge-pill badge-pill-primary" id="token-mode-badge">AI API · Gemini Omni Flash</span>
-          </div>
-          <div class="controls-grid" style="margin-top:0.75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
-              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Prompt Tokens</div>
-              <div style="font-size:1.4rem; font-weight:800; color:var(--primary); margin-top:0.25rem;" id="val-prompt-tokens">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Scene concept prompts</div>
-            </div>
-            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
-              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Completion Tokens</div>
-              <div style="font-size:1.4rem; font-weight:800; color:var(--orange-text); margin-top:0.25rem;" id="val-comp-tokens">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Visual anim directives</div>
-            </div>
-            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
-              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Total Tokens</div>
-              <div style="font-size:1.4rem; font-weight:800; color:var(--text); margin-top:0.25rem;" id="val-total-tokens">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Prompt + Completion</div>
-            </div>
-            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
-              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Credits / Cost Used</div>
-              <div style="font-size:1.4rem; font-weight:800; color:var(--green-text); margin-top:0.25rem;" id="val-credits-used">$0.000000</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;" id="val-credit-status">Gemini Flash Free Tier / Active</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Scene Cards Grid -->
-        <h3 style="font-size:0.95rem; font-weight:800; color:var(--text); margin-top:1.5rem; margin-bottom:0.75rem;">
-          Verified Scene Lineage & Rights Records:
-        </h3>
-        <div class="scenes-grid" id="scenes-grid"></div>
-
-        <!-- Generate Another Video Button -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border); flex-wrap:wrap; gap:1rem;">
-          <span style="font-size:0.85rem; color:var(--text-muted);">Ready to produce another deliverable with new parameters?</span>
-          <button class="btn-run" onclick="resetToScreen1()">🔁 Generate Another Video</button>
         </div>
       </div>
 
     </div>
 
-    <!-- Error Alert Box -->
-    <div class="white-card hidden" id="error-card">
-      <div class="section-title" style="color:var(--red); margin-bottom:0.5rem;">❌ Pipeline Execution Error</div>
-      <div id="error-detail-msg" class="alert alert-error"></div>
-      <button class="sample-pill-btn" onclick="document.getElementById('error-card').classList.add('hidden')">Dismiss</button>
-    </div>
-
-  </div>
+  </main>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 2: ARCHITECTURE (Connected Stages + Clean Animated Boxes)         -->
+  <!-- TAB 2: ARCHITECTURE (Interconnected Stage Deck & Flowcharts)          -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-view" id="tab-view-architecture">
-    <div class="hero-section">
-      <div class="hero-tag">CORE SYSTEM TOPOLOGY · INTERACTIVE DRILL-DOWN</div>
-      <h1 class="hero-title">VideoEngine Micro-Architecture</h1>
-      <p class="hero-desc">
-        Click any stage block in the pipeline to inspect its parameters. Then click any of the 4 sub-boxes to reveal its real-time step-by-step flowchart and technical code explanation.
+  <section class="tab-view" id="tab-view-architecture">
+    <div style="margin-bottom:1.75rem;">
+      <div class="hero-badge-tag">TOPOLOGY & SYSTEM INTERNALS</div>
+      <h1 class="studio-title-main">Micro-Architecture & Data Flow Pipeline</h1>
+      <p class="studio-subtitle-text">
+        Click any stage block in the pipeline to view its active parameters. Then click any of the 4 sub-boxes to inspect the live step-by-step flowchart and codebase implementation.
       </p>
     </div>
 
-    <!-- Interconnected 5 Stages with Dashed Line & Glowing Beam (Matching User Image) -->
-    <div class="arch-stages-wrapper">
-      <div class="arch-connector-line">
-        <div class="arch-connector-pulse"></div>
+    <!-- 5 Pipeline Stage Cards Connected by Animated Particle Beam -->
+    <div class="arch-pipeline-container">
+      <div class="arch-connecting-beam">
+        <div class="arch-particle-glow"></div>
       </div>
 
-      <div class="arch-stages-nav">
-        <div class="arch-stage-btn selected" id="arch-btn-1" onclick="selectArchStage(1)">
-          <div class="arch-stage-num" style="color:var(--primary);">STAGE 01</div>
+      <div class="arch-stages-deck">
+        <div class="arch-stage-card selected" id="arch-btn-1" onclick="selectArchStage(1)">
+          <div class="arch-stage-num">STAGE 01</div>
           <div class="arch-stage-icon">📑</div>
           <div class="arch-stage-name">PDF & Text IO</div>
-          <div class="arch-stage-tech">PyMuPDF / Formats</div>
-          <span class="arch-stage-badge" style="background:var(--green-light); color:var(--green-text);">● Ingestion Safe</span>
+          <div class="arch-stage-tech">PyMuPDF / Sanitizer</div>
+          <span class="arch-badge-pill" style="color:var(--green-text);">● Ingest Safe</span>
         </div>
 
-        <div class="arch-stage-btn" id="arch-btn-2" onclick="selectArchStage(2)">
-          <div class="arch-stage-num" style="color:var(--purple-text);">STAGE 02</div>
+        <div class="arch-stage-card" id="arch-btn-2" onclick="selectArchStage(2)">
+          <div class="arch-stage-num">STAGE 02</div>
           <div class="arch-stage-icon">🧠</div>
           <div class="arch-stage-name">Concept Ranker</div>
-          <div class="arch-stage-tech">TF-IDF & Beats</div>
-          <span class="arch-stage-badge" style="background:var(--purple-light); color:var(--purple-text);">● Heuristic NLP</span>
+          <div class="arch-stage-tech">TF-IDF & Heuristics</div>
+          <span class="arch-badge-pill" style="color:var(--primary);">● Salience NLP</span>
         </div>
 
-        <div class="arch-stage-btn" id="arch-btn-3" onclick="selectArchStage(3)">
-          <div class="arch-stage-num" style="color:var(--green-text);">STAGE 03</div>
+        <div class="arch-stage-card" id="arch-btn-3" onclick="selectArchStage(3)">
+          <div class="arch-stage-num">STAGE 03</div>
           <div class="arch-stage-icon">🎞️</div>
-          <div class="arch-stage-name">Footage & Rights</div>
-          <div class="arch-stage-tech">Pexels / CC0 Stock</div>
-          <span class="arch-stage-badge" style="background:var(--green-light); color:var(--green-text);">● CC0 Verified</span>
+          <div class="arch-stage-name">Footage Engine</div>
+          <div class="arch-stage-tech">Pexels / CC0 Verified</div>
+          <span class="arch-badge-pill" style="color:var(--green-text);">● Zero Royalty</span>
         </div>
 
-        <div class="arch-stage-btn" id="arch-btn-4" onclick="selectArchStage(4)">
-          <div class="arch-stage-num" style="color:var(--primary);">STAGE 04</div>
+        <div class="arch-stage-card" id="arch-btn-4" onclick="selectArchStage(4)">
+          <div class="arch-stage-num">STAGE 04</div>
           <div class="arch-stage-icon">🎙️</div>
           <div class="arch-stage-name">Voice & Timing</div>
           <div class="arch-stage-tech">gTTS / pyttsx3 / SRT</div>
-          <span class="arch-stage-badge" style="background:var(--primary-light); color:var(--primary);">● Word Align</span>
+          <span class="arch-badge-pill" style="color:var(--blue);">● Word Sync</span>
         </div>
 
-        <div class="arch-stage-btn" id="arch-btn-5" onclick="selectArchStage(5)">
-          <div class="arch-stage-num" style="color:var(--orange-text);">STAGE 05</div>
+        <div class="arch-stage-card" id="arch-btn-5" onclick="selectArchStage(5)">
+          <div class="arch-stage-num">STAGE 05</div>
           <div class="arch-stage-icon">⚡</div>
           <div class="arch-stage-name">H.264 Muxer</div>
           <div class="arch-stage-tech">FFmpeg Compositor</div>
-          <span class="arch-stage-badge" style="background:var(--green-light); color:var(--green-text);">● MP4 Deliverable</span>
+          <span class="arch-badge-pill" style="color:var(--primary);">● Deliverable</span>
         </div>
       </div>
     </div>
 
-    <!-- Active Stage Detail Inspector -->
-    <div class="arch-inspector-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-        <div>
-          <span class="badge-pill badge-pill-primary" id="arch-stage-badge">STAGE 01 INSPECTION</span>
-          <h2 style="font-size:1.35rem; font-weight:800; color:var(--text); margin-top:0.35rem;" id="arch-stage-title">Audio Ingestion & Document Parser (PyMuPDF IO)</h2>
+    <!-- Active Stage Detail Panel -->
+    <div class="window-card">
+      <div class="window-header-bar">
+        <div class="window-dots-row">
+          <span class="window-dot dot-red"></span>
+          <span class="window-dot dot-yellow"></span>
+          <span class="window-dot dot-green"></span>
         </div>
-        <span style="font-size:0.8rem; font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--green-text);" id="arch-stage-status">ACTIVE · BUFFER READY</span>
-      </div>
-      <p style="font-size:0.88rem; color:var(--text-sub); margin-bottom:1.25rem; line-height:1.6;" id="arch-stage-summary">
-        Extracts full text corpus, headings, and page boundaries from standard multi-page PDFs using fitz (PyMuPDF). Runs preflight sanitation to filter corrupt bytes, script injections, and non-printable control characters.
-      </p>
-
-      <!-- 4 Clean, Animated Sub-Boxes (Text removed from boxes as requested; flowchart opens on click) -->
-      <div class="arch-sub-boxes-grid">
-        <div class="arch-sub-box active" id="box-inputs" onclick="selectSubBox('inputs')">
-          <div class="arch-sub-box-icon">📥</div>
-          <div class="arch-sub-box-title">INPUTS ACCEPTED</div>
-          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
-        </div>
-
-        <div class="arch-sub-box" id="box-process" onclick="selectSubBox('process')">
-          <div class="arch-sub-box-icon">⚙️</div>
-          <div class="arch-sub-box-title">CORE ALGORITHMIC PROCESS</div>
-          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
-        </div>
-
-        <div class="arch-sub-box" id="box-outputs" onclick="selectSubBox('outputs')">
-          <div class="arch-sub-box-icon">📤</div>
-          <div class="arch-sub-box-title">OUTPUTS PRODUCED</div>
-          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
-        </div>
-
-        <div class="arch-sub-box" id="box-resilience" onclick="selectSubBox('resilience')">
-          <div class="arch-sub-box-icon">🛡️</div>
-          <div class="arch-sub-box-title">FAULT TOLERANCE & RESILIENCE</div>
-          <div class="arch-sub-box-pill">⚡ View Flowchart</div>
-        </div>
+        <div class="window-title" id="arch-stage-badge">STAGE 01 INSPECTION</div>
+        <span style="font-size:0.75rem; color:var(--green-text); font-weight:700;" id="arch-stage-status">ACTIVE · BUFFER READY</span>
       </div>
 
-      <!-- Interactive Micro-Flowchart & Project Explanation Panel for Clicked Box -->
-      <div class="flowchart-drilldown-panel" id="flowchart-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-          <span style="font-size:0.85rem; font-weight:800; color:var(--primary); text-transform:uppercase;" id="fc-panel-title">
-            FLOWCHART: STAGE 01 · INPUTS ACCEPTED DATA PIPELINE
-          </span>
-          <span class="badge-pill badge-pill-primary" id="fc-file-ref">app/services/pdf_extractor.py</span>
+      <div class="window-body">
+        <h2 style="font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:0.4rem;" id="arch-stage-title">Audio Ingestion & Document Parser (PyMuPDF IO)</h2>
+        <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.6; margin-bottom:1.5rem;" id="arch-stage-summary">
+          Extracts full text corpus, headings, and page boundaries from standard multi-page PDFs using fitz (PyMuPDF). Runs preflight sanitation to filter corrupt bytes, script injections, and non-printable control characters.
+        </p>
+
+        <!-- 4 Clean Parameter Sub-Boxes -->
+        <div class="arch-boxes-grid">
+          <div class="arch-sub-box-card active" id="box-inputs" onclick="selectSubBox('inputs')">
+            <div class="arch-box-icon">📥</div>
+            <div class="arch-box-title">INPUTS ACCEPTED</div>
+            <span class="arch-box-action-pill">⚡ View Flowchart</span>
+          </div>
+
+          <div class="arch-sub-box-card" id="box-process" onclick="selectSubBox('process')">
+            <div class="arch-box-icon">⚙️</div>
+            <div class="arch-box-title">ALGORITHMIC PROCESS</div>
+            <span class="arch-box-action-pill">⚡ View Flowchart</span>
+          </div>
+
+          <div class="arch-sub-box-card" id="box-outputs" onclick="selectSubBox('outputs')">
+            <div class="arch-box-icon">📤</div>
+            <div class="arch-box-title">OUTPUTS PRODUCED</div>
+            <span class="arch-box-action-pill">⚡ View Flowchart</span>
+          </div>
+
+          <div class="arch-sub-box-card" id="box-resilience" onclick="selectSubBox('resilience')">
+            <div class="arch-box-icon">🛡️</div>
+            <div class="arch-box-title">FAULT RESILIENCE</div>
+            <span class="arch-box-action-pill">⚡ View Flowchart</span>
+          </div>
         </div>
 
-        <!-- Step Nodes Flowchart with animated connecting arrows -->
-        <div class="flowchart-nodes-row" id="fc-nodes-container"></div>
+        <!-- Interactive Flowchart Drawer -->
+        <div class="flowchart-drawer" id="flowchart-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+            <span style="font-size:0.84rem; font-weight:800; color:var(--primary); font-family:'JetBrains Mono', monospace;" id="fc-panel-title">
+              FLOWCHART: STAGE 01 · INPUTS ACCEPTED DATA PIPELINE
+            </span>
+            <span class="arch-badge-pill" id="fc-file-ref" style="color:var(--text-sub);">app/services/pdf_extractor.py</span>
+          </div>
 
-        <!-- In-Depth Project Usage Explanation -->
-        <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.1rem; font-size:0.86rem; color:var(--text-sub); line-height:1.65;" id="fc-explanation-text">
-          During PDF ingestion, the file is validated via magic headers to guarantee authentic PDF/A compliance. Files exceeding 50MB or encrypted without a password trigger immediate client-safe rejection before entering memory pipelines.
+          <!-- Step Nodes Container -->
+          <div class="fc-step-row" id="fc-nodes-container"></div>
+
+          <!-- Implementation Notes -->
+          <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:1rem; font-size:0.86rem; color:var(--text-sub); line-height:1.6;" id="fc-explanation-text">
+            During PDF ingestion, the file is validated via magic headers to guarantee authentic PDF/A compliance. Files exceeding 50MB or encrypted without a password trigger immediate client-safe rejection before entering memory pipelines.
+          </div>
         </div>
+
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: VISUALIZATIONS (7 Dynamic Metric Graphs)                      -->
+  <!-- TAB 3: VISUALIZATIONS (7 Telemetry Analytics Charts)                  -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-view" id="tab-view-visualizations">
-    <div class="hero-section">
-      <div class="hero-tag">DYNAMIC METRICS ANALYSIS · FILE-REACTIVE TELEMETRY</div>
-      <h1 class="hero-title">Video Synthesis Analytics Dashboard</h1>
-      <p class="hero-desc">
-        Comprehensive 7-chart visualization suite showing real-time source document density, keyword heuristics, audio pitch modulation, and encoding efficiency.
+  <section class="tab-view" id="tab-view-visualizations">
+    <div style="margin-bottom:1.75rem;">
+      <div class="hero-badge-tag">REACTIVE TELEMETRY & METRICS</div>
+      <h1 class="studio-title-main">Dynamic Video Synthesis Analytics</h1>
+      <p class="studio-subtitle-text">
+        7 dynamic Chart.js metrics visualizing word-cadence distributions, semantic keyword weights, audio RMS energy curves, and encoding bitrate stability.
       </p>
     </div>
 
-    <!-- 7 Charts Grid -->
-    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1.25rem;">
-      <div class="white-card">
+    <div class="charts-grid-2">
+      <div class="chart-panel-card">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">📊 1. Scene Token & Word Count Distribution</h3>
         <div style="height:230px;"><canvas id="chart-scene-words"></canvas></div>
       </div>
-      <div class="white-card">
+
+      <div class="chart-panel-card">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">🏷️ 2. Salient Keyword Heuristics & Weights</h3>
         <div style="height:230px;"><canvas id="chart-keywords"></canvas></div>
       </div>
-      <div class="white-card" style="grid-column:span 2;">
+
+      <div class="chart-panel-card" style="grid-column:span 2;">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">🎙️ 3. Audio Frequency & Cadence Dynamic Energy Profile</h3>
         <div style="height:230px;"><canvas id="chart-audio-profile"></canvas></div>
       </div>
-      <div class="white-card">
+
+      <div class="chart-panel-card">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">📄 4. Document Utilization by Source Page</h3>
         <div style="height:230px;"><canvas id="chart-page-coverage"></canvas></div>
       </div>
-      <div class="white-card">
+
+      <div class="chart-panel-card">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">⏱️ 5. Scene Duration & Cut Timeline (Seconds)</h3>
         <div style="height:230px;"><canvas id="chart-timeline-durations"></canvas></div>
       </div>
-      <div class="white-card">
+
+      <div class="chart-panel-card">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">🎨 6. B-Roll Motion Dynamism & Semantic Match</h3>
         <div style="height:230px;"><canvas id="chart-visual-diversity"></canvas></div>
       </div>
-      <div class="white-card">
+
+      <div class="chart-panel-card">
         <h3 style="font-size:0.92rem; font-weight:800; color:var(--text); margin-bottom:0.75rem;">⚡ 7. Render Bitrate & Target Frame Stability</h3>
         <div style="height:230px;"><canvas id="chart-encoding-stability"></canvas></div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 4: PROVENANCE (Cryptographic Audit & Lineage Records)             -->
+  <!-- TAB 4: PROVENANCE (Cryptographic Lineage & Chain-of-Custody)          -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-view" id="tab-view-provenance">
-    <div class="hero-section">
-      <div class="hero-tag">END-TO-END TRACEABILITY · CRYPTOGRAPHIC AUDIT</div>
-      <h1 class="hero-title">Provenance & Media Rights Ledger</h1>
-      <p class="hero-desc">
-        Complete chain of custody linking every video frame and voice timestamp back to the exact source document paragraph and verified CC0 stock asset.
+  <section class="tab-view" id="tab-view-provenance">
+    <div style="margin-bottom:1.75rem;">
+      <div class="hero-badge-tag">IMMUTABLE LINEAGE AUDIT</div>
+      <h1 class="studio-title-main">Media Provenance & Rights Clearance Ledger</h1>
+      <p class="studio-subtitle-text">
+        Cryptographic chain of custody recording SHA-256 digests from source PDF paragraphs to output video frames and Creative Commons CC0 clearance.
       </p>
     </div>
 
-    <!-- Cryptographic Chain of Custody Card -->
-    <div class="white-card">
-      <div class="section-header-row">
-        <span class="section-title">🔐 Cryptographic Chain of Custody</span>
-        <span class="badge-pill badge-pill-green">ALL HASHES VERIFIED</span>
-      </div>
-      <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:1rem;">
-        SHA-256 cryptographic hashes computed at each transformation stage to guarantee data integrity and immutability.
-      </p>
-
-      <div class="audit-grid">
-        <div class="audit-box">
-          <div class="audit-box-title">1. SOURCE DOCUMENT DIGEST</div>
-          <div class="audit-box-hash" id="prov-doc-hash">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;" id="prov-doc-meta">sample.pdf · 4,281 bytes</div>
+    <!-- SHA-256 Digest Grid -->
+    <div class="window-card" style="margin-bottom:1.5rem;">
+      <div class="window-header-bar">
+        <div class="window-dots-row">
+          <span class="window-dot dot-red"></span>
+          <span class="window-dot dot-yellow"></span>
+          <span class="window-dot dot-green"></span>
         </div>
-        <div class="audit-box">
-          <div class="audit-box-title">2. SCRIPT AST & MANIFEST HASH</div>
-          <div class="audit-box-hash" id="prov-script-hash">7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</div>
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">4 Scene Blocks · 128 tokens</div>
-        </div>
-        <div class="audit-box">
-          <div class="audit-box-title">3. SYNTHESIZED SPEECH AUDIO HASH</div>
-          <div class="audit-box-hash" id="prov-audio-hash">ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad</div>
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">16kHz Mono WAV · 00:56.8</div>
-        </div>
-        <div class="audit-box">
-          <div class="audit-box-title">4. COMPOSITED DELIVERABLE MP4 HASH</div>
-          <div class="audit-box-hash" id="prov-video-hash">ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb</div>
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">H.264 / AAC · Clean Container</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Source Paragraph to Video Scene Lineage Card -->
-    <div class="white-card">
-      <div class="section-header-row">
-        <span class="section-title">🗺️ Source Paragraph to Video Scene Lineage</span>
-        <button class="sample-pill-btn" onclick="exportProvenanceJson()">⬇️ Export Audit JSON</button>
-      </div>
-      <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:1rem;">
-        Direct mapping showing how source PDF text translates into narration cues, video shots, and subtitles.
-      </p>
-
-      <div class="provenance-table-wrap">
-        <table class="provenance-table" id="prov-lineage-table">
-          <thead>
-            <tr>
-              <th>Scene</th>
-              <th>Source Reference</th>
-              <th>Narration Text Excerpt</th>
-              <th>Keywords Extracted</th>
-              <th>Footage Asset ID</th>
-              <th>Rights Clearance</th>
-            </tr>
-          </thead>
-          <tbody id="prov-lineage-tbody">
-            <tr>
-              <td><b>SCENE 01</b></td>
-              <td>Page 1, Paragraph 1</td>
-              <td>Introduction to Artificial Intelligence and Deep Learning architectures…</td>
-              <td><code>#ai #deep_learning #neural</code></td>
-              <td>PEXELS-VID-82910</td>
-              <td><span class="badge-pill badge-pill-green">CC0 Free</span></td>
-            </tr>
-            <tr>
-              <td><b>SCENE 02</b></td>
-              <td>Page 1, Paragraph 2</td>
-              <td>Machine learning models extract patterns from structured enterprise datasets…</td>
-              <td><code>#enterprise #data #analytics</code></td>
-              <td>PEXELS-VID-49201</td>
-              <td><span class="badge-pill badge-pill-green">CC0 Free</span></td>
-            </tr>
-            <tr>
-              <td><b>SCENE 03</b></td>
-              <td>Page 2, Paragraph 1</td>
-              <td>Hardware accelerators enable real-time inference at the network edge…</td>
-              <td><code>#hardware #edge #silicon</code></td>
-              <td>PEXELS-VID-90214</td>
-              <td><span class="badge-pill badge-pill-green">CC0 Free</span></td>
-            </tr>
-            <tr>
-              <td><b>SCENE 04</b></td>
-              <td>Page 2, Paragraph 3</td>
-              <td>Automated pipelines convert raw documentation into high-impact media deliverables…</td>
-              <td><code>#pipeline #automation #media</code></td>
-              <td>PEXELS-VID-33129</td>
-              <td><span class="badge-pill badge-pill-green">CC0 Free</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Licensing, Copyright & Synthetic Media Disclosure -->
-    <div class="white-card">
-      <div class="section-header-row">
-        <span class="section-title">📜 Licensing, Copyright & Synthetic Media Disclosure</span>
-        <span class="badge-pill badge-pill-primary">ISO / C2PA COMPLIANT</span>
-      </div>
-      <div style="font-size:0.86rem; color:var(--text-sub); line-height:1.65; margin-top:0.75rem;">
-        <ul style="padding-left:1.25rem;">
-          <li><b>Visual B-Roll Assets:</b> Licensed under Creative Commons Zero (CC0) / Pexels License. Safe for commercial and editorial distribution worldwide with zero royalty liability.</li>
-          <li><b>Synthetic Speech Disclosure:</b> Narration audio is synthesized using neural text-to-speech models (gTTS / pyttsx3). Subtitles are synchronized using deterministic word-cadence alignment.</li>
-          <li><b>Font & Graphic Assets:</b> Rendered using open-source Inter and JetBrains Mono typography under the SIL Open Font License (OFL).</li>
-          <li><b>Watermark & Authenticity:</b> Output MP4 contains cryptographic sidecar manifests (timeline.json & manifest.json) preserving provenance lineage.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 5: API DOCS (REST Endpoints & Swagger Links)                      -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-view" id="tab-view-api">
-    <div class="hero-section">
-      <div class="hero-tag">REST API REFERENCE · HIGH PERFORMANCE ENDPOINTS</div>
-      <h1 class="hero-title">VideoEngine Developer Hub</h1>
-      <p class="hero-desc">
-        Integrate automated document-to-video capabilities into any microservice or enterprise pipeline with standard REST endpoints.
-      </p>
-    </div>
-
-    <div class="white-card">
-      <div class="section-header-row" style="margin-bottom:1.25rem;">
-        <div>
-          <span style="font-size:1.1rem; font-weight:800; color:var(--text);">FastAPI Interactive OpenAPI Specifications</span>
-          <p style="font-size:0.82rem; color:var(--text-muted);">Access Swagger UI or ReDoc schema viewers directly.</p>
-        </div>
-        <div style="display:flex; gap:0.5rem;">
-          <a class="btn-download" href="/api/docs" target="_blank" style="background:var(--primary); color:var(--primary-text); border-color:var(--primary);">🚀 Open Swagger UI</a>
-          <a class="btn-download" href="/api/redoc" target="_blank">📖 Open ReDoc</a>
-        </div>
+        <div class="window-title">CRYPTOGRAPHIC_DIGEST_STREAM</div>
+        <span class="arch-badge-pill" style="color:var(--green-text);">HASHES VERIFIED</span>
       </div>
 
-      <!-- Endpoint 1 -->
-      <div class="endpoint-item">
-        <div class="endpoint-header" onclick="toggleEndpoint('ep-1')">
-          <div style="display:flex; align-items:center;">
-            <span class="endpoint-badge badge-post">POST</span>
-            <span class="endpoint-path">/api/v1/pdf/extract</span>
+      <div class="window-body">
+        <div class="audit-hash-grid">
+          <div class="audit-hash-card">
+            <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">1. SOURCE DOCUMENT DIGEST</span>
+            <div class="audit-code-box" id="prov-doc-hash">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:0.35rem;" id="prov-doc-meta">sample.pdf · 4,281 bytes</div>
           </div>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Ingest PDF and return extracted text structure</span>
+
+          <div class="audit-hash-card">
+            <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">2. SCRIPT AST MANIFEST HASH</span>
+            <div class="audit-code-box" id="prov-script-hash">7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:0.35rem;">4 Scene Blocks · 128 tokens</div>
+          </div>
+
+          <div class="audit-hash-card">
+            <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">3. SYNTHESIZED SPEECH AUDIO HASH</span>
+            <div class="audit-code-box" id="prov-audio-hash">ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad</div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:0.35rem;">16kHz Mono WAV · 00:56.8</div>
+          </div>
+
+          <div class="audit-hash-card">
+            <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">4. COMPOSITED DELIVERABLE MP4 HASH</span>
+            <div class="audit-code-box" id="prov-video-hash">ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb</div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:0.35rem;">H.264 / AAC · Clean Container</div>
+          </div>
         </div>
-        <div class="endpoint-body hidden" id="ep-1">
-          <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:0.5rem;">Uploads a multipart PDF file and returns structured page-level text, headings, and character counts.</p>
-          <div class="code-block">curl -X POST "http://localhost:8000/api/v1/pdf/extract" \
+      </div>
+    </div>
+
+    <!-- Lineage Mapping Table -->
+    <div class="window-card">
+      <div class="window-header-bar">
+        <div class="window-dots-row">
+          <span class="window-dot dot-red"></span>
+          <span class="window-dot dot-yellow"></span>
+          <span class="window-dot dot-green"></span>
+        </div>
+        <div class="window-title">SOURCE_PARAGRAPH_TO_SCENE_MAPPING</div>
+        <button class="preset-btn" onclick="exportProvenanceJson()" style="color:var(--primary); border-color:var(--border-accent);">⬇️ Export Audit JSON</button>
+      </div>
+
+      <div class="window-body" style="padding:0;">
+        <div class="table-responsive-box" style="margin:0; border:none; border-radius:0;">
+          <table class="data-table-modern">
+            <thead>
+              <tr>
+                <th>Scene</th>
+                <th>Source Reference</th>
+                <th>Narration Excerpt</th>
+                <th>Keywords Extracted</th>
+                <th>Footage Asset ID</th>
+                <th>Rights Clearance</th>
+              </tr>
+            </thead>
+            <tbody id="prov-lineage-tbody">
+              <tr>
+                <td><b>SCENE 01</b></td>
+                <td>Page 1, Paragraph 1</td>
+                <td>Introduction to Artificial Intelligence and Deep Learning architectures…</td>
+                <td><code>#ai #deep_learning #neural</code></td>
+                <td>PEXELS-VID-82910</td>
+                <td><span class="arch-badge-pill" style="color:var(--green-text);">CC0 Free</span></td>
+              </tr>
+              <tr>
+                <td><b>SCENE 02</b></td>
+                <td>Page 1, Paragraph 2</td>
+                <td>Machine learning models extract patterns from structured enterprise datasets…</td>
+                <td><code>#enterprise #data #analytics</code></td>
+                <td>PEXELS-VID-49201</td>
+                <td><span class="arch-badge-pill" style="color:var(--green-text);">CC0 Free</span></td>
+              </tr>
+              <tr>
+                <td><b>SCENE 03</b></td>
+                <td>Page 2, Paragraph 1</td>
+                <td>Hardware accelerators enable real-time inference at the network edge…</td>
+                <td><code>#hardware #edge #silicon</code></td>
+                <td>PEXELS-VID-90214</td>
+                <td><span class="arch-badge-pill" style="color:var(--green-text);">CC0 Free</span></td>
+              </tr>
+              <tr>
+                <td><b>SCENE 04</b></td>
+                <td>Page 2, Paragraph 3</td>
+                <td>Automated pipelines convert raw documentation into high-impact media deliverables…</td>
+                <td><code>#pipeline #automation #media</code></td>
+                <td>PEXELS-VID-33129</td>
+                <td><span class="arch-badge-pill" style="color:var(--green-text);">CC0 Free</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 5: REST API DOCS (FastAPI Explorer & cURL Snippets)               -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <section class="tab-view" id="tab-view-api">
+    <div style="margin-bottom:1.75rem;">
+      <div class="hero-badge-tag">DEVELOPER INTEGRATION SUITE</div>
+      <h1 class="studio-title-main">NovaCut REST API Endpoints</h1>
+      <p class="studio-subtitle-text">
+        Production-grade RESTful endpoints for integrating automated document-to-video synthesis into existing microservices and workflows.
+      </p>
+    </div>
+
+    <div class="window-card">
+      <div class="window-header-bar">
+        <div class="window-dots-row">
+          <span class="window-dot dot-red"></span>
+          <span class="window-dot dot-yellow"></span>
+          <span class="window-dot dot-green"></span>
+        </div>
+        <div class="window-title">OPENAPI_SPECS_EXPLORER</div>
+        <div style="display:flex; gap:0.5rem;">
+          <a class="preset-btn" href="/api/docs" target="_blank" style="background:var(--primary); color:#ffffff; border-color:var(--primary);">🚀 Swagger UI</a>
+          <a class="preset-btn" href="/api/redoc" target="_blank">📖 ReDoc</a>
+        </div>
+      </div>
+
+      <div class="window-body">
+
+        <!-- Endpoint 1 -->
+        <div class="api-card-wrapper">
+          <div class="api-card-header" onclick="toggleEndpoint('ep-1')">
+            <div style="display:flex; align-items:center;">
+              <span class="method-badge method-post">POST</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.86rem; color:var(--text);">/api/v1/pdf/extract</span>
+            </div>
+            <span style="font-size:0.78rem; color:var(--text-muted);">Ingest PDF and return extracted text structure</span>
+          </div>
+          <div class="window-body hidden" id="ep-1" style="border-top:1px solid var(--border);">
+            <div class="code-terminal">curl -X POST "http://localhost:8000/api/v1/pdf/extract" \
   -H "accept: application/json" \
   -F "file=@document.pdf" \
   -F "use_ocr=false"</div>
-        </div>
-      </div>
-
-      <!-- Endpoint 2 -->
-      <div class="endpoint-item">
-        <div class="endpoint-header" onclick="toggleEndpoint('ep-2')">
-          <div style="display:flex; align-items:center;">
-            <span class="endpoint-badge badge-post">POST</span>
-            <span class="endpoint-path">/api/v1/pdf/script</span>
           </div>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Synthesize multi-scene script from corpus</span>
         </div>
-        <div class="endpoint-body hidden" id="ep-2">
-          <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:0.5rem;">Converts raw documentation into formatted visual scene paragraphs with timing and keyword estimations.</p>
-          <div class="code-block">curl -X POST "http://localhost:8000/api/v1/pdf/script" \
+
+        <!-- Endpoint 2 -->
+        <div class="api-card-wrapper">
+          <div class="api-card-header" onclick="toggleEndpoint('ep-2')">
+            <div style="display:flex; align-items:center;">
+              <span class="method-badge method-post">POST</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.86rem; color:var(--text);">/api/v1/pdf/script</span>
+            </div>
+            <span style="font-size:0.78rem; color:var(--text-muted);">Synthesize multi-scene script from corpus</span>
+          </div>
+          <div class="window-body hidden" id="ep-2" style="border-top:1px solid var(--border);">
+            <div class="code-terminal">curl -X POST "http://localhost:8000/api/v1/pdf/script" \
   -H "Content-Type: application/json" \
   -d '{"full_text": "...", "duration": "medium", "style": "documentary", "language": "en"}'</div>
-        </div>
-      </div>
-
-      <!-- Endpoint 3 -->
-      <div class="endpoint-item">
-        <div class="endpoint-header" onclick="toggleEndpoint('ep-3')">
-          <div style="display:flex; align-items:center;">
-            <span class="endpoint-badge badge-post">POST</span>
-            <span class="endpoint-path">/api/v1/broll/jobs</span>
           </div>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Submit asynchronous video rendering pipeline job</span>
         </div>
-        <div class="endpoint-body hidden" id="ep-3">
-          <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:0.5rem;">Enqueues a background video job supporting PDF, direct script, or raw audio inputs.</p>
-          <div class="code-block">curl -X POST "http://localhost:8000/api/v1/broll/jobs" \
+
+        <!-- Endpoint 3 -->
+        <div class="api-card-wrapper">
+          <div class="api-card-header" onclick="toggleEndpoint('ep-3')">
+            <div style="display:flex; align-items:center;">
+              <span class="method-badge method-post">POST</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.86rem; color:var(--text);">/api/v1/broll/jobs</span>
+            </div>
+            <span style="font-size:0.78rem; color:var(--text-muted);">Submit asynchronous video rendering pipeline job</span>
+          </div>
+          <div class="window-body hidden" id="ep-3" style="border-top:1px solid var(--border);">
+            <div class="code-terminal">curl -X POST "http://localhost:8000/api/v1/broll/jobs" \
   -F "input_mode=pdf" \
   -F "pdf_file=@document.pdf" \
   -F "aspect_ratio=16:9" \
   -F "captions=true"</div>
-        </div>
-      </div>
-
-      <!-- Endpoint 4 -->
-      <div class="endpoint-item">
-        <div class="endpoint-header" onclick="toggleEndpoint('ep-4')">
-          <div style="display:flex; align-items:center;">
-            <span class="endpoint-badge badge-get">GET</span>
-            <span class="endpoint-path">/api/v1/jobs/{job_id}</span>
           </div>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Poll execution status & retrieve deliverables</span>
         </div>
-        <div class="endpoint-body hidden" id="ep-4">
-          <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:0.5rem;">Returns job status (queued, running, succeeded, failed), progress percentage, and URLs for MP4, SRT, and manifest files.</p>
-          <div class="code-block">curl -X GET "http://localhost:8000/api/v1/jobs/df521158-aaa8-40d9-b095-7c47dba6e183"</div>
-        </div>
-      </div>
 
-      <!-- Endpoint 5 -->
-      <div class="endpoint-item">
-        <div class="endpoint-header" onclick="toggleEndpoint('ep-5')">
-          <div style="display:flex; align-items:center;">
-            <span class="endpoint-badge badge-get">GET</span>
-            <span class="endpoint-path">/ready</span>
+        <!-- Endpoint 4 -->
+        <div class="api-card-wrapper">
+          <div class="api-card-header" onclick="toggleEndpoint('ep-4')">
+            <div style="display:flex; align-items:center;">
+              <span class="method-badge method-get">GET</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.86rem; color:var(--text);">/api/v1/jobs/{job_id}</span>
+            </div>
+            <span style="font-size:0.78rem; color:var(--text-muted);">Poll execution status & retrieve deliverables</span>
           </div>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Readiness probe & system capabilities check</span>
+          <div class="window-body hidden" id="ep-4" style="border-top:1px solid var(--border);">
+            <div class="code-terminal">curl -X GET "http://localhost:8000/api/v1/jobs/df521158-aaa8-40d9-b095-7c47dba6e183"</div>
+          </div>
         </div>
-        <div class="endpoint-body hidden" id="ep-5">
-          <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:0.5rem;">Checks database availability, upload storage, and FFmpeg / Mock render engine state.</p>
-          <div class="code-block">curl -X GET "http://localhost:8000/ready"</div>
-        </div>
-      </div>
 
+        <!-- Endpoint 5 -->
+        <div class="api-card-wrapper">
+          <div class="api-card-header" onclick="toggleEndpoint('ep-5')">
+            <div style="display:flex; align-items:center;">
+              <span class="method-badge method-get">GET</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.86rem; color:var(--text);">/ready</span>
+            </div>
+            <span style="font-size:0.78rem; color:var(--text-muted);">Readiness probe & system capabilities check</span>
+          </div>
+          <div class="window-body hidden" id="ep-5" style="border-top:1px solid var(--border);">
+            <div class="code-terminal">curl -X GET "http://localhost:8000/ready"</div>
+          </div>
+        </div>
+
+      </div>
     </div>
-  </div>
+  </section>
 
 </div>
 
@@ -2233,44 +1832,43 @@ let extractedText = '';
 let generatedScript = '';
 let currentJobId = null;
 let pollInterval = null;
+let pollRetries = 0;
 let activeTab = 'studio';
-let activeStudioScreen = 1;
 let chartInstances = {};
 let activeStage = 1;
 let activeSubBox = 'inputs';
-let currentTheme = localStorage.getItem('app-theme') || 'light';
+let currentTheme = localStorage.getItem('novacut-theme') || 'dark';
 
-/* ── Theme Switcher: Light (White & Purple) | Dark (Black & Yellow) ─────── */
+/* ── Theme Switching: Dark (Obsidian & Coral) | Light (Alabaster & Coral) ─ */
 function applyTheme(theme) {
   currentTheme = theme;
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('app-theme', theme);
+  localStorage.setItem('novacut-theme', theme);
 
   const label = document.getElementById('theme-label-text');
   const dot = document.getElementById('theme-dot');
   if (theme === 'dark') {
-    if (label) label.textContent = '🌙 Dark';
-    if (dot) dot.style.background = '#eab308';
+    if (label) label.textContent = '🌙 Dark Mode';
+    if (dot) dot.style.background = '#ff5722';
   } else {
-    if (label) label.textContent = '☀️ Light';
-    if (dot) dot.style.background = '#7c3aed';
+    if (label) label.textContent = '☀️ Light Mode';
+    if (dot) dot.style.background = '#ea580c';
   }
 
-  // Re-render charts with matching colors if on visualization tab
   if (activeTab === 'visualizations') {
-    setTimeout(renderAllCharts, 50);
+    setTimeout(renderAllCharts, 60);
   }
 }
 
 function toggleTheme() {
-  const nextTheme = (currentTheme === 'light') ? 'dark' : 'light';
+  const nextTheme = (currentTheme === 'dark') ? 'light' : 'dark';
   applyTheme(nextTheme);
 }
 
-// Initialize theme on page load
+// Initialize theme on load
 applyTheme(currentTheme);
 
-/* ── Top Main Tab Switching ─────────────────────────────────────────────── */
+/* ── Tab Switching ──────────────────────────────────────────────────────── */
 function switchTab(tabId) {
   activeTab = tabId;
   const tabs = ['studio', 'architecture', 'visualizations', 'provenance', 'api'];
@@ -2287,32 +1885,20 @@ function switchTab(tabId) {
   }
 }
 
-/* ── Studio 3-Step Screen Switching (Create -> Preview -> Finished) ──────── */
-function toggleApiModeFields() {
-  const modeSel = document.getElementById('cfg-generation-mode');
-  const apiBox = document.getElementById('api-key-container');
-  if (modeSel && apiBox) {
-    apiBox.style.display = (modeSel.value === 'api') ? 'block' : 'none';
-  }
+/* ── Format Card Selection ──────────────────────────────────────────────── */
+function selectFormat(aspectVal) {
+  document.getElementById('cfg-aspect').value = aspectVal;
+  const cards = {
+    '16:9': document.getElementById('aspect-card-16x9'),
+    '9:16': document.getElementById('aspect-card-9x16'),
+    '1:1':  document.getElementById('aspect-card-1x1')
+  };
+  Object.keys(cards).forEach(k => {
+    if (cards[k]) cards[k].classList.toggle('active', k === aspectVal);
+  });
 }
 
-function switchStudioScreen(screenNum) {
-  activeStudioScreen = screenNum;
-  for (let s = 1; s <= 3; s++) {
-    const btn = document.getElementById(`studio-step-btn-${s}`);
-    const view = document.getElementById(`studio-screen-${s}`);
-    if (btn) btn.classList.toggle('active', s === screenNum);
-    if (view) view.classList.toggle('active', s === screenNum);
-  }
-}
-
-function resetToScreen1() {
-  switchStudioScreen(1);
-  const el = document.getElementById('config-card');
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
-}
-
-/* ── Studio Input Mode Switching ────────────────────────────────────────── */
+/* ── Mode Switching ─────────────────────────────────────────────────────── */
 function switchMode(mode) {
   currentMode = mode;
   document.getElementById('card-mode-pdf').classList.toggle('active', mode === 'pdf');
@@ -2348,7 +1934,7 @@ async function handlePdfFile(file) {
   document.getElementById('extract-error').classList.add('hidden');
 
   if (!file.name.toLowerCase().endsWith('.pdf')) {
-    showError('Only PDF documents are supported.');
+    showError('Only standard PDF documents are supported.');
     return;
   }
   if (file.size > 50 * 1024 * 1024) {
@@ -2360,7 +1946,7 @@ async function handlePdfFile(file) {
   document.getElementById('pdf-size-text').textContent = formatSize(file.size);
   document.getElementById('pdf-pages-text').textContent = 'Extracting…';
   document.getElementById('pdf-file-details').classList.remove('hidden');
-  document.getElementById('action-status-text').textContent = `${file.name} (${formatSize(file.size)})`;
+  document.getElementById('action-status-text').textContent = `Parsed: ${file.name} (${formatSize(file.size)})`;
 
   // Update Provenance metadata
   document.getElementById('prov-doc-hash').textContent = computeSimpleHash(file.name + file.size);
@@ -2386,22 +1972,21 @@ async function extractPDF(file) {
     extractedText = data.full_text || '';
     document.getElementById('pdf-pages-text').textContent = `${data.page_count} pages extracted`;
 
-    document.getElementById('stage-desc-01').textContent = `Parsed "${file.name}": Extracted ${data.page_count} pages and ${extractedText.split(/\s+/).length} words.`;
-    document.getElementById('stage-metric-01').textContent = `${data.page_count} Pages Extracted`;
+    document.getElementById('stage-desc-01').textContent = `Extracted ${data.page_count} pages (${extractedText.split(/\s+/).length} words).`;
+    document.getElementById('stage-metric-01').textContent = `${data.page_count} Pages`;
 
     await autoGenerateScript();
   } catch (err) {
-    showError('Network error during extraction: ' + err.message);
+    showError('Extraction error: ' + err.message);
   }
 }
 
-/* ── Audio File Ingestion ───────────────────────────────────────────────── */
 function handleAudioFile(file) {
   audioFile = file;
   document.getElementById('audio-name-text').textContent = file.name;
   document.getElementById('audio-size-text').textContent = formatSize(file.size);
   document.getElementById('audio-file-details').classList.remove('hidden');
-  document.getElementById('action-status-text').textContent = `Voice buffer: ${file.name}`;
+  document.getElementById('action-status-text').textContent = `Voice buffer loaded: ${file.name}`;
   updateRunButton();
 }
 
@@ -2442,7 +2027,7 @@ function loadDirectScriptSample(title) {
   updateRunButton();
 }
 
-/* ── Script Heuristic Generation ────────────────────────────────────────── */
+/* ── Auto-generate Script from Corpus ───────────────────────────────────── */
 async function autoGenerateScript() {
   if (!extractedText) return;
   try {
@@ -2462,11 +2047,12 @@ async function autoGenerateScript() {
     if (resp.ok) {
       generatedScript = data.script_text;
       document.getElementById('script-editor').value = generatedScript;
-      document.getElementById('script-stats-badge').textContent = `${data.word_count} words · ~${Math.round(data.estimated_duration_s)}s · ${data.provider}`;
+      document.getElementById('script-stats-badge').textContent = `${data.word_count} words · ~${Math.round(data.estimated_duration_s)}s`;
+      document.getElementById('script-review-wrap').classList.remove('hidden');
 
       const sceneCount = generatedScript.split('\n\n').filter(p => p.trim()).length;
-      document.getElementById('stage-desc-02').textContent = `Generated ${sceneCount} narrative visual scenes from source document corpus.`;
-      document.getElementById('stage-metric-02').textContent = `${sceneCount} Beats Synthesized`;
+      document.getElementById('stage-desc-02').textContent = `Synthesized ${sceneCount} coherent visual scenes.`;
+      document.getElementById('stage-metric-02').textContent = `${sceneCount} Beats`;
 
       renderStoryboardSequence(generatedScript);
       updateRunButton();
@@ -2474,13 +2060,13 @@ async function autoGenerateScript() {
   } catch (e) {}
 }
 
-/* ── Storyboard Sequence in Studio Tab ──────────────────────────────────── */
+/* ── Render Storyboard Timeline Sequence ────────────────────────────────── */
 function renderStoryboardSequence(fullText) {
   const paragraphs = fullText.split('\n\n').filter(p => p.trim());
   if (!paragraphs.length) return;
 
-  const countBadge = document.getElementById('storyboard-count-badge');
-  if (countBadge) countBadge.textContent = `${paragraphs.length} SCENES`;
+  const countBadge = document.getElementById('scenes-detected-badge');
+  if (countBadge) countBadge.textContent = `${paragraphs.length} BEATS`;
 
   const timelineRow = document.getElementById('storyboard-timeline-row');
   if (!timelineRow) return;
@@ -2492,17 +2078,17 @@ function renderStoryboardSequence(fullText) {
     const words = p.split(/\s+/).filter(Boolean).length;
     const estSec = Math.max(4, Math.round(words / 2.3));
     const card = document.createElement('div');
-    card.className = `storyboard-thumb-card ${idx === 0 ? 'active' : ''}`;
+    card.className = `storyboard-item-thumb ${idx === 0 ? 'active' : ''}`;
     card.innerHTML = `
-      <div class="thumb-header-row">
-        <span>SCENE 0${idx + 1}</span>
+      <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:0.3rem;">
+        <span>BEAT 0${idx + 1}</span>
         <span>~${estSec}s</span>
       </div>
-      <div class="thumb-visual-preview">${icons[idx % icons.length]}</div>
-      <div class="thumb-script-excerpt" title="${p}">${p}</div>
+      <div class="thumb-preview-gradient">${icons[idx % icons.length]}</div>
+      <div style="font-size:0.72rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${p}">${p}</div>
     `;
     card.onclick = () => {
-      document.querySelectorAll('.storyboard-thumb-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.storyboard-item-thumb').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
     };
     timelineRow.appendChild(card);
@@ -2528,10 +2114,7 @@ async function submitVideoJob() {
   const btn = document.getElementById('generate-btn');
   btn.disabled = true;
 
-  // Move user automatically to Screen 2: Preview & Edit
-  switchStudioScreen(2);
-
-  setProgress(5, 'Submitting job to VideoEngine render worker…');
+  setProgress(5, 'Dispatching task to synthesis engine…');
 
   const formData = new FormData();
   formData.append('input_mode', currentMode);
@@ -2540,12 +2123,6 @@ async function submitVideoJob() {
   formData.append('language', document.getElementById('cfg-language').value);
   formData.append('aspect_ratio', document.getElementById('cfg-aspect').value);
   formData.append('captions', document.getElementById('cfg-captions').value);
-  const genMode = document.getElementById('cfg-generation-mode') ? document.getElementById('cfg-generation-mode').value : 'local';
-  formData.append('generation_mode', genMode);
-  const userApiKey = document.getElementById('cfg-api-key') ? document.getElementById('cfg-api-key').value.trim() : '';
-  if (userApiKey) {
-    formData.append('api_key', userApiKey);
-  }
 
   if (currentMode === 'pdf' && pdfFile) {
     formData.append('pdf_file', pdfFile);
@@ -2561,18 +2138,17 @@ async function submitVideoJob() {
     const data = await resp.json();
 
     if (!resp.ok) {
-      showJobError(data.detail || 'Job submission failed.');
+      showJobError(data.detail || 'Job dispatch failed.');
       return;
     }
 
     currentJobId = data.job_id;
     pollJobProgress(currentJobId);
   } catch (err) {
-    showJobError('Submission network error: ' + err.message);
+    showJobError('Network submission error: ' + err.message);
   }
 }
 
-let pollRetries = 0;
 function pollJobProgress(jobId) {
   if (pollInterval) clearInterval(pollInterval);
   pollRetries = 0;
@@ -2582,7 +2158,7 @@ function pollJobProgress(jobId) {
       const resp = await fetch(`/api/v1/jobs/${jobId}`);
       if (resp.status === 404) {
         pollRetries++;
-        if (pollRetries <= 3) return; // Allow brief server delay while registering
+        if (pollRetries <= 3) return; // Allow transient delay while job registers
       }
       const data = await resp.json();
       if (!resp.ok) {
@@ -2598,8 +2174,6 @@ function pollJobProgress(jobId) {
       if (data.status === 'succeeded') {
         clearInterval(pollInterval);
         renderResultsView(data);
-        // Automatically advance to Screen 3: Finished Video
-        switchStudioScreen(3);
       } else if (data.status === 'failed') {
         clearInterval(pollInterval);
         showJobError(data.error || 'Job processing failed');
@@ -2610,10 +2184,10 @@ function pollJobProgress(jobId) {
 
 function formatProgressLabel(status, pct) {
   if (status === 'queued') return 'Job Queued in Worker Pool…';
-  if (pct < 30) return `[01/02] Parsing Source Document & Extracting Salient Concepts… (${pct}%)`;
-  if (pct < 60) return `[03] Matching Verified B-Roll Footage & Checking License… (${pct}%)`;
-  if (pct < 85) return `[04] Synthesizing Neural Narration Audio & Aligning Subtitles… (${pct}%)`;
-  return `[05] Compositing Final Multi-Layer H.264 MP4 Deliverable… (${pct}%)`;
+  if (pct < 30) return `[01/02] Ingesting Source & Structuring Narrative… (${pct}%)`;
+  if (pct < 60) return `[03] Matching CC0 B-Roll Footage & Rights Verification… (${pct}%)`;
+  if (pct < 85) return `[04] Synthesizing Voiceover Audio & Word Subtitles… (${pct}%)`;
+  return `[05] Compositing Broadcast H.264 Deliverable… (${pct}%)`;
 }
 
 function setProgress(pct, label) {
@@ -2637,10 +2211,10 @@ function updateLivePipelineStages(pct, status) {
     if (!row) return;
 
     if (pct >= st.threshold || status === 'succeeded') {
-      row.className = 'stage-row completed';
+      row.className = 'pipeline-stage-card completed';
       if (icon) icon.textContent = '✔';
     } else if (pct >= st.threshold - 20) {
-      row.className = 'stage-row in-progress';
+      row.className = 'pipeline-stage-card in-progress';
       if (icon) icon.innerHTML = '<span class="spin">⏳</span>';
     }
   });
@@ -2655,33 +2229,6 @@ function renderResultsView(data) {
   const paragraphs = scriptText.split('\n\n').filter(p => p.trim());
   const sceneCount = paragraphs.length || 4;
 
-  document.getElementById('scenes-detected-badge').textContent = `${sceneCount} READY`;
-
-  const resObj = data.result || {};
-  const tu = resObj.token_usage || {};
-  const isApiMode = (resObj.generation_mode === 'api') || ((document.getElementById('cfg-generation-mode') || {}).value === 'api');
-
-  const pTokEl = document.getElementById('val-prompt-tokens');
-  if (pTokEl) {
-    pTokEl.textContent = Number(tu.prompt_tokens || 0).toLocaleString();
-    document.getElementById('val-comp-tokens').textContent = Number(tu.completion_tokens || 0).toLocaleString();
-    document.getElementById('val-total-tokens').textContent = Number(tu.total_tokens || 0).toLocaleString();
-    
-    const costNum = Number(tu.estimated_cost_usd || tu.credits_used || 0);
-    document.getElementById('val-credits-used').textContent = isApiMode ? `$${costNum.toFixed(6)}` : '$0.000000 (Free Local)';
-    document.getElementById('val-credit-status').textContent = isApiMode ? 'Gemini 1.5 Flash Free Tier / Active' : 'Offline Engine / 0 Credits Used';
-
-    const modeBadge = document.getElementById('token-mode-badge');
-    if (modeBadge) {
-      modeBadge.textContent = isApiMode ? '✨ AI API Mode · Gemini Omni Flash' : '💻 Local Pipeline · Stock B-Roll';
-      modeBadge.className = isApiMode ? 'badge-pill badge-pill-primary' : 'badge-pill badge-pill-green';
-    }
-  }
-
-  // Render Scene Cards Grid
-  const grid = document.getElementById('scenes-grid');
-  grid.innerHTML = '';
-  
   const sampleExcerpts = paragraphs.length ? paragraphs : [
     'Introduction to Artificial Intelligence and Deep Learning architectures.',
     'Machine learning models extract patterns from structured enterprise datasets.',
@@ -2689,56 +2236,28 @@ function renderResultsView(data) {
     'Automated pipelines convert raw documentation into high-impact media deliverables.'
   ];
 
-  for (let i = 0; i < sceneCount; i++) {
-    const card = document.createElement('div');
-    card.className = 'scene-card active';
-    const excerpt = sampleExcerpts[i % sampleExcerpts.length] || 'Extracted document segment narrative beat.';
-    const score = (98.6 - (i * 0.1)).toFixed(1);
-    
-    card.innerHTML = `
-      <div>
-        <div class="scene-card-header">
-          <span class="scene-card-title">SCENE 0${i + 1}</span>
-          <span class="badge-pill badge-pill-green">✔ READY</span>
-        </div>
-        <div class="scene-text-excerpt" title="${excerpt}">${excerpt}</div>
-      </div>
-      <div>
-        <div class="scene-stat-row">
-          <span>Status: <b>PRESENT</b></span>
-          <span><b>${score}%</b></span>
-        </div>
-        <div class="scene-bar-track">
-          <div class="scene-bar-fill" style="width: ${score}%;"></div>
-        </div>
-        <div class="scene-keywords">#scene_0${i + 1} #broll_verified #license_clean</div>
-      </div>
-    `;
-    grid.appendChild(card);
-  }
-
-  // Update Transformation Stage Rows
+  // Update Transformation Stages
   const docTitle = pdfFile ? pdfFile.name : (currentMode === 'script' ? 'Direct Script Narration' : 'Speech Audio Ingestion');
-  document.getElementById('stage-desc-01').textContent = `Parsed "${docTitle}": 100% textual structure extracted and sanitized.`;
+  document.getElementById('stage-desc-01').textContent = `Parsed "${docTitle}": 100% extracted.`;
   document.getElementById('stage-metric-01').textContent = 'Corpus Extracted';
 
-  document.getElementById('stage-desc-02').textContent = `Synthesized ${sceneCount} coherent visual scenes from source document paragraphs.`;
+  document.getElementById('stage-desc-02').textContent = `Synthesized ${sceneCount} narrative visual scenes.`;
   document.getElementById('stage-metric-02').textContent = `${sceneCount} Visual Beats`;
 
-  document.getElementById('stage-desc-03').textContent = `Matched ${sceneCount} verified high-relevance HD stock video clips with CC0 clearance.`;
+  document.getElementById('stage-desc-03').textContent = `Matched ${sceneCount} verified HD stock clips with CC0 clearance.`;
   document.getElementById('stage-metric-03').textContent = '100% CC0 Clear';
 
-  document.getElementById('stage-desc-04').textContent = `Synthesized synchronized speech narration audio with ${sceneCount * 8} subtitle timecodes.`;
+  document.getElementById('stage-desc-04').textContent = `Synthesized synchronized speech audio with ${sceneCount * 8} subtitle timecodes.`;
   document.getElementById('stage-metric-04').textContent = 'Audio & SRT Synced';
 
   const aspectLabel = document.getElementById('cfg-aspect').value;
-  document.getElementById('stage-desc-05').textContent = `Compiled final deliverable MP4 in ${aspectLabel} with embedded subtitle overlay.`;
+  document.getElementById('stage-desc-05').textContent = `Compiled final deliverable MP4 in ${aspectLabel} with subtitle overlay.`;
   document.getElementById('stage-metric-05').textContent = 'Composited MP4';
 
   for (let s = 1; s <= 5; s++) {
     const row = document.getElementById(`stage-row-0${s}`);
     const icon = document.getElementById(`stage-icon-0${s}`);
-    if (row) row.className = 'stage-row completed';
+    if (row) row.className = 'pipeline-stage-card completed';
     if (icon) icon.textContent = '✔';
   }
 
@@ -2752,8 +2271,8 @@ function renderResultsView(data) {
 
   const dlRow = document.getElementById('downloads-row');
   dlRow.innerHTML = '';
-  if (r.video_url) dlRow.appendChild(createDlBtn('⬇️ Download MP4 Video', r.video_url));
-  if (r.captions_url) dlRow.appendChild(createDlBtn('📄 Captions (SRT)', r.captions_url));
+  if (r.video_url) dlRow.appendChild(createDlBtn('⬇️ Download MP4', r.video_url));
+  if (r.captions_url) dlRow.appendChild(createDlBtn('📄 Subtitles (.SRT)', r.captions_url));
   if (r.manifest_url) dlRow.appendChild(createDlBtn('📋 Manifest JSON', r.manifest_url));
   if (r.timeline_url) dlRow.appendChild(createDlBtn('🗺️ Timeline JSON', r.timeline_url));
 
@@ -2764,7 +2283,7 @@ function renderResultsView(data) {
 
 function createDlBtn(text, url) {
   const a = document.createElement('a');
-  a.className = 'btn-download';
+  a.className = 'btn-pill-action';
   a.href = url;
   a.download = '';
   a.textContent = text;
@@ -2800,7 +2319,7 @@ function computeSimpleHash(str) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
-/* ARCHITECTURE: ALL 5 STAGES & SUB-BOX FLOWCHARTS & CODE DRILL-DOWN        */
+/* ARCHITECTURE: ALL 5 STAGES & SUB-BOX FLOWCHARTS & DRILL-DOWN              */
 /* ══════════════════════════════════════════════════════════════════════════ */
 const archData = {
   1: {
@@ -3013,7 +2532,7 @@ const archData = {
           { title: '1. Footage Streams', desc: 'Verified B-roll MP4 clips from Stage 03.' },
           { title: '2. Narration Audio', desc: 'Normalized narration.wav audio track from Stage 04.' },
           { title: '3. Subtitle Script', desc: 'captions.srt file with timestamped dialogue.' },
-          { title: '4. Format Profile', desc: '1080p 16:9 Landscape, 9:16 Vertical, or 1:1 Square.' }
+          { title: '4. Format Profile', desc: '1280x720 Landscape, 720x1280 Vertical, or 720x720 Square.' }
         ],
         explanation: 'Aggregates visual assets, voiceover audio, and subtitle streams into the final composition timeline.'
       },
@@ -3066,7 +2585,6 @@ function selectArchStage(stageNum) {
   document.getElementById('arch-stage-status').textContent = d.status;
   document.getElementById('arch-stage-summary').textContent = d.summary;
 
-  // Render drilldown flowchart for currently selected sub-box
   selectSubBox(activeSubBox);
 }
 
@@ -3089,16 +2607,16 @@ function selectSubBox(boxKey) {
   container.innerHTML = '';
   fc.nodes.forEach((n, idx) => {
     const nodeEl = document.createElement('div');
-    nodeEl.className = 'fc-node';
+    nodeEl.className = 'fc-step-node';
     nodeEl.innerHTML = `
-      <div class="fc-node-title">${n.title}</div>
-      <div class="fc-node-desc">${n.desc}</div>
+      <div class="fc-step-title">${n.title}</div>
+      <div class="fc-step-desc">${n.desc}</div>
     `;
     container.appendChild(nodeEl);
 
     if (idx < fc.nodes.length - 1) {
       const arr = document.createElement('div');
-      arr.className = 'fc-arrow';
+      arr.className = 'fc-flow-arrow';
       arr.textContent = '➔';
       container.appendChild(arr);
     }
@@ -3106,17 +2624,17 @@ function selectSubBox(boxKey) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
-/* VISUALIZATIONS TAB: 7 DYNAMIC CHARTS (Theme-Aware)                        */
+/* VISUALIZATIONS: 7 DYNAMIC CHARTS (Theme-Aware Ember/Coral Colors)         */
 /* ══════════════════════════════════════════════════════════════════════════ */
 function renderAllCharts() {
   if (typeof Chart === 'undefined') return;
 
   const isDark = currentTheme === 'dark';
-  const primaryColor = isDark ? '#eab308' : '#7c3aed';
-  const secondaryColor = isDark ? '#facc15' : '#9333ea';
-  const lightColor = isDark ? 'rgba(234, 179, 8, 0.25)' : 'rgba(124, 58, 237, 0.15)';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-  const textColor = isDark ? '#d4d4d8' : '#4b5563';
+  const primaryColor = isDark ? '#ff5722' : '#ea580c';
+  const secondaryColor = isDark ? '#ff9800' : '#f59e0b';
+  const lightColor = isDark ? 'rgba(255, 87, 34, 0.22)' : 'rgba(234, 88, 12, 0.15)';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.06)';
+  const textColor = isDark ? '#bebeca' : '#57534e';
 
   Chart.defaults.color = textColor;
 
@@ -3211,7 +2729,7 @@ function renderAllCharts() {
         labels: pageLabels,
         datasets: [
           { label: 'Extracted for Narration', data: wordsUsed, backgroundColor: primaryColor, borderRadius: 6 },
-          { label: 'Contextual References', data: wordsTotal.map((tot, i) => tot - wordsUsed[i]), backgroundColor: isDark ? '#27272a' : '#e2e8f0', borderRadius: 6 }
+          { label: 'Contextual References', data: wordsTotal.map((tot, i) => tot - wordsUsed[i]), backgroundColor: isDark ? '#272733' : '#e5ded4', borderRadius: 6 }
         ]
       },
       options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: gridColor } } } }
@@ -3260,8 +2778,8 @@ function renderAllCharts() {
         datasets: [{
           label: 'H.264 Video Bitrate (kbps)',
           data: bitrateData,
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          borderColor: '#ff9800',
+          backgroundColor: 'rgba(255, 152, 0, 0.1)',
           fill: true,
           tension: 0.2
         }]
@@ -3294,7 +2812,7 @@ function updateProvenanceLineage(excerpts) {
       <td title="${txt}">${txt.substring(0, 65)}…</td>
       <td><code>${tagsList[idx % tagsList.length]}</code></td>
       <td>PEXELS-VID-${10420 + idx * 73}</td>
-      <td><span class="badge-pill badge-pill-green">CC0 Free</span></td>
+      <td><span class="arch-badge-pill" style="color:var(--green-text);">CC0 Free</span></td>
     `;
     tbody.appendChild(tr);
   });
@@ -3307,7 +2825,7 @@ function updateProvenanceLineage(excerpts) {
 
 function exportProvenanceJson() {
   const manifest = {
-    engine: 'VideoEngine Core v1.0.0',
+    engine: 'NovaCut Production Engine v2.0.0',
     export_timestamp: new Date().toISOString(),
     document_hash: document.getElementById('prov-doc-hash').textContent,
     script_hash: document.getElementById('prov-script-hash').textContent,
@@ -3339,8 +2857,9 @@ function toggleEndpoint(id) {
     const wrap = document.getElementById('system-banner-wrap');
     if (!d.checks.ffmpeg) {
       const banner = document.createElement('div');
-      banner.className = 'alert alert-info';
-      banner.innerHTML = 'ℹ️ <b>Active Video Mode:</b> Running with Mock Renderer pipeline. Clean MP4 deliverables with timeline metadata and subtitles are automatically generated.';
+      banner.className = 'file-chip';
+      banner.style.borderColor = 'var(--primary)';
+      banner.innerHTML = 'ℹ️ <b>Active Video Mode:</b> Running with Cloud Mock Renderer pipeline. Clean MP4 deliverables with timeline metadata and subtitles are generated.';
       wrap.appendChild(banner);
     }
   } catch(e) {}
