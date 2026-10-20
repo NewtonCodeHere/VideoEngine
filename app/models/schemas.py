@@ -85,6 +85,16 @@ class ScriptResponse(BaseModel):
 
 # ── Job ───────────────────────────────────────────────────────────────────────
 
+class TokenUsage(BaseModel):
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+    credits_used: float = 0.0
+    model: str = "gemini-1.5-flash"
+    generation_mode: str = "local"
+
+
 class VideoSettings(BaseModel):
     duration: VideoDuration = VideoDuration.medium
     language: str = "en"
@@ -93,6 +103,8 @@ class VideoSettings(BaseModel):
     aspect_ratio: AspectRatio = AspectRatio.r16x9
     captions: bool = True
     avoid: List[str] = Field(default_factory=list)
+    generation_mode: str = "local"   # "local" | "api"
+    api_key: Optional[str] = None
 
 
 class BRollJobRequest(BaseModel):
@@ -142,6 +154,8 @@ class JobResult(BaseModel):
     duration_s: Optional[float] = None
     scenes: List[SceneResult] = Field(default_factory=list)
     aspect_ratio: Optional[str] = None
+    generation_mode: str = "local"
+    token_usage: Optional[TokenUsage] = None
 
 
 class JobResponse(BaseModel):

@@ -1,16 +1,19 @@
 """
 Main video generation pipeline.
 
-Orchestrates: TTS → footage retrieval → scene timing → rendering → outputs.
+Orchestrates: TTS → footage retrieval / AI animation → scene timing → rendering → outputs.
 Called in a background thread by the job runner.
 """
 from __future__ import annotations
 
 import json
+import re
 import time
 import uuid
 from pathlib import Path
 from typing import Callable, List, Optional
+
+import httpx
 
 from app.core.config import Settings
 from app.core.database import update_job
@@ -20,13 +23,19 @@ from app.models.schemas import (
     JobResult,
     SceneResult,
     ScriptScene,
+    TokenUsage,
     VideoSettings,
     VisualStyle,
 )
 from app.services.caption_generator import generate_srt
 from app.services.footage_provider import get_footage_provider
+from app.services.gemini_animator import (
+    call_gemini_analysis,
+    compute_cost,
+    render_animated_scene_mp4,
+)
 from app.services.tts_adapter import get_tts_adapter
-from app.services.video_renderer import check_ffmpeg, render_video, validate_output
+from app.services.video_renderer import RESOLUTION, check_ffmpeg, render_video, validate_output
 
 
 def run_job(
@@ -44,7 +53,7 @@ def run_job(
 
     Steps:
     1. TTS synthesis (skip if audio_path supplied)
-    2. Footage retrieval
+    2. Footage retrieval / AI Gemini animation
     3. Scene timing calculation
     4. Caption (SRT) generation
     5. Video rendering with FFmpeg
@@ -86,77 +95,142 @@ def run_job(
 
     _progress(20)
 
-    # ── Step 2: Footage Retrieval ─────────────────────────────────────────────
-    footage_provider = None
-    clip_map: dict[int, Optional[ClipInfo]] = {}
-    used_clip_ids: set = set()
-
-    try:
-        footage_provider = get_footage_provider(cfg.FOOTAGE_PROVIDER, cfg.PEXELS_API_KEY)
-    except ValueError as exc:
-        warnings.append(str(exc))
-
-    if footage_provider is not None:
-        for i, scene in enumerate(scenes):
-            if i >= cfg.FOOTAGE_MAX_CLIPS_PER_JOB:
-                break
-            try:
-                clips = footage_provider.search(
-                    scene.visual_query or scene.text[:60],
-                    settings.aspect_ratio,
-                    n=3,
-                    avoid_ids=used_clip_ids,
-                )
-                # Filter by minimum relevance
-                clips = [c for c in clips if c.relevance_score >= cfg.FOOTAGE_MIN_RELEVANCE]
-                if clips:
-                    chosen = clips[0]
-                    if chosen.download_url and not chosen.is_mock:
-                        try:
-                            clean_id = re.sub(r"[^\w\-]", "_", chosen.asset_id)
-                            ext = ".webm" if ".webm" in chosen.download_url.lower() else ".mp4"
-                            clip_save = cfg.UPLOAD_DIR / f"clip_{clean_id}{ext}"
-                            if not clip_save.exists() or clip_save.stat().st_size == 0:
-                                headers = {"User-Agent": "Mozilla/5.0"}
-                                with httpx.Client(timeout=30.0, follow_redirects=True) as dl_client:
-                                    with dl_client.stream("GET", chosen.download_url, headers=headers) as r_dl:
-                                        if r_dl.status_code == 200:
-                                            with open(clip_save, "wb") as f_out:
-                                                for chunk in r_dl.iter_bytes(chunk_size=65536):
-                                                    f_out.write(chunk)
-                                            if clip_save.stat().st_size > 1000:
-                                                chosen.local_path = str(clip_save)
-                            else:
-                                chosen.local_path = str(clip_save)
-                        except Exception as dl_exc:
-                            warnings.append(f"Footage download failed for scene {i}: {dl_exc}")
-
-                    clip_map[i] = chosen
-                    used_clip_ids.add(chosen.asset_id)
-                else:
-                    clip_map[i] = None
-                    warnings.append(f"No footage found for scene {i}: '{scene.visual_query}'")
-            except Exception as exc:
-                clip_map[i] = None
-                warnings.append(f"Footage error for scene {i}: {exc}")
-    else:
-        for i in range(len(scenes)):
-            clip_map[i] = None
-
-    if cfg.FOOTAGE_PROVIDER == "mock":
-        warnings.append(
-            "Footage is provided by the MOCK provider for offline testing. "
-            "Set FOOTAGE_PROVIDER=auto or FOOTAGE_PROVIDER=pexels for real stock footage."
-        )
-
-    _progress(40)
-
-    # ── Step 3: Scene Timing ──────────────────────────────────────────────────
-    # Distribute timing proportionally by word count
+    # ── Step 2 & 3: Scene Timing & Footage Retrieval / AI Generation ──────────
     total_words = sum(len(s.text.split()) for s in scenes) or 1
     wpm = 140  # approximate narration speed
     total_duration = sum(s.duration_hint or (len(s.text.split()) / wpm * 60) for s in scenes)
 
+    clip_map: dict[int, Optional[ClipInfo]] = {}
+    used_clip_ids: set = set()
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
+    token_usage = None
+    gen_mode = getattr(settings, "generation_mode", "local")
+
+    if gen_mode == "api":
+        # API Mode: Gemini Omni Flash animated video generation
+        width, height = RESOLUTION.get(settings.aspect_ratio, (1280, 720))
+        for i, scene in enumerate(scenes):
+            dur = scene.duration_hint or (len(scene.text.split()) / wpm * 60)
+            dur = max(dur, 2.0)
+            try:
+                topic, p_tok, c_tok = call_gemini_analysis(
+                    scene.text,
+                    api_key=settings.api_key,
+                )
+                total_prompt_tokens += p_tok
+                total_completion_tokens += c_tok
+
+                anim_out = job_output / f"anim_scene_{i:04d}_{topic}.mp4"
+                render_animated_scene_mp4(
+                    topic=topic,
+                    duration_s=dur,
+                    width=width,
+                    height=height,
+                    output_mp4=anim_out,
+                    fps=cfg.VIDEO_FPS,
+                    ffmpeg_bin=cfg.FFMPEG_BIN,
+                )
+                clip_map[i] = ClipInfo(
+                    asset_id=f"gemini_omni_flash_{topic}_{i}",
+                    provider="Gemini Omni Flash AI Animated Engine",
+                    source_url="https://ai.google.dev/",
+                    licence_name="Google Gemini Free Tier / Creative Commons",
+                    licence_url="https://ai.google.dev/terms",
+                    attribution=f"Generated AI Animation for '{topic.capitalize()}' beat",
+                    relevance_score=1.0,
+                    selection_reason=f"Script-relevant animated video for {topic}",
+                    is_mock=False,
+                    download_url=None,
+                    local_path=str(anim_out),
+                )
+            except Exception as anim_err:
+                warnings.append(f"AI Animated generation error for scene {i}: {anim_err}")
+                clip_map[i] = None
+
+        cost = compute_cost(total_prompt_tokens, total_completion_tokens)
+        token_usage = TokenUsage(
+            prompt_tokens=total_prompt_tokens,
+            completion_tokens=total_completion_tokens,
+            total_tokens=total_prompt_tokens + total_completion_tokens,
+            estimated_cost_usd=cost,
+            credits_used=cost,
+            model="gemini-1.5-flash",
+            generation_mode="api",
+        )
+    else:
+        # Local Mode: Original Stock Footage Provider (untouched)
+        token_usage = TokenUsage(
+            prompt_tokens=0,
+            completion_tokens=0,
+            total_tokens=0,
+            estimated_cost_usd=0.0,
+            credits_used=0.0,
+            model="local-stock",
+            generation_mode="local",
+        )
+        footage_provider = None
+        try:
+            footage_provider = get_footage_provider(cfg.FOOTAGE_PROVIDER, cfg.PEXELS_API_KEY)
+        except ValueError as exc:
+            warnings.append(str(exc))
+
+        if footage_provider is not None:
+            for i, scene in enumerate(scenes):
+                if i >= cfg.FOOTAGE_MAX_CLIPS_PER_JOB:
+                    break
+                try:
+                    clips = footage_provider.search(
+                        scene.visual_query or scene.text[:60],
+                        settings.aspect_ratio,
+                        n=3,
+                        avoid_ids=used_clip_ids,
+                    )
+                    # Filter by minimum relevance
+                    clips = [c for c in clips if c.relevance_score >= cfg.FOOTAGE_MIN_RELEVANCE]
+                    if clips:
+                        chosen = clips[0]
+                        if chosen.download_url and not chosen.is_mock:
+                            try:
+                                clean_id = re.sub(r"[^\w\-]", "_", chosen.asset_id)
+                                ext = ".webm" if ".webm" in chosen.download_url.lower() else ".mp4"
+                                clip_save = cfg.UPLOAD_DIR / f"clip_{clean_id}{ext}"
+                                if not clip_save.exists() or clip_save.stat().st_size == 0:
+                                    headers = {"User-Agent": "Mozilla/5.0"}
+                                    with httpx.Client(timeout=30.0, follow_redirects=True) as dl_client:
+                                        with dl_client.stream("GET", chosen.download_url, headers=headers) as r_dl:
+                                            if r_dl.status_code == 200:
+                                                with open(clip_save, "wb") as f_out:
+                                                    for chunk in r_dl.iter_bytes(chunk_size=65536):
+                                                        f_out.write(chunk)
+                                                if clip_save.stat().st_size > 1000:
+                                                    chosen.local_path = str(clip_save)
+                                else:
+                                    chosen.local_path = str(clip_save)
+                            except Exception as dl_exc:
+                                warnings.append(f"Footage download failed for scene {i}: {dl_exc}")
+
+                        clip_map[i] = chosen
+                        used_clip_ids.add(chosen.asset_id)
+                    else:
+                        clip_map[i] = None
+                        warnings.append(f"No footage found for scene {i}: '{scene.visual_query}'")
+                except Exception as exc:
+                    clip_map[i] = None
+                    warnings.append(f"Footage error for scene {i}: {exc}")
+        else:
+            for i in range(len(scenes)):
+                clip_map[i] = None
+
+        if cfg.FOOTAGE_PROVIDER == "mock":
+            warnings.append(
+                "Footage is provided by the MOCK provider for offline testing. "
+                "Set FOOTAGE_PROVIDER=auto or FOOTAGE_PROVIDER=pexels for real stock footage."
+            )
+
+    _progress(40)
+
+    # ── Scene Results with Timings ────────────────────────────────────────────
     scene_results: List[SceneResult] = []
     cursor = 0.0
     for i, scene in enumerate(scenes):
@@ -224,6 +298,8 @@ def run_job(
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "total_duration_s": round(actual_duration, 3),
         "aspect_ratio": str(ar.value),
+        "generation_mode": gen_mode,
+        "token_usage": token_usage.model_dump() if token_usage else None,
         "scenes": [
             {
                 "index": sr.index,
@@ -245,14 +321,16 @@ def run_job(
         "generated_at": timeline["generated_at"],
         "providers": {
             "tts": cfg.TTS_PROVIDER,
-            "footage": cfg.FOOTAGE_PROVIDER,
+            "footage": "Gemini Omni Flash AI" if gen_mode == "api" else cfg.FOOTAGE_PROVIDER,
             "transcription": cfg.TRANSCRIPTION_PROVIDER,
             "script": "heuristic",
         },
         "settings": settings.model_dump(),
         "duration_s": round(actual_duration, 3),
         "scene_count": len(scene_results),
-        "cost_estimate": "unknown – using free/open providers",
+        "generation_mode": gen_mode,
+        "token_usage": token_usage.model_dump() if token_usage else None,
+        "cost_estimate": f"${token_usage.estimated_cost_usd:.6f}" if token_usage else "unknown",
         "warnings": warnings,
         "rights": [
             {
@@ -281,4 +359,6 @@ def run_job(
         duration_s=round(actual_duration, 3),
         scenes=scene_results,
         aspect_ratio=str(ar.value),
+        generation_mode=gen_mode,
+        token_usage=token_usage,
     )

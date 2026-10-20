@@ -16,5 +16,5 @@ venv/
 .coverage
 htmlcov/
 *.whl
-test_*.*
-real_rendered_*.*
+/test_*.*
+/real_rendered_*.*

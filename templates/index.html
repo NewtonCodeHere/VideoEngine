@@ -1545,6 +1545,17 @@
         <!-- Secondary Controls: Duration, Style, Captions, Voice -->
         <div class="controls-grid">
           <div class="control-item">
+            <label class="control-label">VIDEO GENERATION ENGINE</label>
+            <select class="control-select" id="cfg-generation-mode" onchange="toggleApiModeFields()">
+              <option value="local" selected>💻 Local Engine (Fast Stock / CC B-roll & Offline)</option>
+              <option value="api">✨ AI API Mode (Gemini Omni Flash Animated Engine)</option>
+            </select>
+          </div>
+          <div class="control-item" id="api-key-container" style="display:none;">
+            <label class="control-label">GEMINI API KEY (OPTIONAL / FREE TIER)</label>
+            <input type="password" class="control-select" id="cfg-api-key" style="height:38px; padding:6px 10px; font-size:0.82rem;" placeholder="AIzaSy... (or leave blank for env / free tier)" />
+          </div>
+          <div class="control-item">
             <label class="control-label">VIDEO DURATION</label>
             <select class="control-select" id="cfg-duration">
               <option value="short" selected>Short (~60s · 4 Scenes)</option>
@@ -1755,6 +1766,36 @@
           <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> TF Concept Mapping</div>
           <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Footage Verification</div>
           <div class="legend-item"><span class="legend-dot" style="background:var(--primary);"></span> H.264 Composition</div>
+        </div>
+
+        <!-- Token Usage & Credit Tracking Card -->
+        <div class="white-card" id="token-usage-card" style="margin-top:1.25rem; border:1px solid var(--border-accent); background:var(--card-highlight);">
+          <div class="section-header-row">
+            <span class="section-title">📊 Token Usage & API Credits Tracker</span>
+            <span class="badge-pill badge-pill-primary" id="token-mode-badge">AI API · Gemini Omni Flash</span>
+          </div>
+          <div class="controls-grid" style="margin-top:0.75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Prompt Tokens</div>
+              <div style="font-size:1.4rem; font-weight:800; color:var(--primary); margin-top:0.25rem;" id="val-prompt-tokens">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Scene concept prompts</div>
+            </div>
+            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Completion Tokens</div>
+              <div style="font-size:1.4rem; font-weight:800; color:var(--orange-text); margin-top:0.25rem;" id="val-comp-tokens">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Visual anim directives</div>
+            </div>
+            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Total Tokens</div>
+              <div style="font-size:1.4rem; font-weight:800; color:var(--text); margin-top:0.25rem;" id="val-total-tokens">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Prompt + Completion</div>
+            </div>
+            <div class="control-item" style="background:var(--surface); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Credits / Cost Used</div>
+              <div style="font-size:1.4rem; font-weight:800; color:var(--green-text); margin-top:0.25rem;" id="val-credits-used">$0.000000</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;" id="val-credit-status">Gemini Flash Free Tier / Active</div>
+            </div>
+          </div>
         </div>
 
         <!-- Scene Cards Grid -->
@@ -2247,6 +2288,14 @@ function switchTab(tabId) {
 }
 
 /* ── Studio 3-Step Screen Switching (Create -> Preview -> Finished) ──────── */
+function toggleApiModeFields() {
+  const modeSel = document.getElementById('cfg-generation-mode');
+  const apiBox = document.getElementById('api-key-container');
+  if (modeSel && apiBox) {
+    apiBox.style.display = (modeSel.value === 'api') ? 'block' : 'none';
+  }
+}
+
 function switchStudioScreen(screenNum) {
   activeStudioScreen = screenNum;
   for (let s = 1; s <= 3; s++) {
@@ -2491,6 +2540,12 @@ async function submitVideoJob() {
   formData.append('language', document.getElementById('cfg-language').value);
   formData.append('aspect_ratio', document.getElementById('cfg-aspect').value);
   formData.append('captions', document.getElementById('cfg-captions').value);
+  const genMode = document.getElementById('cfg-generation-mode') ? document.getElementById('cfg-generation-mode').value : 'local';
+  formData.append('generation_mode', genMode);
+  const userApiKey = document.getElementById('cfg-api-key') ? document.getElementById('cfg-api-key').value.trim() : '';
+  if (userApiKey) {
+    formData.append('api_key', userApiKey);
+  }
 
   if (currentMode === 'pdf' && pdfFile) {
     formData.append('pdf_file', pdfFile);
@@ -2601,6 +2656,27 @@ function renderResultsView(data) {
   const sceneCount = paragraphs.length || 4;
 
   document.getElementById('scenes-detected-badge').textContent = `${sceneCount} READY`;
+
+  const resObj = data.result || {};
+  const tu = resObj.token_usage || {};
+  const isApiMode = (resObj.generation_mode === 'api') || ((document.getElementById('cfg-generation-mode') || {}).value === 'api');
+
+  const pTokEl = document.getElementById('val-prompt-tokens');
+  if (pTokEl) {
+    pTokEl.textContent = Number(tu.prompt_tokens || 0).toLocaleString();
+    document.getElementById('val-comp-tokens').textContent = Number(tu.completion_tokens || 0).toLocaleString();
+    document.getElementById('val-total-tokens').textContent = Number(tu.total_tokens || 0).toLocaleString();
+    
+    const costNum = Number(tu.estimated_cost_usd || tu.credits_used || 0);
+    document.getElementById('val-credits-used').textContent = isApiMode ? `$${costNum.toFixed(6)}` : '$0.000000 (Free Local)';
+    document.getElementById('val-credit-status').textContent = isApiMode ? 'Gemini 1.5 Flash Free Tier / Active' : 'Offline Engine / 0 Credits Used';
+
+    const modeBadge = document.getElementById('token-mode-badge');
+    if (modeBadge) {
+      modeBadge.textContent = isApiMode ? '✨ AI API Mode · Gemini Omni Flash' : '💻 Local Pipeline · Stock B-Roll';
+      modeBadge.className = isApiMode ? 'badge-pill badge-pill-primary' : 'badge-pill badge-pill-green';
+    }
+  }
 
   // Render Scene Cards Grid
   const grid = document.getElementById('scenes-grid');

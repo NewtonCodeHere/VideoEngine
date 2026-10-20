@@ -130,6 +130,8 @@ async def create_broll_job(
     aspect_ratio: str = Form("16:9"),
     captions: bool = Form(True),
     avoid: str = Form("", description="Comma-separated terms to avoid in footage"),
+    generation_mode: str = Form("local", description="local | api"),
+    api_key: Optional[str] = Form(None),
     # File uploads
     pdf_file: Optional[UploadFile] = File(None),
     audio_file: Optional[UploadFile] = File(None),
@@ -233,6 +235,8 @@ async def create_broll_job(
         aspect_ratio=_ar,
         captions=captions,
         avoid=[a.strip() for a in avoid.split(",") if a.strip()],
+        generation_mode=generation_mode if generation_mode in ("local", "api") else "local",
+        api_key=api_key,
     )
 
     # ── Create job record ────────────────────────────────────────────────────

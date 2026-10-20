@@ -61,7 +61,10 @@ A lightweight, low-cost PDF-to-video web application and background rendering en
    - Strict de-duplication: no clip is repeated within a video.
    - Complete rights metadata: asset ID, photographer attribution, licence URL, relevance score, and selection reason recorded per scene.
    - Deterministic offline mock provider with clear mock warnings for automated testing.
-4. **FFmpeg Video Rendering**:
+4. **Dual Generation Modes (Local vs. AI Animated Engine)**:
+   - **Local Engine (Default)**: Instant stock B-roll retrieval and offline card pipeline with zero API token cost.
+   - **AI Animated Engine (Gemini Omni Flash)**: Thematically animated 30 fps video generation per narration beat (botanical/flower blooming, robotics HUD, cybernetic tech grids, neural synapse networks) with real-time token tracking and credit accounting. Full documentation in [AI_ANIMATED_VIDEO_GENERATION.md](file:///D:/VideoEngine/AI_ANIMATED_VIDEO_GENERATION.md).
+5. **FFmpeg Video Rendering**:
    - Standard 1080p output at 30 fps in 16:9, 9:16, or 1:1 aspect ratios.
    - Burned-in subtitles option and standalone `captions.srt`.
    - Normalised video segments with zero audio drift.
