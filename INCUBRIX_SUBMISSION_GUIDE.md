@@ -1,7 +1,7 @@
 # IncuBrix Engineering Assessment 3 — Comprehensive Submission Guide
 
 > **Problem Statement:** PS3 — Script and Voiceover to B-roll Video Engine  
-> **Repository:** [https://github.com/Rashikahamed/Incubrix.git](https://github.com/Rashikahamed/Incubrix.git) *(or https://github.com/NewtonCodeHere/VideoEngine.git)*  
+> **Repository:** `https://github.com/<your-username>/VideoEngine.git`  
 > **System Name:** VideoEngine AI Core v1.1.0 (Dual-Engine: Stock B-Roll + Gemini Omni Flash Animated Video)  
 > **Documentation:** [README.md](file:///D:/VideoEngine/README.md) | [REPORT.md](file:///D:/VideoEngine/REPORT.md) | [AI_ANIMATED_VIDEO_GENERATION.md](file:///D:/VideoEngine/AI_ANIMATED_VIDEO_GENERATION.md) | [AI_USE.md](file:///D:/VideoEngine/AI_USE.md) | [SOURCES.md](file:///D:/VideoEngine/SOURCES.md)
 
@@ -18,9 +18,9 @@
 | **Live demo URL** | `https://your-deployment-url.com` *(or `http://<your-ip>:8000` / `http://<your-ip>:8501`)* |
 | **Live demo access token or login (if protected)** | `None (Open access / No authentication barrier)` |
 | **Cold-start wait time (if any)** | `14.2s (Local process) / ~18s (Docker container spin-up)` |
-| **Repository URL (private, reviewer invited)** | `https://github.com/Rashikahamed/Incubrix.git` *(or `https://github.com/NewtonCodeHere/VideoEngine.git`)* |
+| **Repository URL (private, reviewer invited)** | `https://github.com/<your-username>/VideoEngine.git` |
 | **Demo video URL (max 8 min, unedited)** | `[Insert your recorded Loom / YouTube unedited walkthrough link]` |
-| **REPORT.md link** | `https://github.com/Rashikahamed/Incubrix/blob/main/REPORT.md` |
+| **REPORT.md link** | `https://github.com/<your-username>/VideoEngine/blob/main/REPORT.md` |
 | **Compute used (laptop / cloud / GPU, with specs)** | `8-Core CPU (Intel / AMD x86_64), 16 GB RAM, No discrete GPU required (CPU-only execution on Python 3.11)` |
 | **Paid services used and total cost** | `0 (100% Zero-Cost Stack: PyMuPDF, Pexels Free Tier API, Google Gemini Flash Free Tier API, gTTS / Edge TTS, Local FFmpeg)` |
 | **AI coding tools used (details in AI_USE.md)** | `Antigravity / Gemini for rapid scaffold pair-programming (documented transparently in AI_USE.md)` |
@@ -139,9 +139,8 @@
 
 ### 3. GitHub repository URL *
 ```text
-https://github.com/Rashikahamed/Incubrix.git
+https://github.com/<your-username>/VideoEngine.git
 ```
-*(or `https://github.com/NewtonCodeHere/VideoEngine.git`)*
 
 ---
 
